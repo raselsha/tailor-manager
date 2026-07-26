@@ -7,7 +7,20 @@
          * Shared AJAX helper. action is appended with the tmr_ prefix by callers.
          */
         call: function (action, data, onSuccess, onError) {
-            var payload = $.extend({ action: action, nonce: TMR.nonce }, data || {});
+            var payload;
+
+            // `data` is either a plain object (e.g. { id: 5 }) or an already-serialized
+            // query string (e.g. from $form.serialize() / $.param()). $.extend() only
+            // merges objects — feeding it a string silently corrupts the request, so the
+            // two cases must be built into the request body differently.
+            if (typeof data === 'string') {
+                payload = 'action=' + encodeURIComponent(action) + '&nonce=' + encodeURIComponent(TMR.nonce);
+                if (data) {
+                    payload += '&' + data;
+                }
+            } else {
+                payload = $.extend({ action: action, nonce: TMR.nonce }, data || {});
+            }
 
             $.post(TMR.ajaxUrl, payload)
                 .done(function (response) {
