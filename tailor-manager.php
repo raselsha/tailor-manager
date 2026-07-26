@@ -35,11 +35,62 @@ if (!class_exists('TMR_Tailor_Manager')) {
 
         public static function include_plugin_files()
         {
+            spl_autoload_register(array(__CLASS__, 'autoload'));
+
+            new TMR_Category_Taxonomy();
+            new TMR_Dress_Post_Type();
+            new TMR_Dress_Part_Post_Type();
+            new TMR_Design_Type_Post_Type();
+            new TMR_Customer_Post_Type();
+            new TMR_Order_Post_Type();
+            new TMR_Order_Item_Post_Type();
+            new TMR_Panel_Shell();
+            new TMR_Dashboard_Panel();
+            new TMR_Orders_Panel();
+            new TMR_Customers_Panel();
+            new TMR_Dress_Panel();
+            new TMR_Dress_Part_Panel();
+            new TMR_Design_Type_Panel();
+            new TMR_Accounts_Report();
+            new TMR_Settings_Page();
+            new TMR_Print_Slips();
+        }
+
+        public static function autoload($class)
+        {
+            if (strpos($class, 'TMR_') !== 0) {
+                return;
+            }
+
+            $file = TMR_PLUGIN_PATH . 'classes/class-' . strtolower(str_replace('_', '-', $class)) . '.php';
+
+            if (file_exists($file)) {
+                require_once $file;
+            }
         }
 
         public static function activate()
         {
-            update_option('rewrite_rules', '');
+            $taxonomy    = new TMR_Category_Taxonomy();
+            $dress       = new TMR_Dress_Post_Type();
+            $dress_part  = new TMR_Dress_Part_Post_Type();
+            $design_type = new TMR_Design_Type_Post_Type();
+            $customer    = new TMR_Customer_Post_Type();
+            $order       = new TMR_Order_Post_Type();
+            $order_item  = new TMR_Order_Item_Post_Type();
+
+            $taxonomy->register();
+            $dress->register();
+            $dress_part->register();
+            $design_type->register();
+            $customer->register();
+            $order->register();
+            $order_item->register();
+
+            $taxonomy->maybe_seed_default_terms();
+            TMR_Measurement_Fields::maybe_seed_defaults();
+
+            flush_rewrite_rules();
         }
 
         public static function deactivate()

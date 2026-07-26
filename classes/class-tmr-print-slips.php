@@ -1,0 +1,112 @@
+<?php
+defined('ABSPATH') || exit;
+
+/**
+ * Three bare (no panel chrome) printable views of an order, replicating the reference
+ * system's ?action=print1/2/3 — customer receipt, tailor work slip, full design slip.
+ * Browser print-to-PDF, no PDF library, same as the original.
+ */
+class TMR_Print_Slips
+{
+    public function __construct()
+    {
+        add_action('admin_post_tmr_print', array($this, 'render'));
+    }
+
+    public function render()
+    {
+        if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
+            wp_die(esc_html__('You do not have permission to view this.', 'tailor-manager'));
+        }
+
+        $order_id = isset($_GET['order_id']) ? (int) $_GET['order_id'] : 0;
+        $type     = isset($_GET['type']) ? (int) $_GET['type'] : 1;
+        $order    = get_post($order_id);
+
+        if (!$order || TMR_Order_Post_Type::POST_TYPE !== $order->post_type) {
+            wp_die(esc_html__('Order not found.', 'tailor-manager'));
+        }
+
+        $data = self::prepare_order_data($order_id);
+
+        $template = 'print-receipt.php';
+        if (2 === $type) {
+            $template = 'print-workslip.php';
+        } elseif (3 === $type) {
+            $template = 'print-full.php';
+        }
+
+        $file = TMR_PLUGIN_PATH . 'templates/' . $template;
+
+        if (!file_exists($file)) {
+            wp_die(esc_html__('Print template missing.', 'tailor-manager'));
+        }
+
+        include $file;
+        exit;
+    }
+
+    public static function prepare_order_data($order_id)
+    {
+        $customer_id = (int) get_post_meta($order_id, '_tmr_customer_id', true);
+
+        $items = array();
+        foreach (TMR_Order_Post_Type::get_items($order_id) as $item) {
+            $cat_id = TMR_Order_Item_Post_Type::get_category_id($item->ID);
+            $term   = get_term($cat_id, TMR_Category_Taxonomy::TAXONOMY);
+
+            $dress_lines = array();
+            foreach (TMR_Order_Item_Post_Type::get_dresses($item->ID) as $d) {
+                $dress = get_post($d['dress_id']);
+                if ($dress) {
+                    $dress_lines[] = $dress->post_title . '(' . (int) $d['quantity'] . ')';
+                }
+            }
+
+            $part_lines = array();
+            foreach (TMR_Order_Item_Post_Type::get_part_selections($item->ID) as $sel) {
+                $part = get_post($sel['part_id']);
+                if (!$part) {
+                    continue;
+                }
+                $names = array();
+                foreach ($sel['design_type_ids'] as $did) {
+                    $d = get_post($did);
+                    if ($d) {
+                        $names[] = $d->post_title;
+                    }
+                }
+                $part_lines[] = array(
+                    'part'        => $part->post_title,
+                    'designs'     => $names,
+                    'measurement' => $sel['part_measurement'],
+                );
+            }
+
+            $items[] = array(
+                'category'     => $term && !is_wp_error($term) ? $term->name : '',
+                'dress_lines'  => $dress_lines,
+                'measurements' => TMR_Order_Item_Post_Type::get_measurements($item->ID),
+                'part_lines'   => $part_lines,
+                'cutter'       => get_post_meta($item->ID, '_tmr_cutter_name', true),
+            );
+        }
+
+        return array(
+            'order_id'      => $order_id,
+            'shop_name'     => get_option('tmr_shop_name', get_bloginfo('name')),
+            'shop_address'  => get_option('tmr_shop_address', ''),
+            'shop_phone'    => get_option('tmr_shop_phone', ''),
+            'customer_name' => $customer_id ? get_the_title($customer_id) : __('Walk-in', 'tailor-manager'),
+            'customer_phone' => $customer_id ? TMR_Customer_Post_Type::get_phone($customer_id) : '',
+            'order_date'    => get_post_meta($order_id, '_tmr_order_date', true),
+            'delivery_date' => get_post_meta($order_id, '_tmr_delivery_date', true),
+            'wage'          => get_post_meta($order_id, '_tmr_wage', true),
+            'cloth_price'   => get_post_meta($order_id, '_tmr_cloth_price', true),
+            'total'         => get_post_meta($order_id, '_tmr_total', true),
+            'advance'       => get_post_meta($order_id, '_tmr_advance', true),
+            'due'           => get_post_meta($order_id, '_tmr_due', true),
+            'items'         => $items,
+        );
+    }
+}
