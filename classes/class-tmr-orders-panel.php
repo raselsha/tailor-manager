@@ -380,8 +380,11 @@ class TMR_Orders_Panel
                 <svg class="tmr-category-chevron<?php echo $has_data ? ' is-open' : ''; ?>" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg>
             </div>
 
-            <div class="tmr-form-row">
-                <label class="tmr-form-label"><?php esc_html_e('ড্রেস ও পরিমাণ (ক্লিক করে নির্বাচন করুন)', 'tailor-manager'); ?></label>
+            <div class="tmr-form-row tmr-dress-block">
+                <div class="tmr-part-block-title">
+                    <span class="tmr-part-block-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></span>
+                    <?php esc_html_e('ড্রেস ও পরিমাণ (ক্লিক করে নির্বাচন করুন)', 'tailor-manager'); ?>
+                </div>
                 <div class="tmr-checkbox-grid tmr-dress-checkbox-grid">
                     <?php foreach ($dresses as $dress) :
                         $checked = isset($selected_dresses[$dress->ID]);
@@ -413,7 +416,7 @@ class TMR_Orders_Panel
                 </div>
 
                 <?php if ($fields) : ?>
-                    <div class="tmr-form-row">
+                    <div class="tmr-form-row tmr-part-block">
                         <div class="tmr-part-block-title">
                             <span class="tmr-part-block-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0z"></path><path d="M14.5 6.5l3 3"></path><path d="M11.5 9.5l1.5 1.5"></path><path d="M8.5 12.5l1.5 1.5"></path></svg></span>
                             <?php esc_html_e('মাপের বিবরণ', 'tailor-manager'); ?>
@@ -422,7 +425,11 @@ class TMR_Orders_Panel
                             <?php foreach ($fields as $slug => $label) : ?>
                                 <div class="tmr-measure-field-wrap">
                                     <label class="tmr-form-label" style="font-weight:400;text-transform:none;letter-spacing:0;"><?php echo esc_html($label); ?></label>
-                                    <input type="text" class="tmr-measure-field" data-slug="<?php echo esc_attr($slug); ?>" placeholder="০" value="<?php echo esc_attr(isset($measurements[$slug]) ? $measurements[$slug] : ''); ?>" />
+                                    <span class="tmr-qty-stepper tmr-measure-stepper">
+                                        <button type="button" class="tmr-qty-btn tmr-measure-minus" tabindex="-1" aria-label="<?php esc_attr_e('কমান', 'tailor-manager'); ?>">&minus;</button>
+                                        <input type="text" class="tmr-measure-field" data-slug="<?php echo esc_attr($slug); ?>" placeholder="0" value="<?php echo esc_attr(isset($measurements[$slug]) ? $measurements[$slug] : ''); ?>" />
+                                        <button type="button" class="tmr-qty-btn tmr-measure-plus" tabindex="-1" aria-label="<?php esc_attr_e('বাড়ান', 'tailor-manager'); ?>">+</button>
+                                    </span>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -627,6 +634,14 @@ class TMR_Orders_Panel
                 }
                 var val = parseInt($input.val(), 10) || 0;
                 val = $(this).hasClass('tmr-qty-plus') ? val + 1 : Math.max(0, val - 1);
+                $input.val(val);
+            });
+
+            $(document).on('click', '.tmr-measure-plus, .tmr-measure-minus', function (e) {
+                e.preventDefault();
+                var $input = $(this).siblings('.tmr-measure-field');
+                var val = parseInt($input.val(), 10) || 0;
+                val = $(this).hasClass('tmr-measure-plus') ? val + 1 : Math.max(0, val - 1);
                 $input.val(val);
             });
 

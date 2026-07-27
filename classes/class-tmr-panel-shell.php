@@ -22,10 +22,19 @@ class TMR_Panel_Shell
             'orders'      => array('slug' => 'tmr-orders', 'title' => __('অর্ডার', 'tailor-manager'), 'icon' => self::icon('calendar')),
             'my-orders'   => array('slug' => 'tmr-my-orders', 'title' => __('আমার অর্ডার', 'tailor-manager'), 'icon' => self::icon('calendar')),
             'customers'   => array('slug' => 'tmr-customers', 'title' => __('কাস্টমার', 'tailor-manager'), 'icon' => self::icon('users')),
-            'dress'       => array('slug' => 'tmr-dress', 'title' => __('ড্রেস', 'tailor-manager'), 'icon' => self::icon('tag')),
+            // URL slugs deliberately swapped from what their array keys/classes suggest —
+            // ?page=tmr-dress is the "পোশাক" (broad category, TMR_Categories_Panel) screen
+            // and ?page=tmr-categories is the "ড্রেস টাইপ" (individual garment,
+            // TMR_Dress_Panel) screen. The array KEYS still match each screen's underlying
+            // class/purpose (TMR_Dress_Panel = 'dress', TMR_Categories_Panel = 'categories')
+            // so render() calls below didn't need to change — only the slug/title values did.
+            // Menu order: "পোশাক" (categories key) right after কাস্টমার, then "ড্রেস টাইপ"
+            // (dress key) beneath it — array order drives sidebar order (visible_nav()).
+            'categories'  => array('slug' => 'tmr-dress', 'title' => __('পোশাক', 'tailor-manager'), 'icon' => self::icon('grid')),
+            'dress'       => array('slug' => 'tmr-categories', 'title' => __('ড্রেস টাইপ', 'tailor-manager'), 'icon' => self::icon('tag')),
             'dress-part'  => array('slug' => 'tmr-dress-part', 'title' => __('পার্ট ডিজাইন', 'tailor-manager'), 'icon' => self::icon('tag')),
             'design-type' => array('slug' => 'tmr-design-type', 'title' => __('ডিজাইন টাইপ', 'tailor-manager'), 'icon' => self::icon('tag')),
-            'categories'  => array('slug' => 'tmr-categories', 'title' => __('ক্যাটাগরি', 'tailor-manager'), 'icon' => self::icon('grid')),
+            'measurement-fields' => array('slug' => 'tmr-measurement-fields', 'title' => __('মাপের ফিল্ড', 'tailor-manager'), 'icon' => self::icon('tag')),
             'accounts'    => array('slug' => 'tmr-accounts', 'title' => __('হিসাব', 'tailor-manager'), 'icon' => self::icon('dollar')),
             'settings'    => array('slug' => 'tmr-settings', 'title' => __('সেটিংস', 'tailor-manager'), 'icon' => self::icon('settings')),
         );
@@ -54,9 +63,10 @@ class TMR_Panel_Shell
         add_submenu_page($n['dashboard']['slug'], $n['my-orders']['title'], $n['my-orders']['title'], TMR_Staff_Role::CAPABILITY, $n['my-orders']['slug'], array('TMR_My_Orders_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['orders']['title'], $n['orders']['title'], self::CAPABILITY, $n['orders']['slug'], array('TMR_Orders_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['customers']['title'], $n['customers']['title'], self::CAPABILITY, $n['customers']['slug'], array('TMR_Customers_Panel', 'render'));
-        add_submenu_page($n['dashboard']['slug'], $n['dress']['title'], __('প্রোডাক্ট ইনপুট: ড্রেস', 'tailor-manager'), self::CAPABILITY, $n['dress']['slug'], array('TMR_Dress_Panel', 'render'));
+        add_submenu_page($n['dashboard']['slug'], $n['dress']['title'], __('প্রোডাক্ট ইনপুট: ড্রেস টাইপ', 'tailor-manager'), self::CAPABILITY, $n['dress']['slug'], array('TMR_Dress_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['dress-part']['title'], __('প্রোডাক্ট ইনপুট: পার্ট ডিজাইন', 'tailor-manager'), self::CAPABILITY, $n['dress-part']['slug'], array('TMR_Dress_Part_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['design-type']['title'], __('প্রোডাক্ট ইনপুট: ডিজাইন টাইপ', 'tailor-manager'), self::CAPABILITY, $n['design-type']['slug'], array('TMR_Design_Type_Panel', 'render'));
+        add_submenu_page($n['dashboard']['slug'], $n['measurement-fields']['title'], __('প্রোডাক্ট ইনপুট: মাপের ফিল্ড', 'tailor-manager'), self::CAPABILITY, $n['measurement-fields']['slug'], array('TMR_Measurement_Fields_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['categories']['title'], $n['categories']['title'], self::CAPABILITY, $n['categories']['slug'], array('TMR_Categories_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['accounts']['title'], $n['accounts']['title'], self::CAPABILITY, $n['accounts']['slug'], array('TMR_Accounts_Report', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['settings']['title'], $n['settings']['title'], self::CAPABILITY, $n['settings']['slug'], array('TMR_Settings_Page', 'render'));
@@ -205,12 +215,27 @@ class TMR_Panel_Shell
      * @param string $subtitle
      * @param string $header_right raw HTML for the header's right side (search/add button) — caller-escaped
      */
-    public static function header($active, $title, $subtitle = '', $header_right = '')
+    /**
+     * @var bool tracks whether header() opened a .tmr-scroll-wrap that footer() needs
+     * to close — set per-call since header()/footer() are static and this plugin
+     * never nests two panel shells in one request.
+     */
+    private static $fixed_header_open = false;
+
+    /**
+     * @param bool $fixed_header keeps the title/subtitle/header-right row pinned in
+     * place while everything below it scrolls in its own contained area — for pages
+     * whose content (collapsible category/part sections, grid cards) can get long
+     * enough to otherwise push the sidebar out of view. Same pattern already used for
+     * doctor-appointment's schedule view (.mdbk-main-content-fixed-header).
+     */
+    public static function header($active, $title, $subtitle = '', $header_right = '', $fixed_header = false)
     {
+        self::$fixed_header_open = $fixed_header;
         ?>
         <div id="tmr-admin-dashboard"><div class="tmr-admin-wrapper">
             <?php self::render_sidebar($active); ?>
-            <div class="tmr-main-content">
+            <div class="tmr-main-content<?php echo $fixed_header ? ' tmr-main-content-fixed-header' : ''; ?>">
                 <div class="tmr-header">
                     <div class="tmr-header-left">
                         <h1><?php echo esc_html($title); ?></h1>
@@ -220,12 +245,18 @@ class TMR_Panel_Shell
                         <div class="tmr-header-right"><?php echo $header_right; // phpcs:ignore -- caller-escaped ?></div>
                     <?php endif; ?>
                 </div>
+                <?php if ($fixed_header) : ?>
+                <div class="tmr-scroll-wrap">
+                <?php endif; ?>
         <?php
     }
 
     public static function footer()
     {
         ?>
+                <?php if (self::$fixed_header_open) : ?>
+                </div>
+                <?php endif; ?>
             </div>
         </div></div>
         <?php

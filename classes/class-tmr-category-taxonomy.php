@@ -7,7 +7,8 @@ defined('ABSPATH') || exit;
  */
 class TMR_Category_Taxonomy
 {
-    const TAXONOMY = 'tmr_category';
+    const TAXONOMY     = 'tmr_category';
+    const ACTIVE_META  = '_tmr_category_active';
 
     public function __construct()
     {
@@ -58,5 +59,20 @@ class TMR_Category_Taxonomy
         ));
 
         return is_wp_error($terms) ? array() : $terms;
+    }
+
+    /**
+     * Absent meta means active — existing categories created before this flag existed
+     * shouldn't silently turn inactive.
+     */
+    public static function is_active($term_id)
+    {
+        $value = get_term_meta($term_id, self::ACTIVE_META, true);
+        return '' === $value || '1' === $value;
+    }
+
+    public static function set_active($term_id, $active)
+    {
+        update_term_meta($term_id, self::ACTIVE_META, $active ? '1' : '0');
     }
 }

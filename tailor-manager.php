@@ -55,6 +55,7 @@ if (!class_exists('TMR_Tailor_Manager')) {
             new TMR_Dress_Part_Panel();
             new TMR_Design_Type_Panel();
             new TMR_Categories_Panel();
+            new TMR_Measurement_Fields_Panel();
             new TMR_Accounts_Report();
             new TMR_Settings_Page();
             new TMR_Print_Slips();

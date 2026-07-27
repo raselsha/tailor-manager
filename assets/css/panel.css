@@ -12,17 +12,22 @@
     color: #1e293b;
 }
 
-/* Layout */
+/* Layout — a real bounded height (not just min-height) so the sidebar and main
+   content, as flex children, actually have something to overflow against: without
+   this, .tmr-main-content's overflow-y:auto below has no effect (nothing to
+   constrain it) and the whole wp-admin PAGE scrolls instead, taking the sidebar out
+   of view with it. 72px accounts for #wpadminbar (86px under WP's own 782px
+   responsive breakpoint, handled below). */
 .tmr-admin-wrapper {
     display: flex;
-    min-height: calc(100vh - 72px);
+    height: calc(100vh - 72px);
     background: #f8fafc;
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 }
 @media screen and (max-width: 782px) {
-    .tmr-admin-wrapper { min-height: calc(100vh - 86px); }
+    .tmr-admin-wrapper { height: calc(100vh - 86px); }
 }
 
 /* Sidebar */
@@ -34,6 +39,7 @@
     padding: 30px 0;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
 }
 
 .tmr-sidebar-logo {
@@ -95,6 +101,27 @@
     flex: 1;
     min-width: 0;
     padding: 40px;
+    overflow-y: auto;
+}
+
+/* Fixed-header mode (TMR_Panel_Shell::header($fixed_header = true)) — the title/
+   subtitle/header-right row stays put; only .tmr-scroll-wrap below it scrolls, in its
+   own contained area, so a long list of collapsible sections doesn't push the page
+   title (or the sidebar) out of view. flex:1 + min-height:0 on the wrap is what lets
+   it actually shrink to fill (and then scroll) the remaining space instead of just
+   growing with its content. */
+.tmr-main-content-fixed-header {
+    display: flex;
+    flex-direction: column;
+    padding: 40px 40px 0;
+    overflow-y: hidden;
+}
+.tmr-main-content-fixed-header .tmr-header { flex-shrink: 0; }
+.tmr-scroll-wrap {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding-bottom: 40px;
 }
 
 .tmr-header {
@@ -261,6 +288,55 @@
     gap: 10px;
 }
 
+/* Category-grouped collapsible list section — reusable across any manager list page
+   (Dress, Dress Part, Design Type...) that wants its rows grouped by category instead
+   of one flat table with a repeated category column. */
+.tmr-cat-collapse-block { margin-bottom: 20px; }
+.tmr-cat-collapse-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 24px;
+    cursor: pointer;
+    user-select: none;
+    background: rgba(0, 97, 213, .1);
+    border-bottom: 1px solid #e2e8f0;
+}
+.tmr-cat-collapse-header h3 { margin: 0; font-size: 15px; font-weight: 700; color: #0061d5; }
+.tmr-cat-collapse-count { font-size: 12px; color: #94a3b8; font-weight: 600; }
+.tmr-cat-collapse-chevron { margin-left: auto; color: #0061d5; transition: transform .18s ease; flex-shrink: 0; }
+.tmr-cat-collapse-chevron.is-open { transform: rotate(180deg); }
+/* Capped height + its own scrollbar — a category with a lot of items used to expand
+   the whole page (and every other collapsed section got pushed far down with it);
+   now only this one section's body scrolls, keeping the page's own height steady. */
+.tmr-cat-collapse-body { background: #fff; max-height: 420px; overflow-y: auto; }
+.tmr-cat-collapse-body .tmr-table { margin: 0; }
+
+/* Card grid for a collapsible section's items (Dress Manager etc.) — a default icon
+   box shows whenever an item has no uploaded icon/photo, so the grid never has a
+   blank/broken-looking cell. */
+.tmr-dress-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; padding: 20px; }
+.tmr-dress-card { position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 18px 12px 14px; border: 1px solid #e2e8f0; border-radius: 14px; background: #fff; text-align: center; transition: border-color .15s ease, box-shadow .15s ease; }
+.tmr-dress-card:hover { border-color: #0061d5; box-shadow: 0 4px 14px rgba(15, 23, 42, .06); }
+.tmr-dress-card-icon { width: 52px; height: 52px; border-radius: 12px; background: #f1f5f9; color: #94a3b8; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+.tmr-dress-card-icon img { width: 100%; height: 100%; object-fit: contain; }
+.tmr-dress-card-name { font-size: 13px; font-weight: 700; color: #1e293b; line-height: 1.3; }
+.tmr-dress-card-footer { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 4px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
+.tmr-dress-card-actions { display: flex; gap: 4px; }
+.tmr-dress-card-actions .tmr-action-btn { opacity: .55; }
+.tmr-dress-card:hover .tmr-action-btn,
+.tmr-dress-card-actions .tmr-action-btn:hover { opacity: 1; }
+
+/* "+ add" card at the end of every grid — same box footprint as a real item card so
+   it lines up in the grid, dashed border + muted color to read as an action, not data. */
+.tmr-dress-card-add { justify-content: center; border-style: dashed; border-color: #cbd5e1; cursor: pointer; background: #fafbfc; }
+.tmr-dress-card-add:hover { border-color: #0061d5; background: rgba(0, 97, 213, .04); }
+.tmr-dress-card-add .tmr-dress-card-icon { background: rgba(0, 97, 213, .1); color: #0061d5; }
+.tmr-dress-card-add .tmr-dress-card-name { color: #0061d5; }
+
+/* Expand/collapse-all header button. */
+.tmr-toggle-all-btn { display: inline-flex; align-items: center; gap: 6px; }
+
 .tmr-card-header h3 {
     margin: 0;
     font-size: 18px;
@@ -322,11 +398,25 @@
 .tmr-badge-amber { background: #fef3c7; color: #b45309; }
 .tmr-badge-red { background: #fee2e2; color: #dc2626; }
 .tmr-badge-gray { background: #f1f5f9; color: #64748b; }
+.tmr-badge-purple { background: #ede9fe; color: #7c3aed; }
 
 .tmr-badge-pending { background: #fef3c7; color: #b45309; }
 .tmr-badge-ready { background: #e0e7ff; color: #4338ca; }
 .tmr-badge-delivered { background: #dcfce7; color: #16a34a; }
 .tmr-badge-cancelled { background: #fee2e2; color: #dc2626; }
+.tmr-dress-card-badge { font-size: 8px; font-weight: 400; padding: 1px 2px; line-height: 1.2; }
+
+/* Field chip — click-to-toggle checkbox pill, shared by any screen that lets you
+   pick a set of items (category assignment, design-type selection, etc.) without
+   showing a raw checkbox. */
+.tmr-field-chip-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 12px; }
+.tmr-field-chip { position: relative; display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid #e2e8f0; border-radius: 999px; padding: 6px 14px; background: #fff; cursor: pointer; font-size: 13px; color: #374151; transition: border-color .15s ease, background .15s ease, color .15s ease; }
+.tmr-field-chip:hover { border-color: #7c3aed; }
+.tmr-field-chip:has(input:checked) { border-color: #7c3aed; background: rgba(124,58,237,.08); color: #7c3aed; font-weight: 600; }
+.tmr-field-chip input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+
+.tmr-field-card-tags { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; }
+.tmr-field-card-tag { padding: 1px 6px; font-size: 8px; font-weight: 400; line-height: 1.2; }
 
 .tmr-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .tmr-action-btn { display: inline-flex; align-items: center; color: #94a3b8; cursor: pointer; transition: color 0.2s; text-decoration: none; }
@@ -787,25 +877,51 @@
     color: #374151;
     white-space: nowrap;
 }
-.tmr-measure-field-wrap input[type="text"] {
-    width: 52px;
+/* Same +/- stepper as the dress quantity box — the number itself sits borderless
+   between the two buttons, relying on the shared .tmr-qty-stepper pill's own border,
+   and is noticeably wider (44px vs the dress stepper's 32px) since a measurement value
+   ("32 ইঞ্চি") needs more room than a 1-2 digit quantity.
+   Selector deliberately includes the input's own .tmr-measure-field class (not just
+   the wrapper) — this form renders inside .tmr-modal, and .tmr-modal form input[type="text"]
+   (0,2,2) outranks a plain .tmr-measure-field-wrap input[type="text"] (0,2,1) regardless
+   of source order, which is why width kept reverting to 100% before. The extra class
+   pushes this to (0,3,1), which wins outright; width also carries !important as a
+   second guarantee. */
+.tmr-measure-field-wrap input.tmr-measure-field[type="text"] {
+    width: 44px !important;
+    height: 26px;
     flex-shrink: 0;
+    margin: 0;
     text-align: center;
     border: none !important;
-    padding: 4px 0;
-    font-size: 12.5px;
+    border-left: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    border-radius: 0;
+    padding: 0 2px;
+    font-size: 12px;
     font-weight: 600;
     color: #1e293b;
-    background: #f1f5f9;
-    border-radius: 8px;
+    background: #fff;
     box-shadow: none;
+    box-sizing: border-box;
 }
-.tmr-measure-field-wrap input[type="text"]::placeholder { color: #cbd5e1; font-weight: 400; }
-.tmr-measure-field-wrap input[type="text"]:focus {
+.tmr-measure-field-wrap input.tmr-measure-field[type="text"]::placeholder { color: #cbd5e1; font-weight: 400; }
+.tmr-measure-field-wrap input.tmr-measure-field[type="text"]:focus {
     border: none !important;
     outline: none;
+    box-shadow: none !important;
+}
+
+/* Same titled-box look as .tmr-part-block (below), given its own class instead of
+   reusing .tmr-part-block directly — that class's ".tmr-part-block .tmr-checkbox-grid"
+   rules turn checkbox chips into wrapped pills with no grid, which would silently
+   undo the dress grid's dedicated 4-per-row .tmr-dress-checkbox-grid layout since a
+   dress box carries both classes. */
+.tmr-dress-block {
     background: #fff;
-    box-shadow: 0 0 0 2px rgba(0, 97, 213, .3) !important;
+    border: 1px solid rgba(0, 97, 213, .12);
+    border-radius: 12px;
+    padding: 12px 14px;
 }
 
 /* Design-part option pills — same chip treatment, tighter/rounder since these are
@@ -821,12 +937,14 @@
 }
 .tmr-part-block .tmr-checkbox-grid label {
     border-radius: 999px;
-    padding: 6px 14px 6px 16px;
+    padding: 6px 14px;
     font-size: 12px;
 }
-.tmr-part-block .tmr-checkbox-grid label:has(input:checked) { padding-right: 30px; }
-.tmr-part-block .tmr-checkbox-grid label::after { right: 8px; width: 13px; height: 13px; }
-.tmr-part-block .tmr-checkbox-grid label::before { right: 12px; width: 4px; height: 7px; }
+/* No tick badge here either — selected state reads purely from the shared
+   :has(input:checked) border/background/color styling, same as the dress boxes. */
+.tmr-part-block .tmr-checkbox-grid label:has(input:checked) { padding: 6px 14px; }
+.tmr-part-block .tmr-checkbox-grid label::after,
+.tmr-part-block .tmr-checkbox-grid label::before { content: none; }
 .tmr-part-block .tmr-checkbox-grid { grid-template-columns: none; display: flex; flex-wrap: wrap; }
 .tmr-part-block-title {
     display: flex;
