@@ -31,7 +31,7 @@
                     } else {
                         var message = response && response.data && response.data.message
                             ? response.data.message
-                            : 'Something went wrong.';
+                            : 'কিছু একটা সমস্যা হয়েছে।';
                         if (typeof onError === 'function') {
                             onError(message);
                         } else {
@@ -41,9 +41,9 @@
                 })
                 .fail(function () {
                     if (typeof onError === 'function') {
-                        onError('Request failed. Please try again.');
+                        onError('রিকোয়েস্ট ব্যর্থ হয়েছে। আবার চেষ্টা করুন।');
                     } else {
-                        window.alert('Request failed. Please try again.');
+                        window.alert('রিকোয়েস্ট ব্যর্থ হয়েছে। আবার চেষ্টা করুন।');
                     }
                 });
         },
@@ -57,19 +57,39 @@
         },
 
         confirmDelete: function (message) {
-            return window.confirm(message || 'Are you sure you want to delete this?');
+            return window.confirm(message || 'আপনি কি নিশ্চিত এটি ডিলিট করতে চান?');
+        },
+
+        /**
+         * Keeps a .tmr-status-toggle checkbox's adjacent .tmr-status-toggle-label text in
+         * sync with its checked state (সক্রিয়/নিষ্ক্রিয়) — called both on the toggle's own
+         * `change` event and directly whenever JS sets `.prop('checked', ...)` itself
+         * (programmatic changes don't fire `change`, e.g. populating an Edit modal).
+         */
+        syncStatusToggle: function ($checkbox) {
+            $checkbox.siblings('.tmr-status-toggle-label').text($checkbox.is(':checked') ? 'সক্রিয়' : 'নিষ্ক্রিয়');
         }
     };
 
-    $(document).on('click', '.tmr-modal-backdrop', function (e) {
+    $(document).on('change', '.tmr-status-toggle', function () {
+        TMRPanel.syncStatusToggle($(this));
+    });
+
+    $(document).on('click', '.tmr-modal', function (e) {
         if (e.target === this) {
             TMRPanel.closeModal($(this));
         }
     });
 
-    $(document).on('click', '.tmr-modal__close, [data-tmr-close-modal]', function (e) {
+    $(document).on('click', '.tmr-modal-close, [data-tmr-close-modal]', function (e) {
         e.preventDefault();
-        $(this).closest('.tmr-modal-backdrop').removeClass('is-open');
+        $(this).closest('.tmr-modal').removeClass('is-open');
+    });
+
+    $(document).on('keydown', function (e) {
+        if (e.key === 'Escape') {
+            $('.tmr-modal.is-open').removeClass('is-open');
+        }
     });
 
 }(jQuery));

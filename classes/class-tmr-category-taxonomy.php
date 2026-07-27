@@ -20,7 +20,7 @@ class TMR_Category_Taxonomy
             self::TAXONOMY,
             array('tmr_dress', 'tmr_dress_part'),
             array(
-                'label'             => __('Category', 'tailor-manager'),
+                'label'             => __('ক্যাটাগরি', 'tailor-manager'),
                 'public'            => false,
                 'show_ui'           => false,
                 'show_admin_column' => false,
@@ -36,7 +36,7 @@ class TMR_Category_Taxonomy
             return;
         }
 
-        foreach (array('Category 1', 'Category 2') as $name) {
+        foreach (array('ক্যাটাগরি ১', 'ক্যাটাগরি ২') as $name) {
             if (!term_exists($name, self::TAXONOMY)) {
                 wp_insert_term($name, self::TAXONOMY);
             }

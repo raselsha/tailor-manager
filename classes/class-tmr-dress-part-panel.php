@@ -15,7 +15,7 @@ class TMR_Dress_Part_Panel
     public static function render()
     {
         if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
-            wp_die(esc_html__('You do not have permission to access this page.', 'tailor-manager'));
+            wp_die(esc_html__('এই পেজ দেখার অনুমতি আপনার নেই।', 'tailor-manager'));
         }
 
         $query = new WP_Query(array(
@@ -28,82 +28,91 @@ class TMR_Dress_Part_Panel
 
         $categories = TMR_Category_Taxonomy::get_terms();
 
-        TMR_Panel_Shell::header('dress-part', __('Dress Part Manager', 'tailor-manager'));
+        $header_right = '<a href="#" class="tmr-btn-add" id="tmr-add-part">' . esc_html__('+ পার্ট যোগ করুন', 'tailor-manager') . '</a>';
+        TMR_Panel_Shell::header('dress-part', __('ড্রেস পার্ট ম্যানেজার', 'tailor-manager'), __('প্রতিটি ক্যাটাগরির কাস্টমাইজযোগ্য অংশ (কলার, পকেট, প্লেট...)।', 'tailor-manager'), $header_right);
         ?>
-        <div class="tmr-toolbar">
-            <div></div>
-            <button type="button" class="tmr-btn tmr-btn--primary" id="tmr-add-part"><span class="dashicons dashicons-plus"></span> <?php esc_html_e('Add Part', 'tailor-manager'); ?></button>
+        <div class="tmr-card">
+            <table class="tmr-table">
+                <thead>
+                    <tr>
+                        <th><?php esc_html_e('পার্টের নাম', 'tailor-manager'); ?></th>
+                        <th><?php esc_html_e('ক্যাটাগরি', 'tailor-manager'); ?></th>
+                        <th><?php esc_html_e('পার্ট মাপ', 'tailor-manager'); ?></th>
+                        <th><?php esc_html_e('স্ট্যাটাস', 'tailor-manager'); ?></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (!$query->have_posts()) : ?>
+                        <tr><td colspan="5" class="tmr-empty"><?php esc_html_e('এখনো কোনো ড্রেস পার্ট যোগ করা হয়নি।', 'tailor-manager'); ?></td></tr>
+                    <?php else : ?>
+                        <?php foreach ($query->posts as $part) : ?>
+                            <?php $terms = get_the_terms($part, TMR_Category_Taxonomy::TAXONOMY); ?>
+                            <tr>
+                                <td><?php echo esc_html(get_the_title($part)); ?></td>
+                                <td><?php echo $terms && !is_wp_error($terms) ? '<span class="tmr-badge tmr-badge-blue">' . esc_html($terms[0]->name) . '</span>' : '—'; ?></td>
+                                <td><?php echo TMR_Dress_Part_Post_Type::measurement_enabled($part->ID) ? '<span class="tmr-badge tmr-badge-green">' . esc_html__('সক্রিয়', 'tailor-manager') . '</span>' : '<span class="tmr-badge tmr-badge-gray">' . esc_html__('নিষ্ক্রিয়', 'tailor-manager') . '</span>'; ?></td>
+                                <td>
+                                    <?php if ('publish' === $part->post_status) : ?>
+                                        <span class="tmr-badge tmr-badge-green"><?php esc_html_e('সক্রিয়', 'tailor-manager'); ?></span>
+                                    <?php else : ?>
+                                        <span class="tmr-badge tmr-badge-gray"><?php esc_html_e('নিষ্ক্রিয়', 'tailor-manager'); ?></span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <div class="tmr-actions">
+                                        <span class="tmr-action-btn tmr-edit-part" data-id="<?php echo esc_attr($part->ID); ?>" title="<?php esc_attr_e('এডিট', 'tailor-manager'); ?>"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></span>
+                                        <span class="tmr-action-btn tmr-action-btn-red tmr-delete-part" data-id="<?php echo esc_attr($part->ID); ?>" title="<?php esc_attr_e('ডিলিট', 'tailor-manager'); ?>"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></span>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
 
-        <table class="tmr-table">
-            <thead>
-                <tr>
-                    <th><?php esc_html_e('Dress Part Name', 'tailor-manager'); ?></th>
-                    <th><?php esc_html_e('Category', 'tailor-manager'); ?></th>
-                    <th><?php esc_html_e('Part Measurement', 'tailor-manager'); ?></th>
-                    <th><?php esc_html_e('Status', 'tailor-manager'); ?></th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (!$query->have_posts()) : ?>
-                    <tr><td colspan="5" class="tmr-empty"><?php esc_html_e('No dress parts yet.', 'tailor-manager'); ?></td></tr>
-                <?php else : ?>
-                    <?php foreach ($query->posts as $part) : ?>
-                        <?php $terms = get_the_terms($part, TMR_Category_Taxonomy::TAXONOMY); ?>
-                        <tr>
-                            <td><?php echo esc_html(get_the_title($part)); ?></td>
-                            <td><?php echo $terms && !is_wp_error($terms) ? esc_html($terms[0]->name) : '—'; ?></td>
-                            <td><?php echo TMR_Dress_Part_Post_Type::measurement_enabled($part->ID) ? esc_html__('Active', 'tailor-manager') : esc_html__('Deactive', 'tailor-manager'); ?></td>
-                            <td>
-                                <?php if ('publish' === $part->post_status) : ?>
-                                    <span class="tmr-badge tmr-badge--delivered"><?php esc_html_e('Active', 'tailor-manager'); ?></span>
-                                <?php else : ?>
-                                    <span class="tmr-badge tmr-badge--cancelled"><?php esc_html_e('Inactive', 'tailor-manager'); ?></span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <button type="button" class="tmr-btn tmr-btn--sm tmr-edit-part" data-id="<?php echo esc_attr($part->ID); ?>"><?php esc_html_e('Edit', 'tailor-manager'); ?></button>
-                                <button type="button" class="tmr-btn tmr-btn--sm tmr-btn--danger tmr-delete-part" data-id="<?php echo esc_attr($part->ID); ?>"><?php esc_html_e('Delete', 'tailor-manager'); ?></button>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </tbody>
-        </table>
-
-        <div class="tmr-modal-backdrop" id="tmr-part-modal">
-            <div class="tmr-modal">
-                <div class="tmr-modal__title">
-                    <h2 id="tmr-part-modal-title"><?php esc_html_e('Add Part', 'tailor-manager'); ?></h2>
-                    <button type="button" class="tmr-modal__close">&times;</button>
+        <div class="tmr-modal" id="tmr-part-modal">
+            <div class="tmr-modal-content">
+                <div class="tmr-modal-head">
+                    <h2 id="tmr-part-modal-title"><?php esc_html_e('পার্ট যোগ করুন', 'tailor-manager'); ?></h2>
+                    <button type="button" class="tmr-modal-close">&times;</button>
                 </div>
                 <form id="tmr-part-form">
                     <input type="hidden" name="part_id" value="0" />
-                    <div class="tmr-form-row">
-                        <label><?php esc_html_e('Dress Part Name', 'tailor-manager'); ?> *</label>
-                        <input type="text" name="name" required />
+                    <div class="tmr-modal-body">
+                        <div class="tmr-form-row">
+                            <label class="tmr-form-label" for="tmr-part-name"><?php esc_html_e('পার্টের নাম', 'tailor-manager'); ?> *</label>
+                            <input type="text" name="name" id="tmr-part-name" required />
+                        </div>
+                        <div class="tmr-form-row">
+                            <label class="tmr-form-label" for="tmr-part-category"><?php esc_html_e('ড্রেস পার্ট ক্যাটাগরি', 'tailor-manager'); ?> *</label>
+                            <select name="category" id="tmr-part-category" required>
+                                <option value=""><?php esc_html_e('ক্যাটাগরি নির্বাচন করুন', 'tailor-manager'); ?></option>
+                                <?php foreach ($categories as $term) : ?>
+                                    <option value="<?php echo esc_attr($term->term_id); ?>"><?php echo esc_html($term->name); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="tmr-form-row">
+                            <label class="tmr-toggle">
+                                <input type="checkbox" name="measurement_enabled" value="1" />
+                                <span class="tmr-toggle-slider"></span>
+                                <span class="tmr-form-label" style="margin:0;"><?php esc_html_e('পার্ট মাপ — এই পার্টের জন্য অতিরিক্ত মাপ নেওয়া হবে', 'tailor-manager'); ?></span>
+                            </label>
+                        </div>
+                        <div class="tmr-form-row">
+                            <label class="tmr-form-label"><?php esc_html_e('স্ট্যাটাস', 'tailor-manager'); ?></label>
+                            <label class="tmr-toggle">
+                                <input type="checkbox" name="status" value="publish" id="tmr-part-status" class="tmr-status-toggle" checked />
+                                <span class="tmr-toggle-slider"></span>
+                                <span class="tmr-form-label tmr-status-toggle-label" style="margin:0;"><?php esc_html_e('সক্রিয়', 'tailor-manager'); ?></span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="tmr-form-row">
-                        <label><?php esc_html_e('Category', 'tailor-manager'); ?> *</label>
-                        <select name="category" required>
-                            <option value=""><?php esc_html_e('Select Category', 'tailor-manager'); ?></option>
-                            <?php foreach ($categories as $term) : ?>
-                                <option value="<?php echo esc_attr($term->term_id); ?>"><?php echo esc_html($term->name); ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                    <div class="tmr-modal-foot">
+                        <button type="submit" class="tmr-btn-add"><?php esc_html_e('পার্ট সেভ করুন', 'tailor-manager'); ?></button>
                     </div>
-                    <div class="tmr-form-row">
-                        <label><input type="checkbox" name="measurement_enabled" value="1" /> <?php esc_html_e('Capture an extra measurement value for this part', 'tailor-manager'); ?></label>
-                    </div>
-                    <div class="tmr-form-row">
-                        <label><?php esc_html_e('Status', 'tailor-manager'); ?></label>
-                        <select name="status">
-                            <option value="publish"><?php esc_html_e('Active', 'tailor-manager'); ?></option>
-                            <option value="draft"><?php esc_html_e('Inactive', 'tailor-manager'); ?></option>
-                        </select>
-                    </div>
-                    <button type="submit" class="tmr-btn tmr-btn--primary"><?php esc_html_e('Save', 'tailor-manager'); ?></button>
                 </form>
             </div>
         </div>
@@ -113,10 +122,12 @@ class TMR_Dress_Part_Panel
             var $modal = $('#tmr-part-modal');
             var $form = $('#tmr-part-form');
 
-            $('#tmr-add-part').on('click', function () {
+            $('#tmr-add-part').on('click', function (e) {
+                e.preventDefault();
                 $form[0].reset();
                 $form.find('[name="part_id"]').val(0);
-                $('#tmr-part-modal-title').text('<?php echo esc_js(__('Add Part', 'tailor-manager')); ?>');
+                TMRPanel.syncStatusToggle($form.find('[name="status"]'));
+                $('#tmr-part-modal-title').text('<?php echo esc_js(__('পার্ট যোগ করুন', 'tailor-manager')); ?>');
                 TMRPanel.openModal($modal);
             });
 
@@ -127,14 +138,15 @@ class TMR_Dress_Part_Panel
                     $form.find('[name="name"]').val(data.name);
                     $form.find('[name="category"]').val(data.category_id);
                     $form.find('[name="measurement_enabled"]').prop('checked', data.measurement_enabled);
-                    $form.find('[name="status"]').val(data.status);
-                    $('#tmr-part-modal-title').text('<?php echo esc_js(__('Edit Part', 'tailor-manager')); ?>');
+                    $form.find('[name="status"]').prop('checked', data.status === 'publish');
+                    TMRPanel.syncStatusToggle($form.find('[name="status"]'));
+                    $('#tmr-part-modal-title').text('<?php echo esc_js(__('পার্ট এডিট করুন', 'tailor-manager')); ?>');
                     TMRPanel.openModal($modal);
                 });
             });
 
             $('.tmr-delete-part').on('click', function () {
-                if (!TMRPanel.confirmDelete('<?php echo esc_js(__('Delete this part?', 'tailor-manager')); ?>')) {
+                if (!TMRPanel.confirmDelete('<?php echo esc_js(__('এই পার্টটি ডিলিট করবেন?', 'tailor-manager')); ?>')) {
                     return;
                 }
                 var id = $(this).data('id');
@@ -163,14 +175,14 @@ class TMR_Dress_Part_Panel
     {
         check_ajax_referer('tmr_panel_nonce', 'nonce');
         if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
-            wp_send_json_error(array('message' => __('Permission denied.', 'tailor-manager')));
+            wp_send_json_error(array('message' => __('অনুমতি নেই।', 'tailor-manager')));
         }
 
         $id   = isset($_POST['id']) ? (int) $_POST['id'] : 0;
         $post = get_post($id);
 
         if (!$post || self::POST_TYPE !== $post->post_type) {
-            wp_send_json_error(array('message' => __('Dress part not found.', 'tailor-manager')));
+            wp_send_json_error(array('message' => __('ড্রেস পার্ট পাওয়া যায়নি।', 'tailor-manager')));
         }
 
         $terms = get_the_terms($post, TMR_Category_Taxonomy::TAXONOMY);
@@ -188,17 +200,19 @@ class TMR_Dress_Part_Panel
     {
         check_ajax_referer('tmr_panel_nonce', 'nonce');
         if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
-            wp_send_json_error(array('message' => __('Permission denied.', 'tailor-manager')));
+            wp_send_json_error(array('message' => __('অনুমতি নেই।', 'tailor-manager')));
         }
 
         $id                  = isset($_POST['part_id']) ? (int) $_POST['part_id'] : 0;
         $name                = isset($_POST['name']) ? sanitize_text_field(wp_unslash($_POST['name'])) : '';
         $category_id         = isset($_POST['category']) ? (int) $_POST['category'] : 0;
         $measurement_enabled = !empty($_POST['measurement_enabled']) && '1' === $_POST['measurement_enabled'];
-        $status              = isset($_POST['status']) && 'draft' === $_POST['status'] ? 'draft' : 'publish';
+        // Status is a checkbox (toggle) now, not a <select> — unchecked means the field
+        // is simply absent from the serialized data, so presence (not value) decides it.
+        $status              = !empty($_POST['status']) ? 'publish' : 'draft';
 
         if ('' === $name || !$category_id) {
-            wp_send_json_error(array('message' => __('Part name and category are required.', 'tailor-manager')));
+            wp_send_json_error(array('message' => __('পার্টের নাম ও ক্যাটাগরি আবশ্যক।', 'tailor-manager')));
         }
 
         $post_data = array(
@@ -228,14 +242,14 @@ class TMR_Dress_Part_Panel
     {
         check_ajax_referer('tmr_panel_nonce', 'nonce');
         if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
-            wp_send_json_error(array('message' => __('Permission denied.', 'tailor-manager')));
+            wp_send_json_error(array('message' => __('অনুমতি নেই।', 'tailor-manager')));
         }
 
         $id   = isset($_POST['id']) ? (int) $_POST['id'] : 0;
         $post = get_post($id);
 
         if (!$post || self::POST_TYPE !== $post->post_type) {
-            wp_send_json_error(array('message' => __('Dress part not found.', 'tailor-manager')));
+            wp_send_json_error(array('message' => __('ড্রেস পার্ট পাওয়া যায়নি।', 'tailor-manager')));
         }
 
         wp_trash_post($id);

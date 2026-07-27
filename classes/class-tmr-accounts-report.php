@@ -17,7 +17,7 @@ class TMR_Accounts_Report
         global $wpdb;
 
         if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
-            wp_die(esc_html__('You do not have permission to access this page.', 'tailor-manager'));
+            wp_die(esc_html__('এই পেজ দেখার অনুমতি আপনার নেই।', 'tailor-manager'));
         }
 
         $from = isset($_GET['from']) ? sanitize_text_field(wp_unslash($_GET['from'])) : current_time('Y-m-01');
@@ -60,59 +60,64 @@ class TMR_Accounts_Report
             $grand['total']       += (float) $row->total;
         }
 
-        TMR_Panel_Shell::header('accounts', __('Accounts Report', 'tailor-manager'));
+        TMR_Panel_Shell::header('accounts', __('হিসাব রিপোর্ট', 'tailor-manager'), __('তারিখ অনুযায়ী আয়, অগ্রিম ও বাকির হিসাব।', 'tailor-manager'));
         ?>
-        <form class="tmr-card" method="get" style="display:flex;gap:10px;align-items:flex-end;">
-            <input type="hidden" name="page" value="tmr-accounts" />
-            <div class="tmr-form-row" style="margin:0;"><label><?php esc_html_e('From', 'tailor-manager'); ?></label><input type="date" name="from" value="<?php echo esc_attr($from); ?>" /></div>
-            <div class="tmr-form-row" style="margin:0;"><label><?php esc_html_e('To', 'tailor-manager'); ?></label><input type="date" name="to" value="<?php echo esc_attr($to); ?>" /></div>
-            <button type="submit" class="tmr-btn tmr-btn--primary"><?php esc_html_e('Go', 'tailor-manager'); ?></button>
-        </form>
-        <p>
-            <a href="<?php echo esc_url(add_query_arg(array('from' => current_time('Y-m-01'), 'to' => current_time('Y-m-d')))); ?>"><?php esc_html_e('This Month', 'tailor-manager'); ?></a> |
-            <a href="<?php echo esc_url(add_query_arg(array('from' => date('Y-m-01', strtotime('first day of last month')), 'to' => date('Y-m-t', strtotime('last day of last month'))))); ?>"><?php esc_html_e('Last Month', 'tailor-manager'); ?></a> |
-            <a href="<?php echo esc_url(add_query_arg(array('from' => '2000-01-01', 'to' => current_time('Y-m-d')))); ?>"><?php esc_html_e('All Time', 'tailor-manager'); ?></a>
-        </p>
+        <div class="tmr-filters-bar">
+            <form method="get" style="display:flex;gap:10px;align-items:center;">
+                <input type="hidden" name="page" value="tmr-accounts" />
+                <label class="tmr-form-label" style="margin:0;"><?php esc_html_e('শুরু', 'tailor-manager'); ?></label>
+                <input type="date" name="from" value="<?php echo esc_attr($from); ?>" style="height:38px;border:1px solid #e2e8f0;border-radius:10px;padding:0 10px;" />
+                <label class="tmr-form-label" style="margin:0;"><?php esc_html_e('শেষ', 'tailor-manager'); ?></label>
+                <input type="date" name="to" value="<?php echo esc_attr($to); ?>" style="height:38px;border:1px solid #e2e8f0;border-radius:10px;padding:0 10px;" />
+                <button type="submit" class="tmr-btn-add"><?php esc_html_e('যান', 'tailor-manager'); ?></button>
+            </form>
+            <div class="tmr-filters-spacer"></div>
+            <a href="<?php echo esc_url(add_query_arg(array('from' => current_time('Y-m-01'), 'to' => current_time('Y-m-d')))); ?>" class="tmr-btn-outline tmr-btn-sm"><?php esc_html_e('এই মাস', 'tailor-manager'); ?></a>
+            <a href="<?php echo esc_url(add_query_arg(array('from' => date('Y-m-01', strtotime('first day of last month')), 'to' => date('Y-m-t', strtotime('last day of last month'))))); ?>" class="tmr-btn-outline tmr-btn-sm"><?php esc_html_e('গত মাস', 'tailor-manager'); ?></a>
+            <a href="<?php echo esc_url(add_query_arg(array('from' => '2000-01-01', 'to' => current_time('Y-m-d')))); ?>" class="tmr-btn-outline tmr-btn-sm"><?php esc_html_e('সর্বমোট', 'tailor-manager'); ?></a>
+        </div>
 
-        <table class="tmr-table">
-            <thead>
-                <tr>
-                    <th><?php esc_html_e('Date', 'tailor-manager'); ?></th>
-                    <th><?php esc_html_e('Orders', 'tailor-manager'); ?></th>
-                    <th><?php esc_html_e('Wage', 'tailor-manager'); ?></th>
-                    <th><?php esc_html_e('Cloth Price', 'tailor-manager'); ?></th>
-                    <th><?php esc_html_e('Advance', 'tailor-manager'); ?></th>
-                    <th><?php esc_html_e('Due', 'tailor-manager'); ?></th>
-                    <th><?php esc_html_e('Total', 'tailor-manager'); ?></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if (empty($rows)) : ?>
-                    <tr><td colspan="7" class="tmr-empty"><?php esc_html_e('No orders in this range.', 'tailor-manager'); ?></td></tr>
-                <?php else : ?>
-                    <?php foreach ($rows as $row) : ?>
-                        <tr>
-                            <td><?php echo esc_html($row->order_date); ?></td>
-                            <td><?php echo esc_html($row->order_count); ?></td>
-                            <td><?php echo esc_html(number_format((float) $row->wage, 2)); ?></td>
-                            <td><?php echo esc_html(number_format((float) $row->cloth_price, 2)); ?></td>
-                            <td><?php echo esc_html(number_format((float) $row->advance, 2)); ?></td>
-                            <td><?php echo esc_html(number_format((float) $row->due, 2)); ?></td>
-                            <td><?php echo esc_html(number_format((float) $row->total, 2)); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                    <tr style="font-weight:700;">
-                        <td><?php esc_html_e('Total', 'tailor-manager'); ?></td>
-                        <td><?php echo esc_html($grand['order_count']); ?></td>
-                        <td><?php echo esc_html(number_format($grand['wage'], 2)); ?></td>
-                        <td><?php echo esc_html(number_format($grand['cloth_price'], 2)); ?></td>
-                        <td><?php echo esc_html(number_format($grand['advance'], 2)); ?></td>
-                        <td><?php echo esc_html(number_format($grand['due'], 2)); ?></td>
-                        <td><?php echo esc_html(number_format($grand['total'], 2)); ?></td>
+        <div class="tmr-card">
+            <table class="tmr-table">
+                <thead>
+                    <tr>
+                        <th><?php esc_html_e('তারিখ', 'tailor-manager'); ?></th>
+                        <th><?php esc_html_e('অর্ডার', 'tailor-manager'); ?></th>
+                        <th><?php esc_html_e('মজুরি', 'tailor-manager'); ?></th>
+                        <th><?php esc_html_e('কাপড়ের দাম', 'tailor-manager'); ?></th>
+                        <th><?php esc_html_e('অগ্রিম', 'tailor-manager'); ?></th>
+                        <th><?php esc_html_e('বাকি', 'tailor-manager'); ?></th>
+                        <th><?php esc_html_e('মোট', 'tailor-manager'); ?></th>
                     </tr>
-                <?php endif; ?>
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    <?php if (empty($rows)) : ?>
+                        <tr><td colspan="7" class="tmr-empty"><?php esc_html_e('এই সময়ে কোনো অর্ডার নেই।', 'tailor-manager'); ?></td></tr>
+                    <?php else : ?>
+                        <?php foreach ($rows as $row) : ?>
+                            <tr>
+                                <td><?php echo esc_html($row->order_date); ?></td>
+                                <td><?php echo esc_html($row->order_count); ?></td>
+                                <td><?php echo esc_html(number_format((float) $row->wage, 2)); ?></td>
+                                <td><?php echo esc_html(number_format((float) $row->cloth_price, 2)); ?></td>
+                                <td><?php echo esc_html(number_format((float) $row->advance, 2)); ?></td>
+                                <td><?php echo esc_html(number_format((float) $row->due, 2)); ?></td>
+                                <td><?php echo esc_html(number_format((float) $row->total, 2)); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                        <tr style="font-weight:700;">
+                            <td><?php esc_html_e('মোট', 'tailor-manager'); ?></td>
+                            <td><?php echo esc_html($grand['order_count']); ?></td>
+                            <td><?php echo esc_html(number_format($grand['wage'], 2)); ?></td>
+                            <td><?php echo esc_html(number_format($grand['cloth_price'], 2)); ?></td>
+                            <td><?php echo esc_html(number_format($grand['advance'], 2)); ?></td>
+                            <td><?php echo esc_html(number_format($grand['due'], 2)); ?></td>
+                            <td><?php echo esc_html(number_format($grand['total'], 2)); ?></td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
         <?php
         TMR_Panel_Shell::footer();
     }

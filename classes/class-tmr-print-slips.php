@@ -16,7 +16,7 @@ class TMR_Print_Slips
     public function render()
     {
         if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
-            wp_die(esc_html__('You do not have permission to view this.', 'tailor-manager'));
+            wp_die(esc_html__('এটি দেখার অনুমতি আপনার নেই।', 'tailor-manager'));
         }
 
         $order_id = isset($_GET['order_id']) ? (int) $_GET['order_id'] : 0;
@@ -24,7 +24,7 @@ class TMR_Print_Slips
         $order    = get_post($order_id);
 
         if (!$order || TMR_Order_Post_Type::POST_TYPE !== $order->post_type) {
-            wp_die(esc_html__('Order not found.', 'tailor-manager'));
+            wp_die(esc_html__('অর্ডার পাওয়া যায়নি।', 'tailor-manager'));
         }
 
         $data = self::prepare_order_data($order_id);
@@ -39,7 +39,7 @@ class TMR_Print_Slips
         $file = TMR_PLUGIN_PATH . 'templates/' . $template;
 
         if (!file_exists($file)) {
-            wp_die(esc_html__('Print template missing.', 'tailor-manager'));
+            wp_die(esc_html__('প্রিন্ট টেমপ্লেট পাওয়া যায়নি।', 'tailor-manager'));
         }
 
         include $file;
@@ -97,7 +97,7 @@ class TMR_Print_Slips
             'shop_name'     => get_option('tmr_shop_name', get_bloginfo('name')),
             'shop_address'  => get_option('tmr_shop_address', ''),
             'shop_phone'    => get_option('tmr_shop_phone', ''),
-            'customer_name' => $customer_id ? get_the_title($customer_id) : __('Walk-in', 'tailor-manager'),
+            'customer_name' => $customer_id ? get_the_title($customer_id) : __('ওয়াক-ইন', 'tailor-manager'),
             'customer_phone' => $customer_id ? TMR_Customer_Post_Type::get_phone($customer_id) : '',
             'order_date'    => get_post_meta($order_id, '_tmr_order_date', true),
             'delivery_date' => get_post_meta($order_id, '_tmr_delivery_date', true),

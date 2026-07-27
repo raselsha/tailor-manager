@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
 <html>
 <head>
 <meta charset="utf-8">
-<title><?php echo esc_html__('Work Slip', 'tailor-manager'); ?> #<?php echo esc_html($data['order_id']); ?></title>
+<title><?php echo esc_html__('ওয়ার্ক স্লিপ', 'tailor-manager'); ?> #<?php echo esc_html($data['order_id']); ?></title>
 <style>
     body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; padding: 20px; background: #efefef; }
     table { border-collapse: collapse; width: 100%; max-width: 480px; margin-bottom: 10px; }
@@ -23,9 +23,9 @@ defined('ABSPATH') || exit;
         <div class="block">
             <table>
                 <tr>
-                    <td><?php esc_html_e('Order #', 'tailor-manager'); ?> <strong><?php echo esc_html($data['order_id']); ?></strong></td>
+                    <td><?php esc_html_e('অর্ডার নং', 'tailor-manager'); ?> <strong><?php echo esc_html($data['order_id']); ?></strong></td>
                     <td><?php echo esc_html(implode(', ', $item['dress_lines'])); ?></td>
-                    <td><?php esc_html_e('Delivery', 'tailor-manager'); ?><br><?php echo esc_html($data['delivery_date']); ?></td>
+                    <td><?php esc_html_e('ডেলিভারি', 'tailor-manager'); ?><br><?php echo esc_html($data['delivery_date']); ?></td>
                 </tr>
             </table>
 
@@ -44,7 +44,7 @@ defined('ABSPATH') || exit;
             <?php endforeach; ?>
 
             <?php if ($item['cutter']) : ?>
-                <p><strong><?php esc_html_e('Cutter/Tailor', 'tailor-manager'); ?>:</strong> <?php echo esc_html($item['cutter']); ?></p>
+                <p><strong><?php esc_html_e('কাটার/টেইলার', 'tailor-manager'); ?>:</strong> <?php echo esc_html($item['cutter']); ?></p>
             <?php endif; ?>
         </div>
     <?php endforeach; ?>

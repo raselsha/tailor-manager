@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
 <html>
 <head>
 <meta charset="utf-8">
-<title><?php echo esc_html__('Design Slip', 'tailor-manager'); ?> #<?php echo esc_html($data['order_id']); ?></title>
+<title><?php echo esc_html__('ডিজাইন স্লিপ', 'tailor-manager'); ?> #<?php echo esc_html($data['order_id']); ?></title>
 <style>
     body { font-family: Arial, Helvetica, sans-serif; font-size: 13px; padding: 20px; }
     table { border-collapse: collapse; width: 100%; margin-bottom: 10px; }
@@ -21,22 +21,22 @@ defined('ABSPATH') || exit;
         <tr>
             <td style="border-right:1px solid #ccc;">
                 <h1><?php echo esc_html($data['shop_name']); ?></h1>
-                <?php esc_html_e('Name', 'tailor-manager'); ?>: <?php echo esc_html($data['customer_name']); ?>
+                <?php esc_html_e('নাম', 'tailor-manager'); ?>: <?php echo esc_html($data['customer_name']); ?>
             </td>
             <td>
-                <?php esc_html_e('Order #', 'tailor-manager'); ?>: <?php echo esc_html($data['order_id']); ?><br>
-                <?php esc_html_e('Order Date', 'tailor-manager'); ?>: <?php echo esc_html($data['order_date']); ?><br>
-                <?php esc_html_e('Delivery Date', 'tailor-manager'); ?>: <?php echo esc_html($data['delivery_date']); ?><br>
-                <?php esc_html_e('Mobile', 'tailor-manager'); ?>: <?php echo esc_html($data['customer_phone']); ?>
+                <?php esc_html_e('অর্ডার নং', 'tailor-manager'); ?>: <?php echo esc_html($data['order_id']); ?><br>
+                <?php esc_html_e('অর্ডারের তারিখ', 'tailor-manager'); ?>: <?php echo esc_html($data['order_date']); ?><br>
+                <?php esc_html_e('ডেলিভারি তারিখ', 'tailor-manager'); ?>: <?php echo esc_html($data['delivery_date']); ?><br>
+                <?php esc_html_e('মোবাইল', 'tailor-manager'); ?>: <?php echo esc_html($data['customer_phone']); ?>
             </td>
         </tr>
     </table>
 
     <table>
         <tr>
-            <th style="width:15%;"><?php esc_html_e('Dress', 'tailor-manager'); ?></th>
-            <th><?php esc_html_e('Measurement & Design Details', 'tailor-manager'); ?></th>
-            <th style="width:15%;"><?php esc_html_e('Price', 'tailor-manager'); ?></th>
+            <th style="width:15%;"><?php esc_html_e('ড্রেস', 'tailor-manager'); ?></th>
+            <th><?php esc_html_e('মাপ ও ডিজাইনের বিবরণ', 'tailor-manager'); ?></th>
+            <th style="width:15%;"><?php esc_html_e('দাম', 'tailor-manager'); ?></th>
         </tr>
         <?php foreach ($data['items'] as $item) : ?>
             <tr>
@@ -61,11 +61,11 @@ defined('ABSPATH') || exit;
     </table>
 
     <table style="max-width:220px;">
-        <tr><td><?php esc_html_e('Wage', 'tailor-manager'); ?></td><td><?php echo esc_html($data['wage']); ?></td></tr>
-        <tr><td><?php esc_html_e('Cloth Price', 'tailor-manager'); ?></td><td><?php echo esc_html($data['cloth_price']); ?></td></tr>
-        <tr><td><?php esc_html_e('Total', 'tailor-manager'); ?></td><td><?php echo esc_html($data['total']); ?></td></tr>
-        <tr><td><?php esc_html_e('Advance', 'tailor-manager'); ?></td><td><?php echo esc_html($data['advance']); ?></td></tr>
-        <tr><td><?php esc_html_e('Due', 'tailor-manager'); ?></td><td><?php echo esc_html($data['due']); ?></td></tr>
+        <tr><td><?php esc_html_e('মজুরি', 'tailor-manager'); ?></td><td><?php echo esc_html($data['wage']); ?></td></tr>
+        <tr><td><?php esc_html_e('কাপড়ের দাম', 'tailor-manager'); ?></td><td><?php echo esc_html($data['cloth_price']); ?></td></tr>
+        <tr><td><?php esc_html_e('মোট', 'tailor-manager'); ?></td><td><?php echo esc_html($data['total']); ?></td></tr>
+        <tr><td><?php esc_html_e('অগ্রিম', 'tailor-manager'); ?></td><td><?php echo esc_html($data['advance']); ?></td></tr>
+        <tr><td><?php esc_html_e('বাকি', 'tailor-manager'); ?></td><td><?php echo esc_html($data['due']); ?></td></tr>
     </table>
 </body>
 </html>

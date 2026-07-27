@@ -17,11 +17,11 @@ class TMR_Dress_Post_Type
     public function register()
     {
         register_post_type(self::POST_TYPE, array(
-            'label'           => __('Dress', 'tailor-manager'),
+            'label'           => __('ড্রেস', 'tailor-manager'),
             'public'          => false,
             'show_ui'         => false,
             'show_in_menu'    => false,
-            'supports'        => array('title'),
+            'supports'        => array('title', 'thumbnail'),
             'capability_type' => 'post',
             'map_meta_cap'    => true,
         ));

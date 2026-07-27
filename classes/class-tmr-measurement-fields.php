@@ -44,24 +44,24 @@ class TMR_Measurement_Fields
         }
 
         $defaults = array(
-            'Category 1' => array(
-                'length'  => __('Length', 'tailor-manager'),
-                'body'    => __('Body', 'tailor-manager'),
-                'put'     => __('Put', 'tailor-manager'),
-                'sleeve'  => __('Sleeve', 'tailor-manager'),
-                'collar'  => __('Collar/Neck', 'tailor-manager'),
-                'muhuri'  => __('Muhuri', 'tailor-manager'),
-                'cuff'    => __('Cuff', 'tailor-manager'),
-                'plate'   => __('Plate', 'tailor-manager'),
-                'gher'    => __('Gher', 'tailor-manager'),
+            'ক্যাটাগরি ১' => array(
+                'length'  => __('লম্বা', 'tailor-manager'),
+                'body'    => __('বডি', 'tailor-manager'),
+                'put'     => __('পুট', 'tailor-manager'),
+                'sleeve'  => __('হাতা', 'tailor-manager'),
+                'collar'  => __('কলার/গলা', 'tailor-manager'),
+                'muhuri'  => __('মুহরী', 'tailor-manager'),
+                'cuff'    => __('কফ', 'tailor-manager'),
+                'plate'   => __('প্লেট', 'tailor-manager'),
+                'gher'    => __('ঘের', 'tailor-manager'),
             ),
-            'Category 2' => array(
-                'length' => __('Length', 'tailor-manager'),
-                'muhuri' => __('Muhuri', 'tailor-manager'),
-                'waist'  => __('Waist', 'tailor-manager'),
-                'hai'    => __('Hai', 'tailor-manager'),
-                'loose'  => __('Loose', 'tailor-manager'),
-                'hip'    => __('Hip', 'tailor-manager'),
+            'ক্যাটাগরি ২' => array(
+                'length' => __('লম্বা', 'tailor-manager'),
+                'muhuri' => __('মুহরী', 'tailor-manager'),
+                'waist'  => __('কোমড়', 'tailor-manager'),
+                'hai'    => __('হাই', 'tailor-manager'),
+                'loose'  => __('লুজ', 'tailor-manager'),
+                'hip'    => __('হিপ', 'tailor-manager'),
             ),
         );
 

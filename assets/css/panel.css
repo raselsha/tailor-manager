@@ -1,391 +1,899 @@
-:root {
-    --tmr-primary: #1f6fa8;
-    --tmr-primary-dark: #175a87;
-    --tmr-bg: #f4f6f8;
-    --tmr-card: #ffffff;
-    --tmr-border: #e1e6ea;
-    --tmr-text: #2b333a;
-    --tmr-text-muted: #6b7680;
-    --tmr-success: #2f9e5b;
-    --tmr-success-bg: #e4f7ec;
-    --tmr-warning: #b5790a;
-    --tmr-warning-bg: #fdf1de;
-    --tmr-danger: #c23b3b;
-    --tmr-danger-bg: #fbe7e7;
-    --tmr-radius: 8px;
+/*
+ * Visual language cloned from /wp-content/plugins/doctor-appointment/assets/css/admin-style.css
+ * (its `mdbk-` prefix renamed to `tmr-`) — dark sidebar, blue/green accents, rounded cards,
+ * modal-compact forms. Same palette/metrics, ported class-for-class where this plugin has an
+ * equivalent screen; appointment-queue-specific pieces (patient grids, mini-calendars, chamber
+ * QR) were not needed here and were left out.
+ */
+
+#tmr-admin-dashboard {
+    margin: 20px 20px 0 0;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #1e293b;
 }
 
-.tmr-shell {
-    background: var(--tmr-bg);
-    color: var(--tmr-text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    font-size: 14px;
-    min-height: 100vh;
-    box-sizing: border-box;
-}
-
-.tmr-shell *,
-.tmr-shell *::before,
-.tmr-shell *::after {
-    box-sizing: border-box;
-}
-
-.tmr-topbar {
-    background: var(--tmr-primary);
-    color: #fff;
+/* Layout */
+.tmr-admin-wrapper {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-    height: 52px;
+    min-height: calc(100vh - 72px);
+    background: #f8fafc;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+@media screen and (max-width: 782px) {
+    .tmr-admin-wrapper { min-height: calc(100vh - 86px); }
 }
 
-.tmr-topbar__brand {
-    font-size: 17px;
-    font-weight: 600;
-}
-
-.tmr-topbar__actions {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-}
-
-.tmr-topbar__actions a,
-.tmr-topbar__user {
-    color: #fff;
-    text-decoration: none;
-    font-size: 13px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    opacity: 0.92;
-}
-
-.tmr-topbar__actions a:hover {
-    opacity: 1;
-    text-decoration: underline;
-}
-
-.tmr-topbar__actions .dashicons {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-}
-
-.tmr-body {
-    display: flex;
-    align-items: flex-start;
-}
-
+/* Sidebar */
 .tmr-sidebar {
-    width: 220px;
+    width: 260px;
     flex-shrink: 0;
-    background: var(--tmr-card);
-    border-right: 1px solid var(--tmr-border);
-    min-height: calc(100vh - 52px);
+    background: #2d3139;
+    color: #fff;
+    padding: 30px 0;
+    display: flex;
+    flex-direction: column;
 }
 
-.tmr-nav {
+.tmr-sidebar-logo {
+    padding: 0 30px 40px;
+    font-size: 22px;
+    font-weight: 800;
+    color: #4ade80;
+}
+
+.tmr-sidebar-menu {
     list-style: none;
-    margin: 12px 0;
     padding: 0;
+    margin: 0;
+    flex: 1;
 }
 
-.tmr-nav li a {
+.tmr-menu-item {
+    padding: 15px 30px;
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 20px;
-    color: var(--tmr-text);
-    text-decoration: none;
-    border-left: 3px solid transparent;
-}
-
-.tmr-nav li a:hover {
-    background: var(--tmr-bg);
-}
-
-.tmr-nav li.is-active a {
-    background: var(--tmr-bg);
-    border-left-color: var(--tmr-primary);
-    color: var(--tmr-primary);
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #94a3b8;
     font-weight: 600;
+    text-decoration: none;
 }
 
-.tmr-main {
+.tmr-menu-item svg { flex-shrink: 0; }
+
+.tmr-menu-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+}
+
+.tmr-menu-item.is-active {
+    background: #4ade80;
+    color: #000;
+}
+
+.tmr-sidebar-footer {
+    padding: 20px 30px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.tmr-user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #4ade80;
+    flex-shrink: 0;
+}
+
+/* Main Content */
+.tmr-main-content {
     flex: 1;
     min-width: 0;
-    padding: 24px 28px 60px;
+    padding: 40px;
 }
 
-.tmr-main__header {
+.tmr-header {
     display: flex;
-    align-items: center;
     justify-content: space-between;
-    margin-bottom: 18px;
+    align-items: center;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
+    gap: 16px;
 }
 
-.tmr-main__header h1 {
-    font-size: 20px;
-    font-weight: 600;
+.tmr-header-left h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 0 0 5px 0;
+}
+
+.tmr-header-left p {
+    color: #64748b;
     margin: 0;
 }
 
-/* Shared components */
-
-.tmr-card {
-    background: var(--tmr-card);
-    border: 1px solid var(--tmr-border);
-    border-radius: var(--tmr-radius);
-    padding: 16px 18px;
-    margin-bottom: 18px;
+.tmr-header-right {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
 }
 
-.tmr-card__title {
+.tmr-search-box {
+    background: #fff;
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    width: 260px;
+    font-family: inherit;
+    font-size: 13px;
+}
+
+.tmr-btn-add {
+    background: #0061d5;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+    box-shadow: none;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
+}
+.tmr-btn-add:hover,
+.tmr-btn-add:focus,
+.tmr-btn-add:active {
+    background: #0052b8;
+    color: #fff;
+    /* WP core's wp-admin/css/common.css sets `a:focus { border-radius: 2px; }` —
+       redeclare our own radius here so clicking the button (which focuses the <a>)
+       doesn't get squared off by that core rule. */
+    border-radius: 12px;
+    box-shadow: none;
+    outline: none;
+}
+
+/* Stats Cards */
+.tmr-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.tmr-stat-card {
+    background: #fff;
+    padding: 24px;
+    border-radius: 16px;
+    border: 1px solid #e2e8f0;
+}
+
+.tmr-stat-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 14px;
+}
+
+.tmr-stat-card h4 {
+    font-size: 13px;
+    color: #64748b;
+    text-transform: uppercase;
+    margin: 0 0 12px 0;
+    letter-spacing: 0.05em;
+}
+
+.tmr-stat-card .value {
+    font-size: 32px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: #1e293b;
+}
+
+.tmr-stat-card .trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    color: #94a3b8;
     font-weight: 600;
-    margin: 0 0 12px;
+}
+
+.tmr-stat-card-blue .tmr-stat-icon { background: rgba(0, 97, 213, .1); color: #0061d5; }
+.tmr-stat-card-blue .value { color: #0061d5; }
+.tmr-stat-card-violet .tmr-stat-icon { background: rgba(124, 58, 237, .1); color: #7c3aed; }
+.tmr-stat-card-violet .value { color: #7c3aed; }
+.tmr-stat-card-green .tmr-stat-icon { background: rgba(22, 163, 74, .1); color: #16a34a; }
+.tmr-stat-card-green .value { color: #16a34a; }
+.tmr-stat-card-amber .tmr-stat-icon { background: rgba(217, 119, 6, .1); color: #d97706; }
+.tmr-stat-card-amber .value { color: #d97706; }
+.tmr-stat-card-red .tmr-stat-icon { background: rgba(239, 68, 68, .1); color: #ef4444; }
+.tmr-stat-card-red .value { color: #ef4444; }
+
+@media (max-width: 1100px) { .tmr-stats-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px) { .tmr-stats-grid { grid-template-columns: 1fr; } }
+
+/* Card + Table */
+.tmr-card {
+    background: #fff;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    overflow: hidden;
+    margin-bottom: 24px;
+}
+
+.tmr-card-plain {
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.tmr-card-header {
+    padding: 20px 30px;
+    border-bottom: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.tmr-card-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.tmr-section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    margin: 0 0 12px;
 }
-
-.tmr-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    border-radius: var(--tmr-radius);
-    border: 1px solid var(--tmr-border);
-    background: #fff;
-    color: var(--tmr-text);
-    cursor: pointer;
-    font-size: 13px;
-    text-decoration: none;
-    line-height: 1.4;
-}
-
-.tmr-btn:hover { border-color: var(--tmr-primary); color: var(--tmr-primary); }
-
-.tmr-btn--primary { background: var(--tmr-primary); border-color: var(--tmr-primary); color: #fff; }
-.tmr-btn--primary:hover { background: var(--tmr-primary-dark); color: #fff; }
-
-.tmr-btn--success { background: var(--tmr-success); border-color: var(--tmr-success); color: #fff; }
-.tmr-btn--danger { background: var(--tmr-danger); border-color: var(--tmr-danger); color: #fff; }
-.tmr-btn--sm { padding: 4px 10px; font-size: 12px; }
-
-.tmr-stat-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 14px;
-    margin-bottom: 20px;
-}
-
-.tmr-stat {
-    background: var(--tmr-card);
-    border: 1px solid var(--tmr-border);
-    border-radius: var(--tmr-radius);
-    overflow: hidden;
-}
-
-.tmr-stat__label {
-    background: var(--tmr-primary);
-    color: #fff;
-    padding: 10px 14px;
-    font-size: 13px;
-    font-weight: 600;
-}
-
-.tmr-stat__value {
-    padding: 16px 14px;
-    font-size: 28px;
-    font-weight: 700;
-}
+.tmr-section-header h3 { margin: 0; font-size: 18px; font-weight: 700; }
+.tmr-view-all-link { color: #0061d5; font-weight: 600; font-size: 13px; text-decoration: none; }
+.tmr-view-all-link:hover { text-decoration: underline; }
 
 .tmr-table {
     width: 100%;
     border-collapse: collapse;
-    background: var(--tmr-card);
-}
-
-.tmr-table th,
-.tmr-table td {
-    padding: 9px 12px;
-    border-bottom: 1px solid var(--tmr-border);
-    text-align: left;
-    font-size: 13px;
-    vertical-align: middle;
 }
 
 .tmr-table th {
-    background: #eef1f4;
+    text-align: left;
+    padding: 16px 24px;
+    background: #f8fafc;
+    font-size: 12px;
+    color: #64748b;
     font-weight: 600;
-    color: var(--tmr-text-muted);
     text-transform: uppercase;
-    font-size: 11px;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
 }
 
+.tmr-table td {
+    padding: 16px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 13px;
+}
+
+.tmr-table tr:last-child td { border-bottom: none; }
 .tmr-table tr:hover td { background: #fafbfc; }
 
+.tmr-empty {
+    text-align: center;
+    padding: 40px;
+    color: #94a3b8;
+}
+
+/* Badge */
 .tmr-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 999px;
+    padding: 6px 12px;
+    border-radius: 20px;
     font-size: 12px;
     font-weight: 600;
+    display: inline-block;
 }
 
-.tmr-badge--pending { background: var(--tmr-warning-bg); color: var(--tmr-warning); }
-.tmr-badge--ready { background: #e1ecfb; color: #2760a8; }
-.tmr-badge--delivered { background: var(--tmr-success-bg); color: var(--tmr-success); }
-.tmr-badge--cancelled { background: var(--tmr-danger-bg); color: var(--tmr-danger); }
+.tmr-badge-blue { background: #e0e7ff; color: #4338ca; }
+.tmr-badge-green { background: #dcfce7; color: #16a34a; }
+.tmr-badge-amber { background: #fef3c7; color: #b45309; }
+.tmr-badge-red { background: #fee2e2; color: #dc2626; }
+.tmr-badge-gray { background: #f1f5f9; color: #64748b; }
 
-.tmr-form-row {
-    margin-bottom: 14px;
-}
+.tmr-badge-pending { background: #fef3c7; color: #b45309; }
+.tmr-badge-ready { background: #e0e7ff; color: #4338ca; }
+.tmr-badge-delivered { background: #dcfce7; color: #16a34a; }
+.tmr-badge-cancelled { background: #fee2e2; color: #dc2626; }
 
-.tmr-form-row label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 5px;
-    font-size: 13px;
-}
+.tmr-actions { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.tmr-action-btn { display: inline-flex; align-items: center; color: #94a3b8; cursor: pointer; transition: color 0.2s; text-decoration: none; }
+.tmr-action-btn:hover { color: #0061d5; }
+.tmr-action-btn-red:hover { color: #ef4444; }
 
-.tmr-form-row input[type="text"],
-.tmr-form-row input[type="number"],
-.tmr-form-row input[type="date"],
-.tmr-form-row select,
-.tmr-form-row textarea {
-    width: 100%;
-    max-width: 420px;
-    padding: 7px 10px;
-    border: 1px solid var(--tmr-border);
-    border-radius: var(--tmr-radius);
-    font-size: 13px;
-}
+.tmr-icon-btn { display: flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; color: #64748b; cursor: pointer; text-decoration: none; transition: all 0.2s ease; }
+.tmr-icon-btn:hover { background: rgba(0, 97, 213, 0.08); color: #0061d5; border-color: rgba(0, 97, 213, 0.3); }
+.tmr-icon-btn-danger:hover { background: #fee2e2; border-color: #fca5a5; color: #ef4444; }
+/* wp-admin's own a:focus rule (border-radius: 2px) outranks the plain .tmr-icon-btn
+   selector's specificity — redeclare our radius so this <a>-tag icon button doesn't
+   square off on click. */
+.tmr-icon-btn:focus,
+.tmr-icon-btn:active { border-radius: 10px; outline: none; box-shadow: none; }
 
-.tmr-form-row textarea { max-width: 100%; }
+.tmr-btn-outline { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; font-size: 13px; font-weight: 600; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; color: #374151; cursor: pointer; font-family: inherit; text-decoration: none; }
+.tmr-btn-outline:hover { background: #f8fafc; border-color: #cbd3e1; }
+.tmr-btn-outline:focus,
+.tmr-btn-outline:active { border-radius: 10px; outline: none; box-shadow: none; }
+.tmr-btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
+.tmr-btn-sm:focus,
+.tmr-btn-sm:active { border-radius: 8px; }
 
-.tmr-checkbox-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 6px 16px;
-}
-
-.tmr-checkbox-grid label {
-    font-weight: 400;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-.tmr-empty {
-    color: var(--tmr-text-muted);
-    padding: 14px;
-    text-align: center;
-}
-
-.tmr-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.tmr-toolbar__search input {
-    padding: 7px 10px;
-    border: 1px solid var(--tmr-border);
-    border-radius: var(--tmr-radius);
-    min-width: 220px;
-}
-
-.tmr-tabs {
-    display: flex;
-    gap: 4px;
-    margin-bottom: 14px;
-}
-
-.tmr-tabs a {
-    padding: 7px 14px;
-    border-radius: var(--tmr-radius);
-    text-decoration: none;
-    color: var(--tmr-text-muted);
-    font-size: 13px;
-    background: var(--tmr-card);
-    border: 1px solid var(--tmr-border);
-}
-
-.tmr-tabs a.is-active {
-    background: var(--tmr-primary);
-    border-color: var(--tmr-primary);
-    color: #fff;
-}
-
-.tmr-modal-backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(20, 26, 31, 0.5);
-    display: none;
-    align-items: flex-start;
-    justify-content: center;
-    padding: 40px 16px;
-    z-index: 100000;
-    overflow-y: auto;
-}
-
-.tmr-modal-backdrop.is-open { display: flex; }
-
+/* Modal */
 .tmr-modal {
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 100000;
+    justify-content: center;
+    align-items: center;
+}
+.tmr-modal.is-open { display: flex; }
+
+.tmr-modal-content {
     background: #fff;
-    border-radius: var(--tmr-radius);
     width: 100%;
     max-width: 640px;
-    padding: 20px 22px 22px;
-}
-
-.tmr-modal__title {
+    max-height: 90vh;
+    border-radius: 24px;
+    overflow-y: auto;
+    position: relative;
+    padding: 0;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 14px;
+    flex-direction: column;
+    margin: 20px;
 }
 
-.tmr-modal__title h2 { font-size: 16px; margin: 0; }
+/* Larger modal variant for content-heavy forms (Take/Update Order) — still a bounded,
+   centered dialog (same "standard modal" pattern as every other Add/Edit popup in this
+   admin, not a full page), just wider since this one form covers dates, customer,
+   multiple category blocks, and pricing. */
+.tmr-modal-content-lg { max-width: 960px; }
+@media (max-width: 1020px) {
+    .tmr-modal-content-lg { max-width: calc(100vw - 40px); }
+}
 
-.tmr-modal__close {
-    cursor: pointer;
-    background: none;
+.tmr-modal-head { display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-bottom: 1px solid #e2e8f0; flex-shrink: 0; }
+.tmr-modal-head h2 { margin: 0; font-size: 17px; font-weight: 700; }
+.tmr-modal-close { font-size: 22px; line-height: 1; cursor: pointer; color: #94a3b8; background: none; border: none; }
+.tmr-modal-close:hover { color: #1e293b; }
+
+.tmr-modal-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
+.tmr-modal-foot { padding: 14px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0; }
+
+/* Form */
+.tmr-form-row { margin-bottom: 16px; }
+.tmr-form-row:last-child { margin-bottom: 0; }
+.tmr-form-row-duo { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.tmr-form-label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px; color: #64748b; margin-bottom: 6px; }
+.tmr-form-label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
+.tmr-form-label-row .tmr-form-label { margin-bottom: 0; }
+.tmr-form-hint { margin: 6px 0 0; font-size: 11px; color: #94a3b8; line-height: 1.4; }
+
+.tmr-modal form input[type="text"],
+.tmr-modal form input[type="email"],
+.tmr-modal form input[type="number"],
+.tmr-modal form input[type="date"],
+.tmr-modal form input[type="time"],
+.tmr-modal form textarea,
+.tmr-card-plain input[type="text"],
+.tmr-card-plain input[type="number"],
+.tmr-card-plain input[type="date"],
+.tmr-card-plain textarea { width: 100%; padding: 9px 12px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 13px; font-family: inherit; color: #1e293b; background: #fff; box-sizing: border-box; }
+.tmr-modal form select,
+.tmr-card-plain select { width: 100%; padding: 0 12px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 13px; font-family: inherit; color: #1e293b; background: #fff; box-sizing: border-box; height: 38px; }
+.tmr-modal form input:focus,
+.tmr-modal form select:focus,
+.tmr-modal form textarea:focus,
+.tmr-card-plain input:focus,
+.tmr-card-plain select:focus,
+.tmr-card-plain textarea:focus { border-color: #0061d5; outline: none; box-shadow: 0 0 0 3px rgba(0, 97, 213, 0.12); }
+.tmr-modal form textarea { resize: vertical; }
+
+.tmr-btn-save {
+    background: #0061d5;
+    color: #fff;
+    width: 100%;
+    padding: 14px;
     border: none;
-    font-size: 18px;
-    color: var(--tmr-text-muted);
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
 }
+.tmr-btn-save:hover { background: #0052b8; }
 
-.tmr-pagination {
+/* Toggle switch */
+.tmr-toggle { position: relative; display: inline-flex; align-items: center; cursor: pointer; gap: 8px; }
+.tmr-toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+.tmr-toggle-slider { width: 36px; height: 20px; background: #cbd5e1; border-radius: 10px; transition: background 0.2s ease; position: relative; display: inline-block; flex-shrink: 0; }
+.tmr-toggle-slider::before { content: ""; position: absolute; width: 16px; height: 16px; left: 2px; top: 2px; background: #fff; border-radius: 50%; transition: transform 0.2s ease; }
+.tmr-toggle input:checked + .tmr-toggle-slider { background: #0061d5; }
+.tmr-toggle input:checked + .tmr-toggle-slider::before { transform: translateX(16px); }
+.tmr-toggle-text { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; color: #9ca3af; }
+.tmr-toggle input:checked ~ .tmr-toggle-text { color: #0061d5; }
+
+.tmr-mini-toggle .tmr-toggle-slider { width: 26px; height: 15px; }
+.tmr-mini-toggle .tmr-toggle-slider::before { width: 11px; height: 11px; left: 2px; top: 2px; }
+.tmr-mini-toggle input:checked + .tmr-toggle-slider::before { transform: translateX(11px); }
+
+/* Photo / image picker */
+.tmr-photo-picker { display: flex; align-items: center; gap: 16px; }
+.tmr-photo-preview { width: 60px; height: 60px; border-radius: 12px; background: #eef1f5; color: #9ca3af; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+.tmr-photo-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.tmr-photo-actions { display: flex; gap: 8px; }
+
+/* Checkbox grid (dress lists, design-type options) */
+.tmr-checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px 16px; }
+.tmr-checkbox-grid label { font-weight: 400; display: flex; align-items: center; gap: 6px; font-size: 13px; color: #374151; }
+
+/* Filters bar */
+.tmr-filters-bar { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 10px 16px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.tmr-filters-bar select { padding: 0 32px 0 12px; height: 38px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 13px; background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236B7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center; color: #1e293b; min-width: 140px; appearance: none; -webkit-appearance: none; cursor: pointer; box-sizing: border-box; }
+.tmr-filters-bar select:focus { border-color: #0061d5; outline: none; box-shadow: 0 0 0 2px rgba(0, 97, 213, .2); }
+.tmr-filters-search { flex: 1 1 240px; min-width: 180px; max-width: 320px; height: 38px; padding: 0 14px; border: 1px solid #e2e8f0; border-radius: 12px; font-size: 13px; color: #1e293b; box-sizing: border-box; }
+.tmr-filters-search:focus { border-color: #0061d5; outline: none; box-shadow: 0 0 0 2px rgba(0, 97, 213, .2); }
+.tmr-filters-spacer { flex: 1 1 auto; }
+
+.tmr-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.tmr-tabs a { padding: 8px 16px; border-radius: 10px; text-decoration: none; color: #64748b; font-size: 13px; font-weight: 600; background: #fff; border: 1px solid #e2e8f0; }
+.tmr-tabs a.is-active { background: #0061d5; border-color: #0061d5; color: #fff; }
+
+/* Pagination */
+.tmr-pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 24px; }
+.tmr-page-btn { display: flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 10px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; color: #374151; font-size: 13px; font-weight: 500; text-decoration: none; }
+.tmr-page-btn.is-active { background: #0061d5; border-color: #0061d5; color: #fff; }
+
+/* Toolbar (kept for backward-compat with existing screens still using it) */
+.tmr-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 10px; flex-wrap: wrap; }
+.tmr-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; color: #1e293b; cursor: pointer; font-size: 13px; text-decoration: none; line-height: 1.4; font-family: inherit; }
+.tmr-btn:hover { border-color: #0061d5; color: #0061d5; }
+.tmr-btn--primary { background: #0061d5; border-color: #0061d5; color: #fff; }
+.tmr-btn--primary:hover { background: #0052b8; color: #fff; }
+.tmr-btn--success { background: #16a34a; border-color: #16a34a; color: #fff; }
+.tmr-btn--danger { background: #ef4444; border-color: #ef4444; color: #fff; }
+.tmr-btn--sm { padding: 4px 10px; font-size: 12px; }
+
+/* ===== Order form (Take Order) — step sections, chip-style selection ===== */
+
+.tmr-step-header {
     display: flex;
-    gap: 4px;
-    margin-top: 14px;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 16px;
+}
+.tmr-step-number {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: #0061d5;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.tmr-step-header h3 { margin: 0; font-size: 15px; font-weight: 700; }
+
+/* Tinted card background + full-width header bar — shared "highlighted section" look
+   reused by any .tmr-card-plain that wants it (category blocks, customer & delivery),
+   not just category blocks specifically. Same soft-blue treatment already used for
+   .tmr-part-block here and .mdbk-availability-section in doctor-appointment's modals. */
+.tmr-highlight-card { background: rgba(0, 97, 213, .04); border: 1px solid rgba(0, 97, 213, .12); }
+
+/* Pulled out to the card's own edges (negative margin matching .tmr-card-plain's 24px
+   padding) so the highlight spans the full card width, heading text (and, where present,
+   a collapse chevron) both sitting on top of it. */
+.tmr-highlight-header {
+    background: rgba(0, 97, 213, .1);
+    margin: -24px -24px 16px -24px;
+    padding: 14px 24px;
+    border-radius: 16px 16px 0 0;
+}
+.tmr-highlight-header h3 { color: #0061d5; }
+
+/* Category block header additionally doubles as a manual collapse/expand toggle — the
+   chevron rotates via .is-open, which JS also adds automatically the moment a dress gets
+   checked in an otherwise-still-collapsed block. */
+.tmr-category-block-header { cursor: pointer; user-select: none; }
+.tmr-category-chevron { margin-left: auto; color: #0061d5; transition: transform .18s ease; flex-shrink: 0; }
+.tmr-category-chevron.is-open { transform: rotate(180deg); }
+.tmr-category-collapsible { padding-top: 4px; }
+
+.tmr-date-display-input { cursor: pointer; background: #fff; }
+
+/* Customer + delivery-date + urgent-toggle, all on one row. */
+.tmr-inline-customer-row { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.tmr-inline-field { flex: 1 1 200px; min-width: 0; }
+.tmr-inline-toggle-field { flex: 0 0 auto; padding-bottom: 9px; }
+@media (max-width: 640px) {
+    .tmr-inline-customer-row { flex-direction: column; align-items: stretch; }
+    .tmr-inline-field { flex-basis: auto; width: 100%; }
+    .tmr-inline-toggle-field { padding-bottom: 0; }
 }
 
-.tmr-pagination a,
-.tmr-pagination span {
-    padding: 5px 10px;
-    border: 1px solid var(--tmr-border);
-    border-radius: var(--tmr-radius);
-    text-decoration: none;
-    color: var(--tmr-text);
+/* "+ নতুন" merged into the customer input itself as a small icon button on its right
+   edge, rather than a separate button beside the field. */
+.tmr-customer-input-wrap { position: relative; }
+.tmr-customer-input-wrap input { padding-right: 40px; }
+.tmr-input-inline-btn {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(0, 97, 213, .1);
+    color: #0061d5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+.tmr-input-inline-btn:hover { background: #0061d5; color: #fff; }
+
+/* ===== Delivery-date calendar dropdown — same self-built month-grid pattern as the
+   cozythai wc-service-booking calendar, reskinned to this plugin's blue accent. ===== */
+.tmr-cal-popover {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    z-index: 30;
+    margin-top: 6px;
+    width: 260px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, .12);
+    padding: 12px;
+    box-sizing: border-box;
+}
+.tmr-cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.tmr-cal-nav-btn {
+    background: none;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 2px 9px;
+    font-size: 16px;
+    line-height: 1.4;
+    cursor: pointer;
+    color: #0061d5;
+}
+.tmr-cal-nav-btn:hover { background: #0061d5; color: #fff; border-color: #0061d5; }
+.tmr-cal-title { font-size: 13px; font-weight: 700; color: #1e293b; }
+.tmr-cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.tmr-cal-day-header { text-align: center; font-size: 10px; font-weight: 700; color: #94a3b8; padding: 0 0 4px; }
+.tmr-cal-day {
+    position: relative;
+    text-align: center;
+    padding: 6px 0;
+    font-size: 12px;
+    font-weight: 500;
+    color: #1e293b;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.tmr-cal-day:hover:not(.empty):not(.past) { background: rgba(0, 97, 213, .1); }
+.tmr-cal-day.today { font-weight: 700; color: #0061d5; }
+.tmr-cal-day.selected { background: #0061d5; color: #fff; font-weight: 700; }
+.tmr-cal-day.past { color: #cbd5e1; cursor: not-allowed; }
+.tmr-cal-day.empty { cursor: default; }
+
+/* Selectable "chip" cards for Dress & Quantity / Design options — the whole box is the
+   clickable target, no visible checkbox at all. This still works with zero JS changes:
+   a native <label> wrapping an <input type=checkbox> already toggles that checkbox on
+   click anywhere in the label (clicking a distinct nested control, like the quantity
+   number input, focuses that control instead without also toggling — standard browser
+   behavior), so the checkbox only needs to be visually hidden (same off-screen technique
+   already used for .tmr-toggle's switches below), never removed from the DOM. Selected
+   state is driven purely by :has(input:checked), which still works on a hidden input. */
+.tmr-checkbox-grid label {
+    position: relative;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 12px 10px 16px;
+    background: #fff;
+    cursor: pointer;
+    transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
+}
+.tmr-checkbox-grid label:hover { border-color: #94a3b8; }
+.tmr-checkbox-grid label:has(input:checked) {
+    border-color: #0061d5;
+    background: rgba(0, 97, 213, .06);
+    box-shadow: 0 0 0 1px rgba(0, 97, 213, .15);
+    color: #0061d5;
+    font-weight: 600;
+    padding-right: 30px;
+}
+.tmr-checkbox-grid input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+/* Small checkmark badge that appears top-right of a selected chip — the only visual
+   cue for "selected" now that the native checkbox square is gone. */
+.tmr-checkbox-grid label::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%) scale(0);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #0061d5;
+    transition: transform .15s ease;
+}
+.tmr-checkbox-grid label:has(input:checked)::after {
+    transform: translateY(-50%) scale(1);
+}
+.tmr-checkbox-grid label::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    width: 5px;
+    height: 9px;
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: translateY(-65%) rotate(45deg) scale(0);
+    transform-origin: center;
+    z-index: 1;
+    transition: transform .15s ease;
+}
+.tmr-checkbox-grid label:has(input:checked)::before {
+    transform: translateY(-65%) rotate(45deg) scale(1);
+}
+.tmr-checkbox-grid .tmr-dress-qty {
+    margin-left: auto;
+    text-align: center;
+    font-weight: 600;
+}
+
+/* Dress-selection chips only: no tick badge — the box itself (border + tinted
+   background from the shared :has(input:checked) rule) is the only "selected" cue —
+   and exactly 4 per row so boxes read as a grid, not a wrapped list. */
+.tmr-dress-checkbox-grid { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 900px) { .tmr-dress-checkbox-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .tmr-dress-checkbox-grid { grid-template-columns: 1fr; } }
+.tmr-dress-checkbox-grid label {
+    padding: 7px 10px;
+    font-size: 12.5px;
+}
+.tmr-dress-checkbox-grid label:has(input:checked) { padding: 7px 10px; }
+.tmr-dress-checkbox-grid label::after,
+.tmr-dress-checkbox-grid label::before { content: none; }
+
+/* Modern +/- stepper around the quantity input, pinned to the box's right edge. Every
+   child gets the SAME explicit pixel height (not 100%/stretch — relying on flex-stretch
+   resolving identically for a <button> and an <input> is what kept leaving the number
+   sitting low) so there's no ambiguity left for any engine to resolve differently. */
+.tmr-qty-stepper {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+    flex-shrink: 0;
+    margin-left: auto;
+    height: 26px;
+}
+.tmr-qty-btn {
+    width: 24px;
+    height: 26px;
+    border: none;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 14px;
+    line-height: 26px;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    flex-shrink: 0;
+    box-sizing: border-box;
+}
+.tmr-qty-btn:hover { background: #e2e8f0; color: #0061d5; }
+.tmr-dress-checkbox-grid label:not(:has(input:checked)) .tmr-qty-btn { opacity: .35; pointer-events: none; }
+
+/* Type-qualified so this reliably beats .tmr-card-plain input[type="number"]'s
+   width:100% — that rule has higher specificity (adds a type selector) than a plain
+   two-class selector, which is why the box was stretching full-width before. */
+.tmr-dress-checkbox-grid input.tmr-dress-qty[type="number"] {
+    width: 32px;
+    height: 26px;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0 2px;
+    font-size: 12px;
+    line-height: 26px;
+    text-align: center;
+    vertical-align: middle;
+    border: none;
+    border-left: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    border-radius: 0;
+    box-sizing: border-box;
+    -moz-appearance: textfield;
+}
+.tmr-dress-checkbox-grid input.tmr-dress-qty[type="number"]::-webkit-inner-spin-button,
+.tmr-dress-checkbox-grid input.tmr-dress-qty[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Measurement fields boxed the same way as the dress-selection chips — bordered card,
+   4 per row, compact — just without the checkbox/selection behavior (every field here
+   is always "on", it's a plain value to type in, not something to pick). */
+.tmr-measure-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px 16px; }
+@media (max-width: 900px) { .tmr-measure-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .tmr-measure-grid { grid-template-columns: 1fr; } }
+.tmr-measure-field-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 7px 12px;
+    background: #fff;
+}
+.tmr-measure-field-wrap .tmr-form-label {
+    margin: 0;
+    font-size: 12px;
+    color: #374151;
+    white-space: nowrap;
+}
+.tmr-measure-field-wrap input[type="text"] {
+    width: 52px;
+    flex-shrink: 0;
+    text-align: center;
+    border: none !important;
+    padding: 4px 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #1e293b;
+    background: #f1f5f9;
+    border-radius: 8px;
+    box-shadow: none;
+}
+.tmr-measure-field-wrap input[type="text"]::placeholder { color: #cbd5e1; font-weight: 400; }
+.tmr-measure-field-wrap input[type="text"]:focus {
+    border: none !important;
+    outline: none;
+    background: #fff;
+    box-shadow: 0 0 0 2px rgba(0, 97, 213, .3) !important;
+}
+
+/* Design-part option pills — same chip treatment, tighter/rounder since these are
+   plain toggles (no quantity stepper riding along). */
+/* White (not the same tint as .tmr-category-block it sits inside) so nested part
+   blocks still read as their own distinct sub-group instead of blending into the
+   category section's own background. */
+.tmr-part-block {
+    background: #fff;
+    border: 1px solid rgba(0, 97, 213, .12);
+    border-radius: 12px;
+    padding: 12px 14px;
+}
+.tmr-part-block .tmr-checkbox-grid label {
+    border-radius: 999px;
+    padding: 6px 14px 6px 16px;
     font-size: 12px;
 }
-
-.tmr-pagination .is-current {
-    background: var(--tmr-primary);
-    color: #fff;
-    border-color: var(--tmr-primary);
+.tmr-part-block .tmr-checkbox-grid label:has(input:checked) { padding-right: 30px; }
+.tmr-part-block .tmr-checkbox-grid label::after { right: 8px; width: 13px; height: 13px; }
+.tmr-part-block .tmr-checkbox-grid label::before { right: 12px; width: 4px; height: 7px; }
+.tmr-part-block .tmr-checkbox-grid { grid-template-columns: none; display: flex; flex-wrap: wrap; }
+.tmr-part-block-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 10px;
+}
+.tmr-part-block-icon {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    background: rgba(0, 97, 213, .12);
+    color: #0061d5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
-@media (max-width: 782px) {
-    .tmr-sidebar { display: none; }
-    .tmr-main { padding: 16px; }
+/* Currency-prefixed number inputs (Wage/Cloth Price/Total/Advance/Due) */
+.tmr-money-field { position: relative; }
+.tmr-money-field::before {
+    content: '৳';
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 13px;
+    pointer-events: none;
+}
+.tmr-money-field input { padding-left: 28px !important; }
+
+/* Reference photo dropzone-style placeholder */
+.tmr-photo-preview svg { color: #cbd5e1; }
+
+/* Cancel button reads clearly secondary, not a near-duplicate of Save */
+.tmr-btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 13px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    color: #64748b;
+    text-decoration: none;
+}
+.tmr-btn-cancel:hover { background: #f8fafc; color: #1e293b; }
+
+.tmr-form-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding-top: 6px;
+}
+
+@media (max-width: 900px) {
+    .tmr-admin-wrapper { flex-direction: column; }
+    .tmr-sidebar { width: 100%; flex-direction: row; overflow-x: auto; padding: 12px 0; }
+    .tmr-sidebar-logo { display: none; }
+    .tmr-sidebar-menu { display: flex; }
+    .tmr-menu-item { padding: 10px 16px; white-space: nowrap; }
+    .tmr-sidebar-footer { display: none; }
 }

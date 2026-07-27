@@ -37,6 +37,7 @@ if (!class_exists('TMR_Tailor_Manager')) {
         {
             spl_autoload_register(array(__CLASS__, 'autoload'));
 
+            new TMR_Svg_Upload_Support();
             new TMR_Category_Taxonomy();
             new TMR_Dress_Post_Type();
             new TMR_Dress_Part_Post_Type();
@@ -44,6 +45,8 @@ if (!class_exists('TMR_Tailor_Manager')) {
             new TMR_Customer_Post_Type();
             new TMR_Order_Post_Type();
             new TMR_Order_Item_Post_Type();
+            $staff_role = new TMR_Staff_Role();
+            $staff_role->register();
             new TMR_Panel_Shell();
             new TMR_Dashboard_Panel();
             new TMR_Orders_Panel();
@@ -51,6 +54,7 @@ if (!class_exists('TMR_Tailor_Manager')) {
             new TMR_Dress_Panel();
             new TMR_Dress_Part_Panel();
             new TMR_Design_Type_Panel();
+            new TMR_Categories_Panel();
             new TMR_Accounts_Report();
             new TMR_Settings_Page();
             new TMR_Print_Slips();

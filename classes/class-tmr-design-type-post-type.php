@@ -17,7 +17,7 @@ class TMR_Design_Type_Post_Type
     public function register()
     {
         register_post_type(self::POST_TYPE, array(
-            'label'           => __('Design Type', 'tailor-manager'),
+            'label'           => __('ডিজাইন টাইপ', 'tailor-manager'),
             'public'          => false,
             'show_ui'         => false,
             'show_in_menu'    => false,

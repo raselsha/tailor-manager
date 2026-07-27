@@ -16,7 +16,7 @@ class TMR_Customer_Post_Type
     public function register()
     {
         register_post_type(self::POST_TYPE, array(
-            'label'           => __('Customer', 'tailor-manager'),
+            'label'           => __('কাস্টমার', 'tailor-manager'),
             'public'          => false,
             'show_ui'         => false,
             'show_in_menu'    => false,

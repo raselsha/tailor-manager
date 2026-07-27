@@ -12,110 +12,124 @@ class TMR_Dashboard_Panel
     public static function render()
     {
         if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
-            wp_die(esc_html__('You do not have permission to access this page.', 'tailor-manager'));
+            wp_die(esc_html__('এই পেজ দেখার অনুমতি আপনার নেই।', 'tailor-manager'));
         }
 
-        $today          = current_time('Y-m-d');
-        $month_start    = current_time('Y-m-01');
-        $next_week      = gmdate('Y-m-d', strtotime($today . ' +7 days'));
+        $today       = current_time('Y-m-d');
+        $month_start = current_time('Y-m-01');
 
-        $orders_this_month = self::count_orders_between($month_start, current_time('Y-m-t'));
-        $delivered_this_month = self::count_delivered_between($month_start, current_time('Y-m-t'));
-        $orders_all_time = self::count_all_orders();
-        $delivered_all_time = self::count_all_delivered();
+        $stats = array(
+            'dresses'   => wp_count_posts(TMR_Dress_Post_Type::POST_TYPE)->publish,
+            'customers' => wp_count_posts(TMR_Customer_Post_Type::POST_TYPE)->publish,
+            'orders'    => self::count_all_orders(),
+        );
+        $today_delivery = self::get_orders_by_delivery_date($today, $today, false);
 
-        $today_delivery = self::get_orders_by_delivery_date($today, $today, true);
-        $next7_delivery = self::get_orders_by_delivery_date(gmdate('Y-m-d', strtotime($today . ' +1 day')), $next_week, true);
-        $pending_delivery = self::get_pending_delivery(10);
+        $groups = self::get_pending_grouped_by_cutter();
 
-        TMR_Panel_Shell::header('dashboard', __('Dashboard', 'tailor-manager'));
+        $header_right = '<input type="text" class="tmr-search-box" id="tmr-dash-search" placeholder="'
+            . esc_attr__('দ্রুত খুঁজুন…', 'tailor-manager') . '" />'
+            . '<a href="' . esc_url(admin_url('admin.php?page=tmr-orders&action=add')) . '" class="tmr-btn-add">'
+            . esc_html__('+ অর্ডার নিন', 'tailor-manager') . '</a>';
+
+        TMR_Panel_Shell::header('dashboard', __('টেইলার ওভারভিউ', 'tailor-manager'), __('আপনার দৈনন্দিন কার্যক্রম দেখুন।', 'tailor-manager'), $header_right);
         ?>
-        <div class="tmr-stat-grid">
-            <div class="tmr-stat">
-                <div class="tmr-stat__label"><?php esc_html_e('Total Order (This Month)', 'tailor-manager'); ?></div>
-                <div class="tmr-stat__value"><?php echo esc_html($orders_this_month); ?></div>
+        <div class="tmr-stats-grid">
+            <div class="tmr-stat-card tmr-stat-card-blue">
+                <div class="tmr-stat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></div>
+                <h4><?php esc_html_e('ড্রেস টাইপ', 'tailor-manager'); ?></h4>
+                <div class="value"><?php echo esc_html($stats['dresses']); ?></div>
+                <div class="trend"><?php esc_html_e('ক্যাটালগে সক্রিয়', 'tailor-manager'); ?></div>
             </div>
-            <div class="tmr-stat">
-                <div class="tmr-stat__label"><?php esc_html_e('Total Delivered (This Month)', 'tailor-manager'); ?></div>
-                <div class="tmr-stat__value"><?php echo esc_html($delivered_this_month); ?></div>
+            <div class="tmr-stat-card tmr-stat-card-violet">
+                <div class="tmr-stat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
+                <h4><?php esc_html_e('কাস্টমার', 'tailor-manager'); ?></h4>
+                <div class="value"><?php echo esc_html($stats['customers']); ?></div>
+                <div class="trend"><?php esc_html_e('মোট রেকর্ড', 'tailor-manager'); ?></div>
             </div>
-            <div class="tmr-stat">
-                <div class="tmr-stat__label"><?php esc_html_e('Total Order (All Time)', 'tailor-manager'); ?></div>
-                <div class="tmr-stat__value"><?php echo esc_html($orders_all_time); ?></div>
+            <div class="tmr-stat-card tmr-stat-card-green">
+                <div class="tmr-stat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="3"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></div>
+                <h4><?php esc_html_e('মোট অর্ডার', 'tailor-manager'); ?></h4>
+                <div class="value"><?php echo esc_html($stats['orders']); ?></div>
+                <div class="trend"><?php esc_html_e('সর্বমোট', 'tailor-manager'); ?></div>
             </div>
-            <div class="tmr-stat">
-                <div class="tmr-stat__label"><?php esc_html_e('Total Delivery (All Time)', 'tailor-manager'); ?></div>
-                <div class="tmr-stat__value"><?php echo esc_html($delivered_all_time); ?></div>
+            <div class="tmr-stat-card tmr-stat-card-amber">
+                <div class="tmr-stat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg></div>
+                <h4><?php esc_html_e('আজকের ডেলিভারি', 'tailor-manager'); ?></h4>
+                <div class="value"><?php echo esc_html(count($today_delivery)); ?></div>
+                <div class="trend"><?php echo esc_html(TMR_Panel_Shell::bangla_date(strtotime($today))); ?></div>
             </div>
         </div>
 
-        <div class="tmr-card">
-            <div class="tmr-card__title">
-                <span><?php esc_html_e('Take an Order', 'tailor-manager'); ?></span>
-                <a class="tmr-btn tmr-btn--success" href="<?php echo esc_url(admin_url('admin.php?page=tmr-orders&action=add')); ?>"><span class="dashicons dashicons-plus"></span> <?php esc_html_e('Take an Order', 'tailor-manager'); ?></a>
+        <div class="tmr-dashboard-grid-container tmr-card-plain">
+            <div class="tmr-section-header">
+                <h3><?php esc_html_e('কাটার / টেইলার সারি', 'tailor-manager'); ?></h3>
+                <a href="<?php echo esc_url(admin_url('admin.php?page=tmr-orders&status=pending')); ?>" class="tmr-view-all-link"><?php esc_html_e('সব দেখুন', 'tailor-manager'); ?> &rarr;</a>
             </div>
+
+            <?php if (empty($groups)) : ?>
+                <div class="tmr-card"><table class="tmr-table"><tbody><tr><td class="tmr-empty"><?php esc_html_e('এই মুহূর্তে কোনো পেন্ডিং কাজ নেই।', 'tailor-manager'); ?></td></tr></tbody></table></div>
+            <?php else : ?>
+                <div class="tmr-dashboard-doctor-groups" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;">
+                    <?php foreach ($groups as $cutter => $order_ids) : ?>
+                        <div class="tmr-card">
+                            <div class="tmr-card-header">
+                                <div>
+                                    <h3><?php echo esc_html($cutter ?: __('অনির্ধারিত', 'tailor-manager')); ?></h3>
+                                    <span style="display:block;font-size:10px;color:#94a3b8;"><?php echo esc_html(TMR_Panel_Shell::bangla_date(strtotime($today))); ?></span>
+                                </div>
+                                <span class="tmr-badge tmr-badge-green"><?php echo esc_html(count($order_ids)); ?></span>
+                            </div>
+                            <ul style="list-style:none;margin:0;padding:4px 0;min-height:100px;max-height:120px;overflow-y:auto;">
+                                <?php foreach (array_slice($order_ids, 0, 6) as $order_id) :
+                                    $customer_id = (int) get_post_meta($order_id, '_tmr_customer_id', true);
+                                    $name        = $customer_id ? get_the_title($customer_id) : __('ওয়াক-ইন', 'tailor-manager');
+                                ?>
+                                    <li style="display:flex;align-items:center;gap:6px;padding:5px 14px;border-top:1px dotted #cbd5e1;font-size:12px;">
+                                        <a href="<?php echo esc_url(admin_url('admin.php?page=tmr-orders&action=view&id=' . $order_id)); ?>" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1e293b;text-decoration:none;">#<?php echo esc_html($order_id); ?> <?php echo esc_html($name); ?></a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
         </div>
-
-        <?php self::render_order_card(__('Today\'s Delivery', 'tailor-manager'), $today_delivery); ?>
-        <?php self::render_order_card(__('Delivery for Next 7 Days', 'tailor-manager'), $next7_delivery); ?>
-        <?php self::render_order_card(__('Pending Delivery', 'tailor-manager'), $pending_delivery); ?>
-
-        <script>
-        jQuery(function ($) {
-            $(document).on('click', '.tmr-toggle-ready', function () {
-                var $btn = $(this);
-                TMRPanel.call('tmr_toggle_ready', { id: $btn.data('id') }, function (data) {
-                    $btn.text(data.ready ? '<?php echo esc_js(__('Ready', 'tailor-manager')); ?>' : '<?php echo esc_js(__('Not Ready', 'tailor-manager')); ?>');
-                });
-            });
-            $(document).on('click', '.tmr-toggle-delivered', function () {
-                var $btn = $(this);
-                TMRPanel.call('tmr_toggle_delivered', { id: $btn.data('id') }, function (data) {
-                    $btn.text(data.delivered ? '<?php echo esc_js(__('Delivered', 'tailor-manager')); ?>' : '<?php echo esc_js(__('Undelivered', 'tailor-manager')); ?>');
-                });
-            });
-        });
-        </script>
         <?php
         TMR_Panel_Shell::footer();
     }
 
-    private static function render_order_card($title, $orders)
+    /**
+     * @return array<string,int[]> cutter name (may be '' for unassigned) => order IDs,
+     *         for orders that are neither delivered nor cancelled
+     */
+    public static function get_pending_grouped_by_cutter()
     {
-        ?>
-        <div class="tmr-card">
-            <div class="tmr-card__title">
-                <span><?php echo esc_html($title); ?> <span class="tmr-badge tmr-badge--pending"><?php echo count($orders); ?></span></span>
-            </div>
-            <?php if (empty($orders)) : ?>
-                <div class="tmr-empty"><?php esc_html_e('No items.', 'tailor-manager'); ?></div>
-            <?php else : ?>
-                <table class="tmr-table">
-                    <tbody>
-                        <?php foreach ($orders as $order) :
-                            $customer_id = (int) get_post_meta($order->ID, '_tmr_customer_id', true);
-                            $phone       = $customer_id ? TMR_Customer_Post_Type::get_phone($customer_id) : '';
-                            $name        = $customer_id ? get_the_title($customer_id) : __('Walk-in', 'tailor-manager');
-                            $ready       = TMR_Order_Post_Type::is_ready($order->ID);
-                            $delivered   = TMR_Order_Post_Type::is_delivered($order->ID);
-                        ?>
-                            <tr>
-                                <td>
-                                    <a href="<?php echo esc_url(admin_url('admin.php?page=tmr-orders&action=view&id=' . $order->ID)); ?>">
-                                        <?php echo esc_html($order->ID . '. ' . $name . ($phone ? ' (' . $phone . ')' : '')); ?>
-                                    </a>
-                                </td>
-                                <td style="text-align:right; white-space:nowrap;">
-                                    <button type="button" class="tmr-btn tmr-btn--sm tmr-toggle-delivered" data-id="<?php echo esc_attr($order->ID); ?>"><?php echo $delivered ? esc_html__('Delivered', 'tailor-manager') : esc_html__('Undelivered', 'tailor-manager'); ?></button>
-                                    <button type="button" class="tmr-btn tmr-btn--sm tmr-toggle-ready" data-id="<?php echo esc_attr($order->ID); ?>"><?php echo $ready ? esc_html__('Ready', 'tailor-manager') : esc_html__('Not Ready', 'tailor-manager'); ?></button>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            <?php endif; ?>
-        </div>
-        <?php
+        $items = get_posts(array(
+            'post_type'      => TMR_Order_Item_Post_Type::POST_TYPE,
+            'post_status'    => 'any',
+            'posts_per_page' => -1,
+        ));
+
+        $groups = array();
+        foreach ($items as $item) {
+            if (!$item->post_parent) {
+                continue;
+            }
+            if (TMR_Order_Post_Type::is_delivered($item->post_parent) || TMR_Order_Post_Type::is_cancelled($item->post_parent)) {
+                continue;
+            }
+
+            $cutter = get_post_meta($item->ID, '_tmr_cutter_name', true);
+            if (!isset($groups[$cutter])) {
+                $groups[$cutter] = array();
+            }
+            if (!in_array($item->post_parent, $groups[$cutter], true)) {
+                $groups[$cutter][] = $item->post_parent;
+            }
+        }
+
+        return $groups;
     }
 
     private static function base_order_query($extra_meta = array(), $limit = -1)
@@ -207,14 +221,35 @@ class TMR_Dashboard_Panel
         return (int) $query->found_posts;
     }
 
+    /**
+     * A tailor_staff user may toggle only orders that are actually theirs (an item's
+     * cutter name matches their own display name) — same ownership-check discipline as
+     * every other staff-facing write path; full admins can toggle anything.
+     */
+    private function can_toggle_order($order_id)
+    {
+        if (current_user_can(TMR_Panel_Shell::CAPABILITY)) {
+            return true;
+        }
+
+        if (!current_user_can(TMR_Staff_Role::CAPABILITY)) {
+            return false;
+        }
+
+        $my_ids = TMR_My_Orders_Panel::get_my_order_ids(wp_get_current_user()->display_name);
+        return in_array((int) $order_id, $my_ids, true);
+    }
+
     public function ajax_toggle_ready()
     {
         check_ajax_referer('tmr_panel_nonce', 'nonce');
-        if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
-            wp_send_json_error(array('message' => __('Permission denied.', 'tailor-manager')));
-        }
 
         $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+
+        if (!$this->can_toggle_order($id)) {
+            wp_send_json_error(array('message' => __('অনুমতি নেই।', 'tailor-manager')));
+        }
+
         $new = TMR_Order_Post_Type::is_ready($id) ? '0' : '1';
         update_post_meta($id, '_tmr_ready', $new);
 
@@ -224,11 +259,13 @@ class TMR_Dashboard_Panel
     public function ajax_toggle_delivered()
     {
         check_ajax_referer('tmr_panel_nonce', 'nonce');
-        if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
-            wp_send_json_error(array('message' => __('Permission denied.', 'tailor-manager')));
-        }
 
         $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+
+        if (!$this->can_toggle_order($id)) {
+            wp_send_json_error(array('message' => __('অনুমতি নেই।', 'tailor-manager')));
+        }
+
         $new = TMR_Order_Post_Type::is_delivered($id) ? '0' : '1';
         update_post_meta($id, '_tmr_delivered', $new);
 

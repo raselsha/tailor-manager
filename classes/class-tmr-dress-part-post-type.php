@@ -18,7 +18,7 @@ class TMR_Dress_Part_Post_Type
     public function register()
     {
         register_post_type(self::POST_TYPE, array(
-            'label'           => __('Dress Part', 'tailor-manager'),
+            'label'           => __('ড্রেস পার্ট', 'tailor-manager'),
             'public'          => false,
             'show_ui'         => false,
             'show_in_menu'    => false,

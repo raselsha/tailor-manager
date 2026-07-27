@@ -23,7 +23,7 @@ class TMR_Order_Item_Post_Type
     public function register()
     {
         register_post_type(self::POST_TYPE, array(
-            'label'           => __('Order Item', 'tailor-manager'),
+            'label'           => __('অর্ডার আইটেম', 'tailor-manager'),
             'public'          => false,
             'show_ui'         => false,
             'show_in_menu'    => false,
