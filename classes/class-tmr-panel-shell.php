@@ -136,6 +136,18 @@ class TMR_Panel_Shell
         return $day . ', ' . gmdate('j', $timestamp) . ' ' . $month;
     }
 
+    /**
+     * "৳ 3,200" — same ৳-prefixed, thousands-separated, no-unnecessary-decimals format
+     * as the order form's own JS formatMoney(), for read-only PHP-rendered amounts
+     * (order view page, print slips) to match what the live form already shows.
+     */
+    public static function format_money($value)
+    {
+        $value = round((float) $value, 2);
+        $decimals = (floor($value) == $value) ? 0 : 2;
+        return '৳ ' . number_format($value, $decimals);
+    }
+
     public function enqueue_assets()
     {
         if (!self::is_tmr_screen()) {
@@ -148,7 +160,10 @@ class TMR_Panel_Shell
         $js_path  = TMR_PLUGIN_PATH . 'assets/js/panel.js';
 
         wp_enqueue_style('tmr-panel', TMR_PLUGIN_URL . 'assets/css/panel.css', array(), file_exists($css_path) ? filemtime($css_path) : TMR_VERSION);
-        wp_enqueue_script('tmr-panel', TMR_PLUGIN_URL . 'assets/js/panel.js', array('jquery'), file_exists($js_path) ? filemtime($js_path) : TMR_VERSION, true);
+        // Kazuhiko Arase's public-domain QR generator (same vendor copy doctor-appointment
+        // uses for its booking-confirmation QR) — powers the order confirmation's QR code.
+        wp_enqueue_script('tmr-qrcode', TMR_PLUGIN_URL . 'assets/js/vendor/qrcode.js', array(), TMR_VERSION, true);
+        wp_enqueue_script('tmr-panel', TMR_PLUGIN_URL . 'assets/js/panel.js', array('jquery', 'tmr-qrcode'), file_exists($js_path) ? filemtime($js_path) : TMR_VERSION, true);
         wp_enqueue_media();
 
         wp_localize_script('tmr-panel', 'TMR', array(

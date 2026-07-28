@@ -34,6 +34,16 @@ class TMR_Dress_Part_Post_Type
     }
 
     /**
+     * The custom label shown on the order form's extra measurement box for this part
+     * (e.g. "লম্বা") — falls back to a generic "পরিমাণ" if never set.
+     */
+    public static function get_measurement_label($part_id)
+    {
+        $label = get_post_meta($part_id, '_tmr_measurement_label', true);
+        return '' !== $label ? $label : __('পরিমাণ', 'tailor-manager');
+    }
+
+    /**
      * @param string $category_slug
      * @return WP_Post[]
      */

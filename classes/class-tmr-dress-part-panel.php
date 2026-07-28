@@ -85,10 +85,14 @@ class TMR_Dress_Part_Panel
                         </div>
                         <div class="tmr-form-row">
                             <label class="tmr-toggle">
-                                <input type="checkbox" name="measurement_enabled" value="1" />
+                                <input type="checkbox" name="measurement_enabled" value="1" id="tmr-part-measurement-toggle" />
                                 <span class="tmr-toggle-slider"></span>
                                 <span class="tmr-form-label" style="margin:0;"><?php esc_html_e('পার্ট মাপ — এই পার্টের জন্য অতিরিক্ত মাপ নেওয়া হবে', 'tailor-manager'); ?></span>
                             </label>
+                        </div>
+                        <div class="tmr-form-row" id="tmr-part-measurement-label-row" style="display:none;">
+                            <label class="tmr-form-label" for="tmr-part-measurement-label"><?php esc_html_e('এই মাপের নাম', 'tailor-manager'); ?></label>
+                            <input type="text" name="measurement_label" id="tmr-part-measurement-label" placeholder="<?php esc_attr_e('যেমনঃ লম্বা', 'tailor-manager'); ?>" />
                         </div>
                     </div>
                     <div class="tmr-modal-foot" style="justify-content:space-between;">
@@ -132,6 +136,12 @@ class TMR_Dress_Part_Panel
                 });
             });
 
+            function toggleMeasurementLabelRow() {
+                $('#tmr-part-measurement-label-row').toggle($('#tmr-part-measurement-toggle').is(':checked'));
+            }
+
+            $(document).on('change', '#tmr-part-measurement-toggle', toggleMeasurementLabelRow);
+
             function openAddPartModal(categoryId) {
                 $form[0].reset();
                 $form.find('[name="part_id"]').val(0);
@@ -139,6 +149,7 @@ class TMR_Dress_Part_Panel
                 if (categoryId) {
                     $form.find('[name="category"]').val(categoryId);
                 }
+                toggleMeasurementLabelRow();
                 $('#tmr-part-modal-title').text('<?php echo esc_js(__('পার্ট যোগ করুন', 'tailor-manager')); ?>');
                 TMRPanel.openModal($modal);
             }
@@ -159,6 +170,8 @@ class TMR_Dress_Part_Panel
                     $form.find('[name="name"]').val(data.name);
                     $form.find('[name="category"]').val(data.category_id);
                     $form.find('[name="measurement_enabled"]').prop('checked', data.measurement_enabled);
+                    $form.find('[name="measurement_label"]').val(data.measurement_label);
+                    toggleMeasurementLabelRow();
                     $form.find('[name="status"]').prop('checked', data.status === 'publish');
                     TMRPanel.syncStatusToggle($form.find('[name="status"]'));
                     $('#tmr-part-modal-title').text('<?php echo esc_js(__('পার্ট এডিট করুন', 'tailor-manager')); ?>');
@@ -293,6 +306,7 @@ class TMR_Dress_Part_Panel
             'name'                => $post->post_title,
             'category_id'         => $terms && !is_wp_error($terms) ? $terms[0]->term_id : '',
             'measurement_enabled' => TMR_Dress_Part_Post_Type::measurement_enabled($post->ID),
+            'measurement_label'   => get_post_meta($post->ID, '_tmr_measurement_label', true),
             'status'              => $post->post_status,
         ));
     }
@@ -308,6 +322,7 @@ class TMR_Dress_Part_Panel
         $name                = isset($_POST['name']) ? sanitize_text_field(wp_unslash($_POST['name'])) : '';
         $category_id         = isset($_POST['category']) ? (int) $_POST['category'] : 0;
         $measurement_enabled = !empty($_POST['measurement_enabled']) && '1' === $_POST['measurement_enabled'];
+        $measurement_label   = isset($_POST['measurement_label']) ? sanitize_text_field(wp_unslash($_POST['measurement_label'])) : '';
         // Status is a checkbox (toggle) now, not a <select> — unchecked means the field
         // is simply absent from the serialized data, so presence (not value) decides it.
         $status              = !empty($_POST['status']) ? 'publish' : 'draft';
@@ -335,6 +350,7 @@ class TMR_Dress_Part_Panel
 
         wp_set_object_terms($result, array($category_id), TMR_Category_Taxonomy::TAXONOMY, false);
         update_post_meta($result, '_tmr_measurement_enabled', $measurement_enabled ? '1' : '0');
+        update_post_meta($result, '_tmr_measurement_label', $measurement_label);
 
         wp_send_json_success(array('id' => $result));
     }

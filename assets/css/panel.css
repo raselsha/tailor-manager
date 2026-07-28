@@ -879,6 +879,32 @@
     margin: 0;
 }
 
+/* Same compact stepper-input treatment for a dress-less category's own direct
+   quantity box — type-qualified for the same specificity-win reason as the dress
+   qty box above (a plain two-class selector loses to .tmr-card-plain input[type="number"]). */
+.tmr-category-qty-direct input.tmr-category-qty[type="number"] {
+    width: 32px;
+    height: 26px;
+    flex-shrink: 0;
+    margin: 0;
+    padding: 0 2px;
+    font-size: 12px;
+    line-height: 26px;
+    text-align: center;
+    vertical-align: middle;
+    border: none;
+    border-left: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    border-radius: 0;
+    box-sizing: border-box;
+    -moz-appearance: textfield;
+}
+.tmr-category-qty-direct input.tmr-category-qty[type="number"]::-webkit-inner-spin-button,
+.tmr-category-qty-direct input.tmr-category-qty[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 /* Measurement fields boxed the same way as the dress-selection chips — bordered card,
    4 per row, compact — just without the checkbox/selection behavior (every field here
    is always "on", it's a plain value to type in, not something to pick). */
@@ -894,7 +920,16 @@
     border-radius: 12px;
     padding: 7px 12px;
     background: #f8fafc;
+    transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
 }
+/* Filled in — same blue highlight language as a checked dress/design chip, so it's
+   obvious at a glance which measurements still need a value and which are done. */
+.tmr-measure-field-wrap.tmr-measure-has-value {
+    border-color: #0061d5;
+    background: rgba(0, 97, 213, .06);
+    box-shadow: 0 0 0 1px rgba(0, 97, 213, .15);
+}
+.tmr-measure-field-wrap.tmr-measure-has-value .tmr-form-label { color: #0061d5; font-weight: 600; }
 .tmr-measure-field-wrap .tmr-form-label {
     margin: 0;
     font-size: 12px;
@@ -910,8 +945,10 @@
    (0,2,2) outranks a plain .tmr-measure-field-wrap input[type="text"] (0,2,1) regardless
    of source order, which is why width kept reverting to 100% before. The extra class
    pushes this to (0,3,1), which wins outright; width also carries !important as a
-   second guarantee. */
-.tmr-measure-field-wrap input.tmr-measure-field[type="text"] {
+   second guarantee. .tmr-part-measurement (a part's own extra measurement, e.g. under
+   Collar Design) reuses this exact same box, so it needs the same specificity win. */
+.tmr-measure-field-wrap input.tmr-measure-field[type="text"],
+.tmr-measure-field-wrap input.tmr-part-measurement[type="text"] {
     width: 44px !important;
     height: 26px;
     flex-shrink: 0;
@@ -929,8 +966,10 @@
     box-shadow: none;
     box-sizing: border-box;
 }
-.tmr-measure-field-wrap input.tmr-measure-field[type="text"]::placeholder { color: #cbd5e1; font-weight: 400; }
-.tmr-measure-field-wrap input.tmr-measure-field[type="text"]:focus {
+.tmr-measure-field-wrap input.tmr-measure-field[type="text"]::placeholder,
+.tmr-measure-field-wrap input.tmr-part-measurement[type="text"]::placeholder { color: #cbd5e1; font-weight: 400; }
+.tmr-measure-field-wrap input.tmr-measure-field[type="text"]:focus,
+.tmr-measure-field-wrap input.tmr-part-measurement[type="text"]:focus {
     border: none !important;
     outline: none;
     box-shadow: none !important;
@@ -990,6 +1029,15 @@
     flex-shrink: 0;
 }
 
+/* Part's own extra measurement (e.g. "লম্বা" under Collar Design) — a dashed divider
+   anchors it to the part's checkbox grid above (so it reads as belonging to that same
+   card, not a detached box), with the actual field a compact .tmr-measure-field-wrap
+   box — same size/active-highlight treatment as every other measurement box in the
+   plugin. Hidden until a design under this part is actually checked (see
+   .tmr-design-check's change handler) — same "pick something, its extra fields
+   reveal" language as the category-level dress/measurement sections. */
+.tmr-part-measure-row { margin-top: 10px; padding-top: 10px; border-top: 1px dashed rgba(0, 97, 213, .18); }
+
 /* Currency-prefixed number inputs (Wage/Cloth Price/Total/Advance/Due) */
 .tmr-money-field { position: relative; }
 .tmr-money-field::before {
@@ -1004,6 +1052,19 @@
     pointer-events: none;
 }
 .tmr-money-field input { padding-left: 28px !important; }
+
+/* Pricing card — editable inputs on the left, a read-only calculated summary
+   (total/advance/due) on the right, so it reads like a receipt instead of a bare
+   list of number boxes. */
+.tmr-price-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; align-items: start; }
+@media (max-width: 700px) { .tmr-price-grid { grid-template-columns: 1fr; } }
+.tmr-price-inputs .tmr-form-row:last-child { margin-bottom: 0; }
+.tmr-price-summary { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 6px 20px; }
+.tmr-price-summary-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; font-size: 13px; color: #64748b; }
+.tmr-price-summary-row + .tmr-price-summary-row { border-top: 1px dashed #e2e8f0; }
+.tmr-price-summary-row span:last-child { font-weight: 600; color: #1e293b; }
+.tmr-price-summary-due span:first-child { font-weight: 700; color: #1e293b; font-size: 14px; }
+.tmr-price-summary-due span:last-child { font-weight: 800; color: #0061d5; font-size: 19px; }
 
 /* Reference photo dropzone-style placeholder */
 .tmr-photo-preview svg { color: #cbd5e1; }
@@ -1039,3 +1100,132 @@
     .tmr-menu-item { padding: 10px 16px; white-space: nowrap; }
     .tmr-sidebar-footer { display: none; }
 }
+
+/* Order confirmation panel — shown in place of the order form, in the same modal,
+   right after a successful save. Same visual language (and QR-download-print recipe)
+   as the doctor-appointment plugin's own post-booking confirmation card. */
+/* max-width + margin:auto keeps this a comfortable "receipt card" width even though
+   it sits inside the wide (960px) order-form modal — letting it stretch full width
+   was the "broken" look, rows spread edge-to-edge with huge label/value gaps. Padding
+   is redeclared (not omitted) because this shares .tmr-modal-body, whose own
+   padding:20px 24px this rule would otherwise silently cancel via source order. */
+.tmr-order-confirmation { text-align: center; padding: 16px 28px 20px; max-width: 800px; margin: 0 auto; box-sizing: border-box; }
+.tmr-confirmation-shop-name { margin: 0 0 8px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #94a3b8; }
+.tmr-confirmation-icon {
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    margin: 0 auto 8px;
+    background: #e6f7ed;
+    color: #1a7f45;
+    border-radius: 50%;
+    font-size: 19px;
+    font-weight: 700;
+}
+.tmr-order-confirmation h4 { margin: 0 0 14px; font-size: 16px; font-weight: 700; color: #1e293b; }
+/* Details/QR/hint stay receipt-width and centered — only the outer card and the
+   share-icon row below get to use the doubled-width space. */
+.tmr-confirmation-details { text-align: left; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 4px 16px 12px; margin: 0 auto 14px; max-width: 420px; }
+/* One container (.tmr-confirmation-details), three labeled sections inside it —
+   customer summary, payment summary, then dress & measurement data row-wise. */
+.tmr-confirmation-section { padding-top: 10px; }
+.tmr-confirmation-section + .tmr-confirmation-section { margin-top: 4px; padding-top: 12px; border-top: 1px solid #e2e8f0; }
+.tmr-confirmation-section-title { margin: 0 0 2px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #0061d5; }
+.tmr-confirmation-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 7px 0; font-size: 13px; }
+.tmr-confirmation-row + .tmr-confirmation-row { border-top: 1px solid #e2e8f0; }
+.tmr-confirmation-row span { color: #64748b; flex-shrink: 0; }
+.tmr-confirmation-row strong { color: #1e293b; font-weight: 700; text-align: right; word-break: break-word; }
+.tmr-conf-item + .tmr-conf-item { margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0; }
+.tmr-conf-item-measurements { padding-left: 12px; border-top: 1px solid #e2e8f0; margin-top: 2px; }
+.tmr-conf-item-measurements .tmr-confirmation-row { font-size: 12px; padding: 5px 0; }
+.tmr-conf-item-measurements .tmr-confirmation-row span { color: #94a3b8; }
+.tmr-confirmation-qr { margin: 0 auto 8px; display: flex; justify-content: center; }
+.tmr-confirmation-qr img { width: 130px; height: 130px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px; background: #fff; }
+.tmr-confirmation-hint { font-size: 12px; color: #94a3b8; margin: 0 0 20px; }
+/* Circular icon + label share row (copy link / WhatsApp / download / print) — same
+   language as a typical share-sheet: dark circle, white icon, label underneath. */
+.tmr-confirmation-share-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 28px; margin-bottom: 4px; }
+.tmr-confirmation-share-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; background: none; border: none; cursor: pointer; font-family: inherit; padding: 0; }
+.tmr-confirmation-share-icon { width: 52px; height: 52px; border-radius: 50%; background: #1e293b; color: #fff; display: flex; align-items: center; justify-content: center; transition: background .15s ease, transform .15s ease; }
+.tmr-confirmation-share-btn:hover .tmr-confirmation-share-icon { background: #0061d5; transform: translateY(-2px); }
+.tmr-confirmation-share-btn span:last-child { font-size: 12px; font-weight: 600; color: #64748b; }
+.tmr-confirmation-view-link { display: block; margin-top: 10px; font-size: 13px; font-weight: 600; color: #0061d5; text-decoration: none; }
+.tmr-confirmation-view-link:hover { text-decoration: underline; }
+.tmr-confirmation-close-btn {
+    margin-top: 12px;
+    padding: 10px 28px;
+    background: #0061d5;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+}
+.tmr-confirmation-close-btn:hover { background: #0056bc; }
+
+/* Printing the confirmation card ("প্রিন্ট / PDF সেভ") — hide everything else on the
+   page and let the card fill the printable area. */
+@media print {
+    body * { visibility: hidden; }
+    .tmr-order-confirmation,
+    .tmr-order-confirmation * { visibility: visible; }
+    .tmr-order-confirmation {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .tmr-confirmation-share-actions,
+    .tmr-confirmation-view-link,
+    .tmr-confirmation-close-btn { display: none !important; }
+}
+
+/* Order view page — read-only info/staff/measurement grids, same card language
+   (.tmr-cat-collapse-block, .tmr-part-block, .tmr-price-grid) as the rest of the
+   plugin, reused instead of the old bare <p>/<table> layout. */
+.tmr-order-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+.tmr-order-info-item { display: flex; flex-direction: column; gap: 4px; }
+.tmr-order-info-item strong { font-size: 14px; color: #1e293b; }
+.tmr-order-staff-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; }
+.tmr-order-staff-row > div { display: flex; flex-direction: column; gap: 4px; }
+.tmr-order-staff-row strong { font-size: 13px; color: #1e293b; }
+
+/* Order-info + payment-summary combined into one card, two labeled sections. */
+.tmr-order-detail-section { padding-top: 18px; }
+.tmr-order-detail-section:first-of-type { padding-top: 0; }
+.tmr-order-detail-section + .tmr-order-detail-section { margin-top: 18px; border-top: 1px solid rgba(0, 97, 213, .12); }
+.tmr-order-detail-section-title { margin: 0 0 14px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #0061d5; }
+
+/* "পোশাক" section label above the per-item collapsible cards. */
+.tmr-order-section-heading { margin: 4px 4px 12px; font-size: 15px; font-weight: 700; color: #1e293b; }
+
+/* Per-dress measurement list, table-row form instead of a pill grid — two label/value
+   pairs per row (not one) so N fields take N/2 rows, not N. */
+.tmr-view-measure-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+.tmr-view-measure-table tr { border-bottom: 1px solid #e2e8f0; }
+.tmr-view-measure-table tr:last-child { border-bottom: none; }
+.tmr-view-measure-table td { padding: 6px 4px; font-size: 12px; color: #64748b; }
+.tmr-view-measure-table td.tmr-vm-value { width: 22%; text-align: right; color: #1e293b; font-weight: 700; }
+.tmr-view-measure-table td.tmr-vm-label:last-of-type,
+.tmr-view-measure-table td.tmr-vm-value:last-of-type { padding-left: 16px; }
+.tmr-view-design-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+
+/* Compact tuning for the order-view page specifically — the shared card/section
+   components default to spacious padding, but this page stacks many of them at once,
+   so every gap here is trimmed down rather than changing those shared defaults. */
+.tmr-order-view .tmr-card-plain { padding: 18px 20px; }
+.tmr-order-view .tmr-order-detail-section { padding-top: 12px; }
+.tmr-order-view .tmr-order-detail-section + .tmr-order-detail-section { margin-top: 12px; }
+.tmr-order-view .tmr-order-detail-section-title { margin-bottom: 8px; }
+.tmr-order-view .tmr-order-info-grid { gap: 10px; }
+.tmr-order-view .tmr-price-grid { gap: 20px; }
+.tmr-order-view .tmr-order-section-heading { margin: 0 4px 8px; font-size: 14px; }
+.tmr-order-view .tmr-cat-collapse-block { margin-bottom: 12px; }
+.tmr-order-view .tmr-cat-collapse-body { max-height: none; }
+.tmr-order-view .tmr-order-staff-row { padding: 8px 12px; gap: 10px; }
+.tmr-order-view .tmr-part-block-title { margin-top: 12px; }
+.tmr-order-view .tmr-part-block { margin-top: 8px; padding: 10px 12px; }
+.tmr-order-view .tmr-view-design-chips { margin-top: 4px; }
+.tmr-order-view .tmr-form-hint { margin-top: 4px; }

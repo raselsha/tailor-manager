@@ -18,6 +18,7 @@ class TMR_Orders_Panel
         add_action('wp_ajax_tmr_search_customers', array($this, 'ajax_search_customers'));
         add_action('wp_ajax_tmr_quick_add_customer', array($this, 'ajax_quick_add_customer'));
         add_action('wp_ajax_tmr_get_order_form', array($this, 'ajax_get_order_form'));
+        add_action('wp_ajax_tmr_get_order_summary', array($this, 'ajax_get_order_summary'));
     }
 
     public static function render()
@@ -135,14 +136,14 @@ class TMR_Orders_Panel
                             $status_key  = TMR_Order_Post_Type::status_label($order->ID);
                         ?>
                             <tr>
-                                <td><a href="<?php echo esc_url(admin_url('admin.php?page=tmr-orders&action=view&id=' . $order->ID)); ?>" style="color:#1e293b;font-weight:600;text-decoration:none;"><?php echo esc_html($name . ($phone ? ' (' . $phone . ')' : '')); ?></a></td>
+                                <td><a href="#" class="tmr-view-order-trigger" data-id="<?php echo esc_attr($order->ID); ?>" style="color:#1e293b;font-weight:600;text-decoration:none;"><?php echo esc_html($name . ($phone ? ' (' . $phone . ')' : '')); ?></a></td>
                                 <td><?php echo esc_html(self::dress_summary($order->ID)); ?></td>
                                 <td><?php echo esc_html(get_post_meta($order->ID, '_tmr_delivery_date', true)); ?></td>
                                 <td><span class="tmr-badge tmr-badge-<?php echo esc_attr($status_key); ?>"><?php echo esc_html(ucfirst($status_key)); ?></span></td>
                                 <td>#<?php echo esc_html($order->ID); ?></td>
                                 <td>
                                     <div class="tmr-actions">
-                                        <a class="tmr-icon-btn" href="<?php echo esc_url(admin_url('admin.php?page=tmr-orders&action=view&id=' . $order->ID)); ?>" title="<?php esc_attr_e('দেখুন', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></a>
+                                        <a class="tmr-icon-btn tmr-view-order-trigger" href="#" data-id="<?php echo esc_attr($order->ID); ?>" title="<?php esc_attr_e('দেখুন', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></a>
                                         <button type="button" class="tmr-icon-btn tmr-open-order-modal-edit" data-id="<?php echo esc_attr($order->ID); ?>" title="<?php esc_attr_e('এডিট', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
                                     </div>
                                 </td>
@@ -163,6 +164,51 @@ class TMR_Orders_Panel
                 </div>
                 <div class="tmr-modal-body" id="tmr-order-modal-body">
                     <div class="tmr-empty"><?php esc_html_e('লোড হচ্ছে…', 'tailor-manager'); ?></div>
+                </div>
+                <div class="tmr-modal-body tmr-order-confirmation" id="tmr-order-confirmation-body" style="display:none;">
+                    <p class="tmr-confirmation-shop-name"><?php echo esc_html(get_bloginfo('name')); ?></p>
+                    <div class="tmr-confirmation-icon">&#10003;</div>
+                    <h4><?php esc_html_e('অর্ডার সম্পন্ন হয়েছে', 'tailor-manager'); ?></h4>
+                    <div class="tmr-confirmation-details">
+                        <div class="tmr-confirmation-section">
+                            <p class="tmr-confirmation-section-title"><?php esc_html_e('কাস্টমার সামারি', 'tailor-manager'); ?></p>
+                            <div class="tmr-confirmation-row"><span><?php esc_html_e('অর্ডার নং', 'tailor-manager'); ?></span><strong id="tmr-conf-order-id"></strong></div>
+                            <div class="tmr-confirmation-row"><span><?php esc_html_e('কাস্টমার', 'tailor-manager'); ?></span><strong id="tmr-conf-customer"></strong></div>
+                            <div class="tmr-confirmation-row"><span><?php esc_html_e('ডেলিভারি তারিখ', 'tailor-manager'); ?></span><strong id="tmr-conf-delivery"></strong></div>
+                        </div>
+                        <div class="tmr-confirmation-section">
+                            <p class="tmr-confirmation-section-title"><?php esc_html_e('পেমেন্ট সামারি', 'tailor-manager'); ?></p>
+                            <div class="tmr-confirmation-row"><span><?php esc_html_e('মোট', 'tailor-manager'); ?></span><strong id="tmr-conf-total"></strong></div>
+                            <div class="tmr-confirmation-row"><span><?php esc_html_e('অগ্রিম', 'tailor-manager'); ?></span><strong id="tmr-conf-advance"></strong></div>
+                            <div class="tmr-confirmation-row"><span><?php esc_html_e('বাকি', 'tailor-manager'); ?></span><strong id="tmr-conf-due"></strong></div>
+                        </div>
+                        <div class="tmr-confirmation-section">
+                            <p class="tmr-confirmation-section-title"><?php esc_html_e('পোশাক ও মাপ', 'tailor-manager'); ?></p>
+                            <div id="tmr-conf-items"></div>
+                        </div>
+                    </div>
+                    <div class="tmr-confirmation-qr" id="tmr-order-confirmation-qr"></div>
+                    <p class="tmr-confirmation-hint"><?php esc_html_e('অর্ডারটি দেখতে এই QR কোড স্ক্যান করুন।', 'tailor-manager'); ?></p>
+                    <div class="tmr-confirmation-share-actions">
+                        <button type="button" class="tmr-confirmation-share-btn" id="tmr-order-confirmation-copy">
+                            <span class="tmr-confirmation-share-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></span>
+                            <span><?php esc_html_e('লিংক কপি', 'tailor-manager'); ?></span>
+                        </button>
+                        <button type="button" class="tmr-confirmation-share-btn" id="tmr-order-confirmation-whatsapp">
+                            <span class="tmr-confirmation-share-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg></span>
+                            <span><?php esc_html_e('হোয়াটসঅ্যাপ', 'tailor-manager'); ?></span>
+                        </button>
+                        <button type="button" class="tmr-confirmation-share-btn" id="tmr-order-confirmation-download">
+                            <span class="tmr-confirmation-share-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg></span>
+                            <span><?php esc_html_e('ডাউনলোড', 'tailor-manager'); ?></span>
+                        </button>
+                        <button type="button" class="tmr-confirmation-share-btn" id="tmr-order-confirmation-print">
+                            <span class="tmr-confirmation-share-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg></span>
+                            <span><?php esc_html_e('প্রিন্ট', 'tailor-manager'); ?></span>
+                        </button>
+                    </div>
+                    <a href="#" class="tmr-confirmation-view-link" id="tmr-order-confirmation-view"><?php esc_html_e('সম্পূর্ণ অর্ডার দেখুন', 'tailor-manager'); ?> &rarr;</a>
+                    <button type="button" class="tmr-confirmation-close-btn tmr-modal-close"><?php esc_html_e('বন্ধ করুন', 'tailor-manager'); ?></button>
                 </div>
             </div>
         </div>
@@ -295,28 +341,7 @@ class TMR_Orders_Panel
                         </label>
                     </div>
                 </div>
-            </div>
 
-            <?php foreach (TMR_Category_Taxonomy::get_terms() as $term) :
-                self::render_category_block($term, isset($existing_items[$term->term_id]) ? $existing_items[$term->term_id] : null);
-            endforeach; ?>
-
-            <div class="tmr-card-plain tmr-highlight-card">
-                <div class="tmr-step-header tmr-highlight-header">
-                    <h3><?php esc_html_e('মূল্য', 'tailor-manager'); ?></h3>
-                </div>
-                <div class="tmr-form-row tmr-form-row-duo">
-                    <div><label class="tmr-form-label" for="tmr-wage"><?php esc_html_e('মজুরি', 'tailor-manager'); ?> *</label><div class="tmr-money-field"><input type="number" step="0.01" name="wage" id="tmr-wage" value="<?php echo esc_attr($wage); ?>" required /></div></div>
-                    <div><label class="tmr-form-label" for="tmr-cloth-price"><?php esc_html_e('কাপড়ের দাম', 'tailor-manager'); ?></label><div class="tmr-money-field"><input type="number" step="0.01" name="cloth_price" id="tmr-cloth-price" value="<?php echo esc_attr($cloth_price); ?>" /></div></div>
-                </div>
-                <div class="tmr-form-row tmr-form-row-duo">
-                    <div><label class="tmr-form-label" for="tmr-total"><?php esc_html_e('মোট', 'tailor-manager'); ?> *</label><div class="tmr-money-field"><input type="number" step="0.01" name="total" id="tmr-total" value="<?php echo esc_attr($total); ?>" required /></div></div>
-                    <div><label class="tmr-form-label" for="tmr-advance"><?php esc_html_e('অগ্রিম', 'tailor-manager'); ?></label><div class="tmr-money-field"><input type="number" step="0.01" name="advance" id="tmr-advance" value="<?php echo esc_attr($advance); ?>" /></div></div>
-                </div>
-                <div class="tmr-form-row">
-                    <label class="tmr-form-label" for="tmr-due"><?php esc_html_e('বাকি', 'tailor-manager'); ?></label>
-                    <div class="tmr-money-field" style="max-width:200px;"><input type="number" step="0.01" name="due" id="tmr-due" value="<?php echo esc_attr($due); ?>" /></div>
-                </div>
                 <div class="tmr-form-row">
                     <label class="tmr-form-label"><?php esc_html_e('রেফারেন্স ছবি', 'tailor-manager'); ?></label>
                     <div class="tmr-photo-picker">
@@ -327,6 +352,48 @@ class TMR_Orders_Panel
                         <button type="button" class="tmr-btn-outline tmr-btn-sm" id="tmr-pick-order-image"><?php esc_html_e('ছবি নির্বাচন করুন', 'tailor-manager'); ?></button>
                     </div>
                 </div>
+            </div>
+
+            <?php foreach (TMR_Category_Taxonomy::get_terms() as $term) :
+                self::render_category_block($term, isset($existing_items[$term->term_id]) ? $existing_items[$term->term_id] : null);
+            endforeach; ?>
+
+            <div class="tmr-card-plain tmr-highlight-card">
+                <div class="tmr-step-header tmr-highlight-header">
+                    <h3><?php esc_html_e('মূল্য', 'tailor-manager'); ?></h3>
+                </div>
+                <div class="tmr-price-grid">
+                    <div class="tmr-price-inputs">
+                        <div class="tmr-form-row">
+                            <label class="tmr-form-label" for="tmr-wage"><?php esc_html_e('মজুরি', 'tailor-manager'); ?> *</label>
+                            <div class="tmr-money-field"><input type="number" step="0.01" name="wage" id="tmr-wage" class="tmr-price-input" value="<?php echo esc_attr($wage); ?>" required /></div>
+                        </div>
+                        <div class="tmr-form-row">
+                            <label class="tmr-form-label" for="tmr-cloth-price"><?php esc_html_e('কাপড়ের দাম', 'tailor-manager'); ?></label>
+                            <div class="tmr-money-field"><input type="number" step="0.01" name="cloth_price" id="tmr-cloth-price" class="tmr-price-input" value="<?php echo esc_attr($cloth_price); ?>" /></div>
+                        </div>
+                        <div class="tmr-form-row">
+                            <label class="tmr-form-label" for="tmr-advance"><?php esc_html_e('অগ্রিম', 'tailor-manager'); ?></label>
+                            <div class="tmr-money-field"><input type="number" step="0.01" name="advance" id="tmr-advance" class="tmr-price-input" value="<?php echo esc_attr($advance); ?>" /></div>
+                        </div>
+                    </div>
+                    <div class="tmr-price-summary">
+                        <div class="tmr-price-summary-row">
+                            <span><?php esc_html_e('মোট', 'tailor-manager'); ?></span>
+                            <span id="tmr-total-display">৳ 0</span>
+                        </div>
+                        <div class="tmr-price-summary-row">
+                            <span><?php esc_html_e('অগ্রিম', 'tailor-manager'); ?></span>
+                            <span id="tmr-advance-display">৳ 0</span>
+                        </div>
+                        <div class="tmr-price-summary-row tmr-price-summary-due">
+                            <span><?php esc_html_e('বাকি', 'tailor-manager'); ?></span>
+                            <span id="tmr-due-display">৳ 0</span>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" name="total" id="tmr-total" value="<?php echo esc_attr($total); ?>" />
+                <input type="hidden" name="due" id="tmr-due" value="<?php echo esc_attr($due); ?>" />
             </div>
 
             <div class="tmr-form-actions">
@@ -487,7 +554,16 @@ class TMR_Orders_Panel
                             <?php endforeach; ?>
                         </div>
                         <?php if (TMR_Dress_Part_Post_Type::measurement_enabled($part->ID)) : ?>
-                            <input type="text" class="tmr-part-measurement" placeholder="<?php esc_attr_e('পরিমাণ', 'tailor-manager'); ?>" value="<?php echo esc_attr($sel['part_measurement']); ?>" style="max-width:200px;margin-top:6px;" />
+                            <div class="tmr-part-measure-row" style="<?php echo empty($selected_ids) ? 'display:none;' : ''; ?>">
+                                <div class="tmr-measure-field-wrap" style="max-width:170px;">
+                                    <span class="tmr-form-label" style="margin:0;font-weight:400;text-transform:none;letter-spacing:0;"><?php echo esc_html(TMR_Dress_Part_Post_Type::get_measurement_label($part->ID)); ?></span>
+                                    <span class="tmr-qty-stepper tmr-measure-stepper">
+                                        <button type="button" class="tmr-qty-btn tmr-part-measure-minus" tabindex="-1" aria-label="<?php esc_attr_e('কমান', 'tailor-manager'); ?>">&minus;</button>
+                                        <input type="text" class="tmr-part-measurement" placeholder="0" value="<?php echo esc_attr($sel['part_measurement']); ?>" />
+                                        <button type="button" class="tmr-qty-btn tmr-part-measure-plus" tabindex="-1" aria-label="<?php esc_attr_e('বাড়ান', 'tailor-manager'); ?>">+</button>
+                                    </span>
+                                </div>
+                            </div>
                         <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
@@ -545,6 +621,8 @@ class TMR_Orders_Panel
             var $orderModal = $('#tmr-order-modal');
             var $orderModalBody = $('#tmr-order-modal-body');
             var $orderModalTitle = $('#tmr-order-modal-title');
+            var $orderConfirmationBody = $('#tmr-order-confirmation-body');
+            var currentOrderConfirmation = null;
 
             // ===== Delivery-date visible calendar (same self-built month-grid pattern
             // as the cozythai booking calendar) — state re-initialized every time the
@@ -611,14 +689,80 @@ class TMR_Orders_Panel
                 });
             }
 
+            // "মাপের বিবরণ" boxes light up (blue border/tint) the moment they carry a
+            // real value, so at a glance it's obvious which measurements are still
+            // blank — same "filled = highlighted" language as the dress/design chips'
+            // own :has(input:checked) treatment, just driven by JS since a text value
+            // (not a checkbox) can't be read with a pure :has() selector.
+            function updateMeasureFieldState($input) {
+                // 0 (the stepper's own resting/empty state) reads as "not measured yet",
+                // same as a blank field — only a real positive value counts as filled in.
+                var num = parseFloat($input.val());
+                var hasValue = !isNaN(num) && num > 0;
+                $input.closest('.tmr-measure-field-wrap').toggleClass('tmr-measure-has-value', hasValue);
+            }
+
+            function initMeasureFieldStates() {
+                $('.tmr-measure-field, .tmr-part-measurement').each(function () {
+                    updateMeasureFieldState($(this));
+                });
+            }
+
+            // A part's own extra measurement row only makes sense once one of its
+            // designs is actually picked — stays hidden otherwise instead of showing
+            // an input with nothing to measure yet.
+            function updatePartMeasureVisibility($partBlock) {
+                var anyChecked = $partBlock.find('.tmr-design-check:checked').length > 0;
+                $partBlock.find('.tmr-part-measure-row').toggle(anyChecked);
+            }
+
+            function initPartMeasureVisibility() {
+                $('.tmr-part-block[data-part-id]').each(function () {
+                    updatePartMeasureVisibility($(this));
+                });
+            }
+
+            $(document).on('change', '.tmr-design-check', function () {
+                updatePartMeasureVisibility($(this).closest('.tmr-part-block'));
+            });
+
+            // Total and due are derived, not typed in — total = wage + cloth price,
+            // due = total - advance. Kept as hidden fields (still submitted with the
+            // rest of the form, so ajax_save() needed no changes) with a read-only
+            // summary card showing the live result instead of an editable number box.
+            function formatMoney(n) {
+                n = Math.round((parseFloat(n) || 0) * 100) / 100;
+                return '৳ ' + n.toLocaleString('en-US');
+            }
+
+            function recalcPricing() {
+                var wage = parseFloat($('#tmr-wage').val()) || 0;
+                var clothPrice = parseFloat($('#tmr-cloth-price').val()) || 0;
+                var advance = parseFloat($('#tmr-advance').val()) || 0;
+                var total = wage + clothPrice;
+                var due = total - advance;
+
+                $('#tmr-total').val(total);
+                $('#tmr-due').val(due);
+                $('#tmr-total-display').text(formatMoney(total));
+                $('#tmr-advance-display').text(formatMoney(advance));
+                $('#tmr-due-display').text(formatMoney(due));
+            }
+
+            $(document).on('input', '.tmr-price-input', recalcPricing);
+
             function loadOrderForm(id) {
                 $orderModalTitle.text(id ? '<?php echo esc_js(__('অর্ডার আপডেট করুন', 'tailor-manager')); ?>' : '<?php echo esc_js(__('অর্ডার নিন', 'tailor-manager')); ?>');
-                $orderModalBody.html('<div class="tmr-empty"><?php echo esc_js(__('লোড হচ্ছে…', 'tailor-manager')); ?></div>');
+                $orderConfirmationBody.hide();
+                $orderModalBody.show().html('<div class="tmr-empty"><?php echo esc_js(__('লোড হচ্ছে…', 'tailor-manager')); ?></div>');
                 TMRPanel.openModal($orderModal);
                 TMRPanel.call('tmr_get_order_form', { id: id || 0 }, function (data) {
                     $orderModalBody.html(data.html);
                     initDeliveryCalendar();
                     initCategoryCollapse();
+                    initMeasureFieldStates();
+                    initPartMeasureVisibility();
+                    recalcPricing();
                 });
             }
 
@@ -716,6 +860,24 @@ class TMR_Orders_Panel
                 var val = parseInt($input.val(), 10) || 0;
                 val = $(this).hasClass('tmr-measure-plus') ? val + 1 : Math.max(0, val - 1);
                 $input.val(val);
+                updateMeasureFieldState($input);
+            });
+
+            $(document).on('input', '.tmr-measure-field', function () {
+                updateMeasureFieldState($(this));
+            });
+
+            $(document).on('click', '.tmr-part-measure-plus, .tmr-part-measure-minus', function (e) {
+                e.preventDefault();
+                var $input = $(this).siblings('.tmr-part-measurement');
+                var val = parseInt($input.val(), 10) || 0;
+                val = $(this).hasClass('tmr-part-measure-plus') ? val + 1 : Math.max(0, val - 1);
+                $input.val(val);
+                updateMeasureFieldState($input);
+            });
+
+            $(document).on('input', '.tmr-part-measurement', function () {
+                updateMeasureFieldState($(this));
             });
 
             // Cutter/tailor picker — a typeable combobox (not a rigid <select>) since
@@ -882,8 +1044,247 @@ class TMR_Orders_Panel
                 payload.push({ name: 'items', value: JSON.stringify(categories) });
 
                 TMRPanel.call('tmr_save_order', $.param(payload), function (data) {
-                    window.location.href = '<?php echo esc_js(admin_url('admin.php?page=tmr-orders&action=view&id=')); ?>' + data.id;
+                    showOrderConfirmation(data);
                 });
+            });
+
+            // Post-save summary + QR, in the same modal (no more redirecting away) —
+            // same recipe as the doctor-appointment plugin's own booking-confirmation
+            // card: qrcode.js for the code, a hand-drawn <canvas> card for "Download as
+            // Image", and window.print() + a @media print rule for "Print / Save as PDF".
+            function showOrderConfirmation(data, modalTitle) {
+                currentOrderConfirmation = data;
+
+                $('#tmr-conf-order-id').text('#' + data.id);
+                $('#tmr-conf-customer').text(data.customer_name + (data.customer_phone ? ' (' + data.customer_phone + ')' : ''));
+                $('#tmr-order-confirmation-whatsapp').toggle(!!data.customer_phone);
+                $('#tmr-conf-delivery').text(data.delivery_date);
+                $('#tmr-conf-total').text(formatMoney(data.total));
+                $('#tmr-conf-advance').text(formatMoney(data.advance));
+                $('#tmr-conf-due').text(formatMoney(data.due));
+                $('#tmr-order-confirmation-view').attr('href', data.view_url);
+
+                // "পোশাক ও মাপ" — one block per category item, its own measurements
+                // listed row-wise beneath it (skips items with nothing to show).
+                var $items = $('#tmr-conf-items').empty();
+                (data.items || []).forEach(function (item) {
+                    if (!item.dress_summary && !item.measurements.length) { return; }
+                    var $block = $('<div class="tmr-conf-item"></div>');
+                    $block.append(
+                        $('<div class="tmr-confirmation-row"></div>')
+                            .append($('<span></span>').text(item.category))
+                            .append($('<strong></strong>').text(item.dress_summary))
+                    );
+                    if (item.measurements.length) {
+                        var $measures = $('<div class="tmr-conf-item-measurements"></div>');
+                        item.measurements.forEach(function (m) {
+                            $measures.append(
+                                $('<div class="tmr-confirmation-row"></div>')
+                                    .append($('<span></span>').text(m.label))
+                                    .append($('<strong></strong>').text(m.value))
+                            );
+                        });
+                        $block.append($measures);
+                    }
+                    $items.append($block);
+                });
+
+                var $qr = $('#tmr-order-confirmation-qr');
+                $qr.empty();
+                if (typeof qrcode === 'function') {
+                    var qr = qrcode(0, 'M');
+                    qr.addData(data.view_url);
+                    qr.make();
+                    $qr.html(qr.createImgTag(5, 4));
+                }
+
+                $orderModalTitle.text(modalTitle || '<?php echo esc_js(__('অর্ডার সম্পন্ন হয়েছে', 'tailor-manager')); ?>');
+                $orderModalBody.hide();
+                $orderConfirmationBody.show();
+            }
+
+            // Reuses the exact same read-only summary the post-save flow shows — lets
+            // you re-open any existing order's card straight from the list (no need to
+            // create a fresh order just to see how the summary/QR/download look).
+            function viewOrderSummary(id) {
+                $orderModalTitle.text('<?php echo esc_js(__('অর্ডার সারাংশ', 'tailor-manager')); ?>');
+                $orderModalBody.hide();
+                $orderConfirmationBody.hide();
+                TMRPanel.openModal($orderModal);
+                TMRPanel.call('tmr_get_order_summary', { id: id }, function (data) {
+                    showOrderConfirmation(data, '#' + data.id + ' — ' + data.customer_name);
+                });
+            }
+
+            $(document).on('click', '.tmr-view-order-trigger', function (e) {
+                e.preventDefault();
+                viewOrderSummary($(this).data('id'));
+            });
+
+            function tmrRoundRect(ctx, x, y, w, h, r) {
+                ctx.beginPath();
+                ctx.moveTo(x + r, y);
+                ctx.arcTo(x + w, y, x + w, y + h, r);
+                ctx.arcTo(x + w, y + h, x, y + h, r);
+                ctx.arcTo(x, y + h, x, y, r);
+                ctx.arcTo(x, y, x + w, y, r);
+                ctx.closePath();
+            }
+
+            function tmrBuildOrderCardImage(data, qrImgSrc, callback) {
+                var W = 400;
+                var titleH = 26;
+                var rowH = 30;
+
+                // Same three sections as the on-screen card (customer / payment / dress
+                // & measurements, row-wise) — flattened into one list with section-title
+                // markers, since <canvas> has no nested boxes to lean on like the DOM does.
+                var rows = [
+                    { type: 'title', text: '<?php echo esc_js(__('কাস্টমার সামারি', 'tailor-manager')); ?>' },
+                    { type: 'row', label: '<?php echo esc_js(__('অর্ডার নং', 'tailor-manager')); ?>', value: '#' + data.id },
+                    { type: 'row', label: '<?php echo esc_js(__('কাস্টমার', 'tailor-manager')); ?>', value: data.customer_name + (data.customer_phone ? ' (' + data.customer_phone + ')' : '') },
+                    { type: 'row', label: '<?php echo esc_js(__('ডেলিভারি তারিখ', 'tailor-manager')); ?>', value: data.delivery_date },
+                    { type: 'title', text: '<?php echo esc_js(__('পেমেন্ট সামারি', 'tailor-manager')); ?>' },
+                    { type: 'row', label: '<?php echo esc_js(__('মোট', 'tailor-manager')); ?>', value: formatMoney(data.total) },
+                    { type: 'row', label: '<?php echo esc_js(__('অগ্রিম', 'tailor-manager')); ?>', value: formatMoney(data.advance) },
+                    { type: 'row', label: '<?php echo esc_js(__('বাকি', 'tailor-manager')); ?>', value: formatMoney(data.due) },
+                    { type: 'title', text: '<?php echo esc_js(__('পোশাক ও মাপ', 'tailor-manager')); ?>' }
+                ];
+                (data.items || []).forEach(function (item) {
+                    if (!item.dress_summary && !item.measurements.length) { return; }
+                    rows.push({ type: 'row', label: item.category, value: item.dress_summary });
+                    item.measurements.forEach(function (m) {
+                        rows.push({ type: 'row', label: '   ' + m.label, value: m.value });
+                    });
+                });
+
+                var boxTop = 158;
+                var boxPad = 16;
+                var boxH = boxPad * 2;
+                rows.forEach(function (r) { boxH += r.type === 'title' ? titleH : rowH; });
+                var qrSize = 200;
+                var qrY = boxTop + boxH + 24;
+                var H = qrY + qrSize + 60;
+
+                var canvas = document.createElement('canvas');
+                canvas.width = W;
+                canvas.height = H;
+                var ctx = canvas.getContext('2d');
+
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, W, H);
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(1, 1, W - 2, H - 2);
+
+                ctx.fillStyle = '#94a3b8';
+                ctx.font = 'bold 12px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'alphabetic';
+                ctx.fillText(<?php echo wp_json_encode(get_bloginfo('name')); ?>, W / 2, 26);
+
+                ctx.beginPath();
+                ctx.fillStyle = '#e6f7ed';
+                ctx.arc(W / 2, 78, 28, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#1a7f45';
+                ctx.font = 'bold 26px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('✓', W / 2, 79);
+
+                ctx.fillStyle = '#1e293b';
+                ctx.font = 'bold 18px sans-serif';
+                ctx.textBaseline = 'alphabetic';
+                ctx.fillText('<?php echo esc_js(__('অর্ডার সম্পন্ন হয়েছে', 'tailor-manager')); ?>', W / 2, 130);
+
+                tmrRoundRect(ctx, 24, boxTop, W - 48, boxH, 12);
+                ctx.fillStyle = '#f8fafc';
+                ctx.fill();
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                var y = boxTop + boxPad;
+                rows.forEach(function (row) {
+                    if (row.type === 'title') {
+                        y += titleH;
+                        ctx.font = 'bold 11px sans-serif';
+                        ctx.textAlign = 'left';
+                        ctx.fillStyle = '#0061d5';
+                        ctx.fillText(row.text, 24 + 16, y - 10);
+                        return;
+                    }
+                    y += rowH;
+                    var rowY = y - 10;
+                    ctx.font = '13px sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillStyle = '#64748b';
+                    ctx.fillText(row.label, 24 + 16, rowY);
+                    ctx.font = 'bold 13px sans-serif';
+                    ctx.textAlign = 'right';
+                    ctx.fillStyle = '#1e293b';
+                    var val = String(row.value || '');
+                    if (val.length > 24) { val = val.substring(0, 23) + '…'; }
+                    ctx.fillText(val, W - 24 - 16, rowY);
+                });
+
+                if (!qrImgSrc) {
+                    callback(canvas);
+                    return;
+                }
+
+                var qrImg = new Image();
+                qrImg.onload = function () {
+                    ctx.drawImage(qrImg, (W - qrSize) / 2, qrY, qrSize, qrSize);
+                    ctx.font = '12px sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillStyle = '#94a3b8';
+                    ctx.fillText('<?php echo esc_js(__('অর্ডারটি দেখতে এই QR কোড স্ক্যান করুন।', 'tailor-manager')); ?>', W / 2, qrY + qrSize + 24);
+                    callback(canvas);
+                };
+                qrImg.onerror = function () { callback(canvas); };
+                qrImg.src = qrImgSrc;
+            }
+
+            $(document).on('click', '#tmr-order-confirmation-copy', function () {
+                if (!currentOrderConfirmation) { return; }
+                var $btn = $(this);
+                var restore = $btn.find('span').last().text();
+                navigator.clipboard.writeText(currentOrderConfirmation.view_url).then(function () {
+                    $btn.find('span').last().text('<?php echo esc_js(__('কপি হয়েছে!', 'tailor-manager')); ?>');
+                    setTimeout(function () { $btn.find('span').last().text(restore); }, 1500);
+                });
+            });
+
+            // wa.me needs digits only, country-code-first — local numbers are stored as
+            // "01XXXXXXXXX" (no country code), so a leading 0 is swapped for Bangladesh's
+            // 880 the same way a customer would actually dial it internationally.
+            $(document).on('click', '#tmr-order-confirmation-whatsapp', function () {
+                if (!currentOrderConfirmation || !currentOrderConfirmation.customer_phone) { return; }
+                var digits = currentOrderConfirmation.customer_phone.replace(/\D/g, '');
+                if (digits.indexOf('0') === 0) { digits = '880' + digits.substring(1); }
+                var text = '<?php echo esc_js(__('আপনার অর্ডার', 'tailor-manager')); ?> #' + currentOrderConfirmation.id + ' — ' +
+                    '<?php echo esc_js(__('বাকি', 'tailor-manager')); ?>: ' + formatMoney(currentOrderConfirmation.due) + '\n' +
+                    currentOrderConfirmation.view_url;
+                window.open('https://wa.me/' + digits + '?text=' + encodeURIComponent(text), '_blank');
+            });
+
+            $(document).on('click', '#tmr-order-confirmation-download', function () {
+                if (!currentOrderConfirmation) { return; }
+                var qrImg = document.querySelector('#tmr-order-confirmation-qr img');
+                tmrBuildOrderCardImage(currentOrderConfirmation, qrImg ? qrImg.src : '', function (canvas) {
+                    var link = document.createElement('a');
+                    link.download = 'order-' + (currentOrderConfirmation.id || 'confirmation') + '.png';
+                    link.href = canvas.toDataURL('image/png');
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                });
+            });
+
+            $(document).on('click', '#tmr-order-confirmation-print', function () {
+                window.print();
             });
 
             <?php if ($auto_open_id) : ?>
@@ -911,73 +1312,222 @@ class TMR_Orders_Panel
             . ' <a class="tmr-btn-outline" target="_blank" href="' . esc_url(admin_url('admin-post.php?action=tmr_print&order_id=' . $order_id . '&type=1')) . '">' . esc_html__('রিসিট প্রিন্ট', 'tailor-manager') . '</a>'
             . ' <a class="tmr-btn-outline" target="_blank" href="' . esc_url(admin_url('admin-post.php?action=tmr_print&order_id=' . $order_id . '&type=2')) . '">' . esc_html__('ওয়ার্ক স্লিপ প্রিন্ট', 'tailor-manager') . '</a>'
             . ' <a class="tmr-btn-outline" target="_blank" href="' . esc_url(admin_url('admin-post.php?action=tmr_print&order_id=' . $order_id . '&type=3')) . '">' . esc_html__('ফুল স্লিপ প্রিন্ট', 'tailor-manager') . '</a>';
-        TMR_Panel_Shell::header('orders', __('অর্ডার', 'tailor-manager') . ' #' . $order_id, '', $header_right);
+        TMR_Panel_Shell::header('orders', __('অর্ডার', 'tailor-manager') . ' #' . $order_id, '', $header_right, true);
+        $status_key   = TMR_Order_Post_Type::status_label($order_id);
+        $field_labels = TMR_Measurement_Fields::get_library();
         ?>
-        <div class="tmr-card-plain">
-            <p style="margin:0 0 8px;"><span class="tmr-badge tmr-badge-<?php echo esc_attr(TMR_Order_Post_Type::status_label($order_id)); ?>"><?php echo esc_html(ucfirst(TMR_Order_Post_Type::status_label($order_id))); ?></span></p>
-            <p><strong><?php esc_html_e('কাস্টমার', 'tailor-manager'); ?>:</strong> <?php echo $customer_id ? esc_html(get_the_title($customer_id) . ' (' . TMR_Customer_Post_Type::get_phone($customer_id) . ')') : esc_html__('ওয়াক-ইন', 'tailor-manager'); ?></p>
-            <p><strong><?php esc_html_e('অর্ডারের তারিখ', 'tailor-manager'); ?>:</strong> <?php echo esc_html(get_post_meta($order_id, '_tmr_order_date', true)); ?> &nbsp; <strong><?php esc_html_e('ডেলিভারি তারিখ', 'tailor-manager'); ?>:</strong> <?php echo esc_html(get_post_meta($order_id, '_tmr_delivery_date', true)); ?></p>
-            <?php if ('1' === get_post_meta($order_id, '_tmr_urgent', true)) : ?>
-                <p><span class="tmr-badge tmr-badge-red"><?php esc_html_e('জরুরি', 'tailor-manager'); ?></span></p>
-            <?php endif; ?>
+        <div class="tmr-order-view">
+        <div class="tmr-card-plain tmr-highlight-card">
+            <div class="tmr-step-header tmr-highlight-header">
+                <h3><?php esc_html_e('অর্ডার তথ্য', 'tailor-manager'); ?></h3>
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <span class="tmr-badge tmr-badge-<?php echo esc_attr($status_key); ?>"><?php echo esc_html(ucfirst($status_key)); ?></span>
+                    <?php if ('1' === get_post_meta($order_id, '_tmr_urgent', true)) : ?>
+                        <span class="tmr-badge tmr-badge-red"><?php esc_html_e('জরুরি', 'tailor-manager'); ?></span>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="tmr-order-detail-section">
+                <p class="tmr-order-detail-section-title"><?php esc_html_e('কাস্টমার তথ্য', 'tailor-manager'); ?></p>
+                <div class="tmr-order-info-grid">
+                    <div class="tmr-order-info-item">
+                        <span class="tmr-form-label"><?php esc_html_e('কাস্টমার', 'tailor-manager'); ?></span>
+                        <strong><?php echo $customer_id ? esc_html(get_the_title($customer_id) . ' (' . TMR_Customer_Post_Type::get_phone($customer_id) . ')') : esc_html__('ওয়াক-ইন', 'tailor-manager'); ?></strong>
+                    </div>
+                    <div class="tmr-order-info-item">
+                        <span class="tmr-form-label"><?php esc_html_e('অর্ডারের তারিখ', 'tailor-manager'); ?></span>
+                        <strong><?php echo esc_html(get_post_meta($order_id, '_tmr_order_date', true)); ?></strong>
+                    </div>
+                    <div class="tmr-order-info-item">
+                        <span class="tmr-form-label"><?php esc_html_e('ডেলিভারি তারিখ', 'tailor-manager'); ?></span>
+                        <strong><?php echo esc_html(get_post_meta($order_id, '_tmr_delivery_date', true)); ?></strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tmr-order-detail-section">
+                <p class="tmr-order-detail-section-title"><?php esc_html_e('পেমেন্ট সামারি', 'tailor-manager'); ?></p>
+                <div class="tmr-price-grid">
+                    <div class="tmr-price-inputs">
+                        <div class="tmr-order-info-item"><span class="tmr-form-label"><?php esc_html_e('মজুরি', 'tailor-manager'); ?></span><strong><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_wage', true))); ?></strong></div>
+                        <div class="tmr-order-info-item" style="margin-top:12px;"><span class="tmr-form-label"><?php esc_html_e('কাপড়ের দাম', 'tailor-manager'); ?></span><strong><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_cloth_price', true))); ?></strong></div>
+                    </div>
+                    <div class="tmr-price-summary">
+                        <div class="tmr-price-summary-row">
+                            <span><?php esc_html_e('মোট', 'tailor-manager'); ?></span>
+                            <span><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_total', true))); ?></span>
+                        </div>
+                        <div class="tmr-price-summary-row">
+                            <span><?php esc_html_e('অগ্রিম', 'tailor-manager'); ?></span>
+                            <span><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_advance', true))); ?></span>
+                        </div>
+                        <div class="tmr-price-summary-row tmr-price-summary-due">
+                            <span><?php esc_html_e('বাকি', 'tailor-manager'); ?></span>
+                            <span><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_due', true))); ?></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <h3 class="tmr-order-section-heading"><?php esc_html_e('পোশাক', 'tailor-manager'); ?></h3>
 
         <?php foreach (TMR_Order_Post_Type::get_items($order_id) as $item) :
             $cat_id = TMR_Order_Item_Post_Type::get_category_id($item->ID);
             $term   = get_term($cat_id, TMR_Category_Taxonomy::TAXONOMY);
+            $dresses = TMR_Order_Item_Post_Type::get_dresses($item->ID);
         ?>
-            <div class="tmr-card-plain">
-                <h3 style="margin:0 0 10px;font-size:15px;"><?php echo $term && !is_wp_error($term) ? esc_html($term->name) : ''; ?></h3>
-                <p>
-                    <?php foreach (TMR_Order_Item_Post_Type::get_dresses($item->ID) as $d) :
-                        $dress = !empty($d['dress_id']) ? get_post($d['dress_id']) : null;
-                        $name  = $dress ? $dress->post_title : ($term && !is_wp_error($term) ? $term->name : '');
-                        if ($name) :
-                    ?>
-                        <?php echo esc_html($name . '(' . (int) $d['quantity'] . ') '); ?>
-                    <?php endif; endforeach; ?>
-                </p>
-                <?php $cutter = get_post_meta($item->ID, '_tmr_cutter_name', true); ?>
-                <?php if ($cutter) : ?><p><strong><?php esc_html_e('কাটিং মাস্টার', 'tailor-manager'); ?>:</strong> <?php echo esc_html($cutter); ?></p><?php endif; ?>
-                <?php $tailor = get_post_meta($item->ID, '_tmr_tailor_name', true); ?>
-                <?php if ($tailor) : ?><p><strong><?php esc_html_e('সোয়িং অপারেটর', 'tailor-manager'); ?>:</strong> <?php echo esc_html($tailor); ?></p><?php endif; ?>
+            <div class="tmr-card tmr-highlight-card tmr-cat-collapse-block">
+                <div class="tmr-cat-collapse-header">
+                    <h3><?php echo $term && !is_wp_error($term) ? esc_html($term->name) : ''; ?></h3>
+                    <span class="tmr-cat-collapse-count"><?php echo esc_html(self::dress_summary_for_item($item->ID, $term)); ?></span>
+                    <svg class="tmr-cat-collapse-chevron is-open" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg>
+                </div>
+                <div class="tmr-cat-collapse-body">
+                    <div style="padding:0 16px 14px;">
+                        <?php $cutter = get_post_meta($item->ID, '_tmr_cutter_name', true); ?>
+                        <?php $tailor = get_post_meta($item->ID, '_tmr_tailor_name', true); ?>
+                        <?php if ($cutter || $tailor) : ?>
+                            <div class="tmr-order-staff-row">
+                                <?php if ($cutter) : ?><div><span class="tmr-form-label"><?php esc_html_e('কাটিং মাস্টার', 'tailor-manager'); ?></span><strong><?php echo esc_html($cutter); ?></strong></div><?php endif; ?>
+                                <?php if ($tailor) : ?><div><span class="tmr-form-label"><?php esc_html_e('সোয়িং অপারেটর', 'tailor-manager'); ?></span><strong><?php echo esc_html($tailor); ?></strong></div><?php endif; ?>
+                            </div>
+                        <?php endif; ?>
 
-                <?php $measurements = TMR_Order_Item_Post_Type::get_measurements($item->ID); ?>
-                <?php if ($measurements) : ?>
-                    <table class="tmr-table">
-                        <thead><tr><?php foreach ($measurements as $slug => $val) : ?><th><?php echo esc_html($slug); ?></th><?php endforeach; ?></tr></thead>
-                        <tbody><tr><?php foreach ($measurements as $val) : ?><td><?php echo esc_html($val); ?></td><?php endforeach; ?></tr></tbody>
-                    </table>
-                <?php endif; ?>
+                        <?php $measurements = TMR_Order_Item_Post_Type::get_measurements($item->ID); ?>
+                        <?php if ($measurements) :
+                            $measure_pairs = array();
+                            foreach ($measurements as $slug => $val) {
+                                $measure_pairs[] = array(
+                                    'label' => isset($field_labels[$slug]) ? $field_labels[$slug] : $slug,
+                                    'value' => $val,
+                                );
+                            }
+                            $measure_rows = array_chunk($measure_pairs, 2);
+                        ?>
+                            <div class="tmr-part-block-title">
+                                <span class="tmr-part-block-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0z"></path><path d="M14.5 6.5l3 3"></path><path d="M11.5 9.5l1.5 1.5"></path><path d="M8.5 12.5l1.5 1.5"></path></svg></span>
+                                <?php esc_html_e('মাপের বিবরণ', 'tailor-manager'); ?>
+                            </div>
+                            <table class="tmr-view-measure-table">
+                                <tbody>
+                                    <?php foreach ($measure_rows as $row) : ?>
+                                        <tr>
+                                            <?php foreach ($row as $pair) : ?>
+                                                <td class="tmr-vm-label"><?php echo esc_html($pair['label']); ?></td>
+                                                <td class="tmr-vm-value"><strong><?php echo esc_html($pair['value']); ?></strong></td>
+                                            <?php endforeach; ?>
+                                            <?php if (count($row) < 2) : ?>
+                                                <td class="tmr-vm-label"></td><td class="tmr-vm-value"></td>
+                                            <?php endif; ?>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php endif; ?>
 
-                <?php foreach (TMR_Order_Item_Post_Type::get_part_selections($item->ID) as $sel) :
-                    $part = get_post($sel['part_id']);
-                    if (!$part) {
-                        continue;
-                    }
-                    $names = array();
-                    foreach ($sel['design_type_ids'] as $did) {
-                        $d = get_post($did);
-                        if ($d) {
-                            $names[] = $d->post_title;
-                        }
-                    }
-                ?>
-                    <p><strong><?php echo esc_html($part->post_title); ?>:</strong> <?php echo esc_html(implode(', ', $names)); ?><?php if (!empty($sel['part_measurement'])) : ?> (<?php echo esc_html($sel['part_measurement']); ?>)<?php endif; ?></p>
-                <?php endforeach; ?>
+                        <?php foreach (TMR_Order_Item_Post_Type::get_part_selections($item->ID) as $sel) :
+                            $part = get_post($sel['part_id']);
+                            if (!$part) {
+                                continue;
+                            }
+                            $names = array();
+                            foreach ($sel['design_type_ids'] as $did) {
+                                $d = get_post($did);
+                                if ($d) {
+                                    $names[] = $d->post_title;
+                                }
+                            }
+                        ?>
+                            <div class="tmr-form-row tmr-part-block">
+                                <div class="tmr-part-block-title">
+                                    <span class="tmr-part-block-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path></svg></span>
+                                    <?php echo esc_html($part->post_title); ?>
+                                </div>
+                                <div class="tmr-view-design-chips">
+                                    <?php foreach ($names as $n) : ?>
+                                        <span class="tmr-badge tmr-badge-blue"><?php echo esc_html($n); ?></span>
+                                    <?php endforeach; ?>
+                                </div>
+                                <?php if (!empty($sel['part_measurement'])) : ?>
+                                    <p class="tmr-form-hint"><?php echo esc_html(TMR_Dress_Part_Post_Type::get_measurement_label($part->ID)); ?>: <strong><?php echo esc_html($sel['part_measurement']); ?></strong></p>
+                                <?php endif; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
             </div>
         <?php endforeach; ?>
-
-        <div class="tmr-card-plain">
-            <h3 style="margin:0 0 10px;font-size:15px;"><?php esc_html_e('মূল্য', 'tailor-manager'); ?></h3>
-            <p><strong><?php esc_html_e('মজুরি', 'tailor-manager'); ?>:</strong> <?php echo esc_html(get_post_meta($order_id, '_tmr_wage', true)); ?></p>
-            <p><strong><?php esc_html_e('কাপড়ের দাম', 'tailor-manager'); ?>:</strong> <?php echo esc_html(get_post_meta($order_id, '_tmr_cloth_price', true)); ?></p>
-            <p><strong><?php esc_html_e('মোট', 'tailor-manager'); ?>:</strong> <?php echo esc_html(get_post_meta($order_id, '_tmr_total', true)); ?></p>
-            <p><strong><?php esc_html_e('অগ্রিম', 'tailor-manager'); ?>:</strong> <?php echo esc_html(get_post_meta($order_id, '_tmr_advance', true)); ?></p>
-            <p><strong><?php esc_html_e('বাকি', 'tailor-manager'); ?>:</strong> <?php echo esc_html(get_post_meta($order_id, '_tmr_due', true)); ?></p>
         </div>
+
+        <script>
+        jQuery(function ($) {
+            $('.tmr-cat-collapse-header').on('click', function () {
+                $(this).next('.tmr-cat-collapse-body').slideToggle(150);
+                $(this).find('.tmr-cat-collapse-chevron').toggleClass('is-open');
+            });
+        });
+        </script>
         <?php
         TMR_Panel_Shell::footer();
+    }
+
+    /**
+     * "Test(1) চুড়িদার(1)" style summary for one order item's own dress list — same
+     * fallback-to-category-name logic as dress_summary(), just scoped to a single item
+     * instead of a whole order (used as the collapse header's item count/preview).
+     */
+    private static function dress_summary_for_item($item_id, $term)
+    {
+        $category_name = $term && !is_wp_error($term) ? $term->name : '';
+        $parts = array();
+        foreach (TMR_Order_Item_Post_Type::get_dresses($item_id) as $d) {
+            $dress = !empty($d['dress_id']) ? get_post($d['dress_id']) : null;
+            $name  = $dress ? $dress->post_title : $category_name;
+            if ($name) {
+                $parts[] = $name . '(' . (int) $d['quantity'] . ')';
+            }
+        }
+        return implode(' ', $parts);
+    }
+
+    /**
+     * Per-category dress + resolved-label measurement rows, for the order
+     * confirmation panel's "পোশাক ও মাপ" section (shared by ajax_save() and
+     * ajax_get_order_summary() so a fresh save and a later re-view render identically).
+     * Zero/blank values are skipped — same "0 isn't really a measurement yet"
+     * convention as the order form's own active-highlight logic.
+     */
+    private static function build_confirmation_items($order_id)
+    {
+        $field_labels = TMR_Measurement_Fields::get_library();
+        $items = array();
+
+        foreach (TMR_Order_Post_Type::get_items($order_id) as $item) {
+            $cat_id = TMR_Order_Item_Post_Type::get_category_id($item->ID);
+            $term   = get_term($cat_id, TMR_Category_Taxonomy::TAXONOMY);
+
+            $measurements = array();
+            foreach (TMR_Order_Item_Post_Type::get_measurements($item->ID) as $slug => $val) {
+                $val = trim((string) $val);
+                if ('' === $val || '0' === $val) {
+                    continue;
+                }
+                $measurements[] = array(
+                    'label' => isset($field_labels[$slug]) ? $field_labels[$slug] : $slug,
+                    'value' => $val,
+                );
+            }
+
+            $items[] = array(
+                'category'      => $term && !is_wp_error($term) ? $term->name : '',
+                'dress_summary' => self::dress_summary_for_item($item->ID, $term),
+                'measurements'  => $measurements,
+            );
+        }
+
+        return $items;
     }
 
     /* ---------------------------------------------------------------- */
@@ -1011,6 +1561,42 @@ class TMR_Orders_Panel
         $html = ob_get_clean();
 
         wp_send_json_success(array('html' => $html));
+    }
+
+    /**
+     * Same data shape as ajax_save()'s success response — feeds the identical
+     * read-only summary/QR panel, just for an order that already exists (the list's
+     * "view" action), instead of only right after a fresh save.
+     */
+    public function ajax_get_order_summary()
+    {
+        check_ajax_referer('tmr_panel_nonce', 'nonce');
+        if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
+            wp_send_json_error(array('message' => __('অনুমতি নেই।', 'tailor-manager')));
+        }
+
+        $order_id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+        $order    = get_post($order_id);
+
+        if (!$order || self::POST_TYPE !== $order->post_type) {
+            wp_send_json_error(array('message' => __('অর্ডার পাওয়া যায়নি।', 'tailor-manager')));
+        }
+
+        $customer_id = (int) get_post_meta($order_id, '_tmr_customer_id', true);
+        $customer    = $customer_id ? get_post($customer_id) : null;
+
+        wp_send_json_success(array(
+            'id'             => $order_id,
+            'customer_name'  => $customer ? $customer->post_title : __('ওয়াক-ইন', 'tailor-manager'),
+            'customer_phone' => $customer_id ? TMR_Customer_Post_Type::get_phone($customer_id) : '',
+            'delivery_date'  => self::format_date_bn(get_post_meta($order_id, '_tmr_delivery_date', true)),
+            'dress_summary'  => self::dress_summary($order_id),
+            'items'          => self::build_confirmation_items($order_id),
+            'total'          => get_post_meta($order_id, '_tmr_total', true),
+            'advance'        => get_post_meta($order_id, '_tmr_advance', true),
+            'due'            => get_post_meta($order_id, '_tmr_due', true),
+            'view_url'       => admin_url('admin.php?page=tmr-orders&action=view&id=' . $order_id),
+        ));
     }
 
     public function ajax_search_customers()
@@ -1217,7 +1803,18 @@ class TMR_Orders_Panel
             update_post_meta($item_id, '_tmr_part_selections', $part_selections);
         }
 
-        wp_send_json_success(array('id' => $order_id));
+        wp_send_json_success(array(
+            'id'             => $order_id,
+            'customer_name'  => $customer ? $customer->post_title : '',
+            'customer_phone' => $customer_id ? TMR_Customer_Post_Type::get_phone($customer_id) : '',
+            'delivery_date'  => self::format_date_bn($delivery_date),
+            'dress_summary'  => self::dress_summary($order_id),
+            'items'          => self::build_confirmation_items($order_id),
+            'total'          => $total,
+            'advance'        => $advance,
+            'due'            => $due,
+            'view_url'       => admin_url('admin.php?page=tmr-orders&action=view&id=' . $order_id),
+        ));
     }
 
     public function ajax_delete()
