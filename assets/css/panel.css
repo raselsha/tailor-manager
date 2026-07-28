@@ -1182,50 +1182,71 @@
     .tmr-confirmation-close-btn { display: none !important; }
 }
 
-/* Order view page — read-only info/staff/measurement grids, same card language
-   (.tmr-cat-collapse-block, .tmr-part-block, .tmr-price-grid) as the rest of the
-   plugin, reused instead of the old bare <p>/<table> layout. */
-.tmr-order-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
-.tmr-order-info-item { display: flex; flex-direction: column; gap: 4px; }
-.tmr-order-info-item strong { font-size: 14px; color: #1e293b; }
-.tmr-order-staff-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 16px; }
-.tmr-order-staff-row > div { display: flex; flex-direction: column; gap: 4px; }
-.tmr-order-staff-row strong { font-size: 13px; color: #1e293b; }
+/* Order view page (.tmr-order-view) — a dedicated compact component set, not the
+   shared form-page classes (.tmr-part-block, .tmr-price-grid etc. stay untouched
+   since the order add/edit form still uses those). */
 
 /* Order-info + payment-summary combined into one card, two labeled sections. */
-.tmr-order-detail-section { padding-top: 18px; }
+.tmr-order-detail-section { padding-top: 14px; }
 .tmr-order-detail-section:first-of-type { padding-top: 0; }
-.tmr-order-detail-section + .tmr-order-detail-section { margin-top: 18px; border-top: 1px solid rgba(0, 97, 213, .12); }
-.tmr-order-detail-section-title { margin: 0 0 14px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #0061d5; }
+.tmr-order-detail-section + .tmr-order-detail-section { margin-top: 14px; border-top: 1px solid rgba(0, 97, 213, .12); }
+.tmr-order-detail-section-title { margin: 0 0 10px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #0061d5; }
 
-/* "পোশাক" section label above the per-item collapsible cards. */
-.tmr-order-section-heading { margin: 4px 4px 12px; font-size: 15px; font-weight: 700; color: #1e293b; }
+/* Customer-info: a single wrapping row, not a grid of boxes. */
+.tmr-vp-info-row { display: flex; flex-wrap: wrap; gap: 6px 36px; }
+.tmr-vp-info-item { display: flex; flex-direction: column; gap: 3px; }
+.tmr-vp-info-label { font-size: 11px; color: #94a3b8; font-weight: 600; }
+.tmr-vp-info-item strong { font-size: 13px; color: #1e293b; font-weight: 700; }
 
-/* Per-dress measurement list, table-row form instead of a pill grid — two label/value
-   pairs per row (not one) so N fields take N/2 rows, not N. */
-.tmr-view-measure-table { width: 100%; border-collapse: collapse; margin-top: 6px; }
-.tmr-view-measure-table tr { border-bottom: 1px solid #e2e8f0; }
-.tmr-view-measure-table tr:last-child { border-bottom: none; }
-.tmr-view-measure-table td { padding: 6px 4px; font-size: 12px; color: #64748b; }
-.tmr-view-measure-table td.tmr-vm-value { width: 22%; text-align: right; color: #1e293b; font-weight: 700; }
-.tmr-view-measure-table td.tmr-vm-label:last-of-type,
-.tmr-view-measure-table td.tmr-vm-value:last-of-type { padding-left: 16px; }
-.tmr-view-design-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+/* Payment summary: one horizontal stat strip instead of a two-column input+box layout. */
+.tmr-vp-pay-strip { display: flex; flex-wrap: wrap; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+.tmr-vp-pay-cell { flex: 1 1 110px; padding: 10px 16px; border-left: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 3px; }
+.tmr-vp-pay-cell:first-child { border-left: none; }
+.tmr-vp-pay-cell strong { font-size: 14px; color: #1e293b; font-weight: 700; }
+.tmr-vp-pay-total strong { color: #0061d5; }
+.tmr-vp-pay-due-outstanding { background: #fef2f2; }
+.tmr-vp-pay-due-outstanding strong { color: #dc2626; }
+@media (max-width: 640px) {
+    .tmr-vp-pay-strip { flex-direction: column; }
+    .tmr-vp-pay-cell { border-left: none; border-top: 1px solid #e2e8f0; }
+    .tmr-vp-pay-cell:first-child { border-top: none; }
+}
 
-/* Compact tuning for the order-view page specifically — the shared card/section
-   components default to spacious padding, but this page stacks many of them at once,
-   so every gap here is trimmed down rather than changing those shared defaults. */
+/* "পোশাক" section label + item count, above the per-item collapsible cards. */
+.tmr-vp-section-heading-row { display: flex; align-items: baseline; justify-content: space-between; margin: 4px 4px 8px; }
+.tmr-order-section-heading { margin: 0; font-size: 14px; font-weight: 700; color: #1e293b; }
+.tmr-vp-section-count { font-size: 12px; color: #94a3b8; font-weight: 600; }
+
+/* Per-item collapsible card body. */
+.tmr-vp-item-body { padding: 14px 18px 16px; }
+
+/* Cutting master / sewing operator: small inline chips, not a bordered grid box. */
+.tmr-vp-staff-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.tmr-vp-staff-chip { display: inline-flex; align-items: center; background: #f1f5f9; border-radius: 999px; padding: 5px 12px; font-size: 11px; color: #64748b; }
+.tmr-vp-staff-chip strong { margin-left: 4px; color: #1e293b; font-weight: 700; }
+
+/* Sub-section heading shared by "মাপের বিবরণ" and "ডিজাইন" — reuses the shared
+   .tmr-part-block-icon chip look from the order form for visual consistency. */
+.tmr-vp-block-title { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 12px; color: #1e293b; margin: 14px 0 6px; }
+.tmr-vp-block-title:first-child { margin-top: 0; }
+
+/* Per-dress measurement list — small labeled cards in a wrapping grid. */
+.tmr-vm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.tmr-vm-card { display: flex; flex-direction: column; gap: 3px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 8px 10px; }
+.tmr-vm-card-label { font-size: 10px; color: #94a3b8; font-weight: 600; }
+.tmr-vm-card-value { font-size: 14px; color: #1e293b; font-weight: 700; }
+
+/* Design-part selections: a tight divided list instead of one bordered box per part. */
+.tmr-vp-part-list { display: flex; flex-direction: column; }
+.tmr-vp-part-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; padding: 7px 0; border-bottom: 1px solid #f1f5f9; }
+.tmr-vp-part-row:last-child { border-bottom: none; }
+.tmr-vp-part-label { flex: 0 0 120px; font-size: 12px; color: #64748b; font-weight: 600; }
+.tmr-vp-part-extra { margin-left: auto; font-size: 11px; color: #94a3b8; }
+.tmr-vp-part-extra strong { color: #1e293b; }
+.tmr-view-design-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* Compact tuning for the order-view page's shared/reused components. */
 .tmr-order-view .tmr-card-plain { padding: 18px 20px; }
-.tmr-order-view .tmr-order-detail-section { padding-top: 12px; }
-.tmr-order-view .tmr-order-detail-section + .tmr-order-detail-section { margin-top: 12px; }
-.tmr-order-view .tmr-order-detail-section-title { margin-bottom: 8px; }
-.tmr-order-view .tmr-order-info-grid { gap: 10px; }
-.tmr-order-view .tmr-price-grid { gap: 20px; }
-.tmr-order-view .tmr-order-section-heading { margin: 0 4px 8px; font-size: 14px; }
+.tmr-order-view .tmr-cat-collapse-header { padding: 12px 18px; }
 .tmr-order-view .tmr-cat-collapse-block { margin-bottom: 12px; }
 .tmr-order-view .tmr-cat-collapse-body { max-height: none; }
-.tmr-order-view .tmr-order-staff-row { padding: 8px 12px; gap: 10px; }
-.tmr-order-view .tmr-part-block-title { margin-top: 12px; }
-.tmr-order-view .tmr-part-block { margin-top: 8px; padding: 10px 12px; }
-.tmr-order-view .tmr-view-design-chips { margin-top: 4px; }
-.tmr-order-view .tmr-form-hint { margin-top: 4px; }

@@ -1315,6 +1315,8 @@ class TMR_Orders_Panel
         TMR_Panel_Shell::header('orders', __('অর্ডার', 'tailor-manager') . ' #' . $order_id, '', $header_right, true);
         $status_key   = TMR_Order_Post_Type::status_label($order_id);
         $field_labels = TMR_Measurement_Fields::get_library();
+        $due          = (float) get_post_meta($order_id, '_tmr_due', true);
+        $items        = TMR_Order_Post_Type::get_items($order_id);
         ?>
         <div class="tmr-order-view">
         <div class="tmr-card-plain tmr-highlight-card">
@@ -1330,17 +1332,17 @@ class TMR_Orders_Panel
 
             <div class="tmr-order-detail-section">
                 <p class="tmr-order-detail-section-title"><?php esc_html_e('কাস্টমার তথ্য', 'tailor-manager'); ?></p>
-                <div class="tmr-order-info-grid">
-                    <div class="tmr-order-info-item">
-                        <span class="tmr-form-label"><?php esc_html_e('কাস্টমার', 'tailor-manager'); ?></span>
+                <div class="tmr-vp-info-row">
+                    <div class="tmr-vp-info-item">
+                        <span class="tmr-vp-info-label"><?php esc_html_e('কাস্টমার', 'tailor-manager'); ?></span>
                         <strong><?php echo $customer_id ? esc_html(get_the_title($customer_id) . ' (' . TMR_Customer_Post_Type::get_phone($customer_id) . ')') : esc_html__('ওয়াক-ইন', 'tailor-manager'); ?></strong>
                     </div>
-                    <div class="tmr-order-info-item">
-                        <span class="tmr-form-label"><?php esc_html_e('অর্ডারের তারিখ', 'tailor-manager'); ?></span>
+                    <div class="tmr-vp-info-item">
+                        <span class="tmr-vp-info-label"><?php esc_html_e('অর্ডারের তারিখ', 'tailor-manager'); ?></span>
                         <strong><?php echo esc_html(get_post_meta($order_id, '_tmr_order_date', true)); ?></strong>
                     </div>
-                    <div class="tmr-order-info-item">
-                        <span class="tmr-form-label"><?php esc_html_e('ডেলিভারি তারিখ', 'tailor-manager'); ?></span>
+                    <div class="tmr-vp-info-item">
+                        <span class="tmr-vp-info-label"><?php esc_html_e('ডেলিভারি তারিখ', 'tailor-manager'); ?></span>
                         <strong><?php echo esc_html(get_post_meta($order_id, '_tmr_delivery_date', true)); ?></strong>
                     </div>
                 </div>
@@ -1348,32 +1350,37 @@ class TMR_Orders_Panel
 
             <div class="tmr-order-detail-section">
                 <p class="tmr-order-detail-section-title"><?php esc_html_e('পেমেন্ট সামারি', 'tailor-manager'); ?></p>
-                <div class="tmr-price-grid">
-                    <div class="tmr-price-inputs">
-                        <div class="tmr-order-info-item"><span class="tmr-form-label"><?php esc_html_e('মজুরি', 'tailor-manager'); ?></span><strong><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_wage', true))); ?></strong></div>
-                        <div class="tmr-order-info-item" style="margin-top:12px;"><span class="tmr-form-label"><?php esc_html_e('কাপড়ের দাম', 'tailor-manager'); ?></span><strong><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_cloth_price', true))); ?></strong></div>
+                <div class="tmr-vp-pay-strip">
+                    <div class="tmr-vp-pay-cell">
+                        <span class="tmr-vp-info-label"><?php esc_html_e('মজুরি', 'tailor-manager'); ?></span>
+                        <strong><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_wage', true))); ?></strong>
                     </div>
-                    <div class="tmr-price-summary">
-                        <div class="tmr-price-summary-row">
-                            <span><?php esc_html_e('মোট', 'tailor-manager'); ?></span>
-                            <span><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_total', true))); ?></span>
-                        </div>
-                        <div class="tmr-price-summary-row">
-                            <span><?php esc_html_e('অগ্রিম', 'tailor-manager'); ?></span>
-                            <span><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_advance', true))); ?></span>
-                        </div>
-                        <div class="tmr-price-summary-row tmr-price-summary-due">
-                            <span><?php esc_html_e('বাকি', 'tailor-manager'); ?></span>
-                            <span><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_due', true))); ?></span>
-                        </div>
+                    <div class="tmr-vp-pay-cell">
+                        <span class="tmr-vp-info-label"><?php esc_html_e('কাপড়ের দাম', 'tailor-manager'); ?></span>
+                        <strong><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_cloth_price', true))); ?></strong>
+                    </div>
+                    <div class="tmr-vp-pay-cell tmr-vp-pay-total">
+                        <span class="tmr-vp-info-label"><?php esc_html_e('মোট', 'tailor-manager'); ?></span>
+                        <strong><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_total', true))); ?></strong>
+                    </div>
+                    <div class="tmr-vp-pay-cell">
+                        <span class="tmr-vp-info-label"><?php esc_html_e('অগ্রিম', 'tailor-manager'); ?></span>
+                        <strong><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_advance', true))); ?></strong>
+                    </div>
+                    <div class="tmr-vp-pay-cell tmr-vp-pay-due<?php echo $due > 0 ? ' tmr-vp-pay-due-outstanding' : ''; ?>">
+                        <span class="tmr-vp-info-label"><?php esc_html_e('বাকি', 'tailor-manager'); ?></span>
+                        <strong><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_due', true))); ?></strong>
                     </div>
                 </div>
             </div>
         </div>
 
-        <h3 class="tmr-order-section-heading"><?php esc_html_e('পোশাক', 'tailor-manager'); ?></h3>
+        <div class="tmr-vp-section-heading-row">
+            <h3 class="tmr-order-section-heading"><?php esc_html_e('পোশাক', 'tailor-manager'); ?></h3>
+            <span class="tmr-vp-section-count"><?php echo esc_html(count($items)); ?> <?php esc_html_e('টি আইটেম', 'tailor-manager'); ?></span>
+        </div>
 
-        <?php foreach (TMR_Order_Post_Type::get_items($order_id) as $item) :
+        <?php foreach ($items as $item) :
             $cat_id = TMR_Order_Item_Post_Type::get_category_id($item->ID);
             $term   = get_term($cat_id, TMR_Category_Taxonomy::TAXONOMY);
             $dresses = TMR_Order_Item_Post_Type::get_dresses($item->ID);
@@ -1385,76 +1392,67 @@ class TMR_Orders_Panel
                     <svg class="tmr-cat-collapse-chevron is-open" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg>
                 </div>
                 <div class="tmr-cat-collapse-body">
-                    <div style="padding:0 16px 14px;">
+                    <div class="tmr-vp-item-body">
                         <?php $cutter = get_post_meta($item->ID, '_tmr_cutter_name', true); ?>
                         <?php $tailor = get_post_meta($item->ID, '_tmr_tailor_name', true); ?>
                         <?php if ($cutter || $tailor) : ?>
-                            <div class="tmr-order-staff-row">
-                                <?php if ($cutter) : ?><div><span class="tmr-form-label"><?php esc_html_e('কাটিং মাস্টার', 'tailor-manager'); ?></span><strong><?php echo esc_html($cutter); ?></strong></div><?php endif; ?>
-                                <?php if ($tailor) : ?><div><span class="tmr-form-label"><?php esc_html_e('সোয়িং অপারেটর', 'tailor-manager'); ?></span><strong><?php echo esc_html($tailor); ?></strong></div><?php endif; ?>
+                            <div class="tmr-vp-staff-row">
+                                <?php if ($cutter) : ?><span class="tmr-vp-staff-chip"><?php esc_html_e('কাটিং মাস্টার', 'tailor-manager'); ?>: <strong><?php echo esc_html($cutter); ?></strong></span><?php endif; ?>
+                                <?php if ($tailor) : ?><span class="tmr-vp-staff-chip"><?php esc_html_e('সোয়িং অপারেটর', 'tailor-manager'); ?>: <strong><?php echo esc_html($tailor); ?></strong></span><?php endif; ?>
                             </div>
                         <?php endif; ?>
 
                         <?php $measurements = TMR_Order_Item_Post_Type::get_measurements($item->ID); ?>
-                        <?php if ($measurements) :
-                            $measure_pairs = array();
-                            foreach ($measurements as $slug => $val) {
-                                $measure_pairs[] = array(
-                                    'label' => isset($field_labels[$slug]) ? $field_labels[$slug] : $slug,
-                                    'value' => $val,
-                                );
-                            }
-                            $measure_rows = array_chunk($measure_pairs, 2);
-                        ?>
-                            <div class="tmr-part-block-title">
+                        <?php if ($measurements) : ?>
+                            <div class="tmr-vp-block-title">
                                 <span class="tmr-part-block-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0z"></path><path d="M14.5 6.5l3 3"></path><path d="M11.5 9.5l1.5 1.5"></path><path d="M8.5 12.5l1.5 1.5"></path></svg></span>
                                 <?php esc_html_e('মাপের বিবরণ', 'tailor-manager'); ?>
                             </div>
-                            <table class="tmr-view-measure-table">
-                                <tbody>
-                                    <?php foreach ($measure_rows as $row) : ?>
-                                        <tr>
-                                            <?php foreach ($row as $pair) : ?>
-                                                <td class="tmr-vm-label"><?php echo esc_html($pair['label']); ?></td>
-                                                <td class="tmr-vm-value"><strong><?php echo esc_html($pair['value']); ?></strong></td>
-                                            <?php endforeach; ?>
-                                            <?php if (count($row) < 2) : ?>
-                                                <td class="tmr-vm-label"></td><td class="tmr-vm-value"></td>
-                                            <?php endif; ?>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
+                            <div class="tmr-vm-grid">
+                                <?php foreach ($measurements as $slug => $val) : ?>
+                                    <div class="tmr-vm-card">
+                                        <span class="tmr-vm-card-label"><?php echo esc_html(isset($field_labels[$slug]) ? $field_labels[$slug] : $slug); ?></span>
+                                        <strong class="tmr-vm-card-value"><?php echo esc_html($val); ?></strong>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
                         <?php endif; ?>
 
-                        <?php foreach (TMR_Order_Item_Post_Type::get_part_selections($item->ID) as $sel) :
-                            $part = get_post($sel['part_id']);
-                            if (!$part) {
-                                continue;
-                            }
-                            $names = array();
-                            foreach ($sel['design_type_ids'] as $did) {
-                                $d = get_post($did);
-                                if ($d) {
-                                    $names[] = $d->post_title;
-                                }
-                            }
-                        ?>
-                            <div class="tmr-form-row tmr-part-block">
-                                <div class="tmr-part-block-title">
-                                    <span class="tmr-part-block-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path></svg></span>
-                                    <?php echo esc_html($part->post_title); ?>
-                                </div>
-                                <div class="tmr-view-design-chips">
-                                    <?php foreach ($names as $n) : ?>
-                                        <span class="tmr-badge tmr-badge-blue"><?php echo esc_html($n); ?></span>
-                                    <?php endforeach; ?>
-                                </div>
-                                <?php if (!empty($sel['part_measurement'])) : ?>
-                                    <p class="tmr-form-hint"><?php echo esc_html(TMR_Dress_Part_Post_Type::get_measurement_label($part->ID)); ?>: <strong><?php echo esc_html($sel['part_measurement']); ?></strong></p>
-                                <?php endif; ?>
+                        <?php
+                        $part_selections = TMR_Order_Item_Post_Type::get_part_selections($item->ID);
+                        if ($part_selections) : ?>
+                            <div class="tmr-vp-block-title">
+                                <span class="tmr-part-block-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path></svg></span>
+                                <?php esc_html_e('ডিজাইন', 'tailor-manager'); ?>
                             </div>
-                        <?php endforeach; ?>
+                            <div class="tmr-vp-part-list">
+                                <?php foreach ($part_selections as $sel) :
+                                    $part = get_post($sel['part_id']);
+                                    if (!$part) {
+                                        continue;
+                                    }
+                                    $names = array();
+                                    foreach ($sel['design_type_ids'] as $did) {
+                                        $d = get_post($did);
+                                        if ($d) {
+                                            $names[] = $d->post_title;
+                                        }
+                                    }
+                                ?>
+                                    <div class="tmr-vp-part-row">
+                                        <span class="tmr-vp-part-label"><?php echo esc_html($part->post_title); ?></span>
+                                        <div class="tmr-view-design-chips">
+                                            <?php foreach ($names as $n) : ?>
+                                                <span class="tmr-badge tmr-badge-blue"><?php echo esc_html($n); ?></span>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        <?php if (!empty($sel['part_measurement'])) : ?>
+                                            <span class="tmr-vp-part-extra"><?php echo esc_html(TMR_Dress_Part_Post_Type::get_measurement_label($part->ID)); ?>: <strong><?php echo esc_html($sel['part_measurement']); ?></strong></span>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
