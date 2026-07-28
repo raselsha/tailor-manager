@@ -52,9 +52,10 @@ class TMR_Settings_Page
         <p style="color:#94a3b8;font-size:13px;">
             <?php
             printf(
-                /* translators: %s: link to the "ড্রেস টাইপ" (category) management page */
-                esc_html__('ক্যাটাগরি ও মাপের ফিল্ড এখন %s পেজ থেকে পরিচালনা করুন।', 'tailor-manager'),
-                '<a href="' . esc_url(admin_url('admin.php?page=' . TMR_Panel_Shell::$nav['categories']['slug'])) . '" style="color:#0061d5;font-weight:600;">' . esc_html(TMR_Panel_Shell::$nav['categories']['title']) . '</a>'
+                /* translators: 1: link to the "পোশাক" (category) management page, 2: link to the "পোশাকের পরিমাপ" (measurement fields) management page */
+                esc_html__('পোশাক এখন %1$s পেজ থেকে এবং পরিমাপের ফিল্ড %2$s পেজ থেকে পরিচালনা করুন।', 'tailor-manager'),
+                '<a href="' . esc_url(admin_url('admin.php?page=' . TMR_Panel_Shell::$nav['categories']['slug'])) . '" style="color:#0061d5;font-weight:600;">' . esc_html(TMR_Panel_Shell::$nav['categories']['title']) . '</a>',
+                '<a href="' . esc_url(admin_url('admin.php?page=' . TMR_Panel_Shell::$nav['measurement-fields']['slug'])) . '" style="color:#0061d5;font-weight:600;">' . esc_html(TMR_Panel_Shell::$nav['measurement-fields']['title']) . '</a>'
             );
             ?>
         </p>

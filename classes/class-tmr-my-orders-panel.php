@@ -137,12 +137,16 @@ class TMR_My_Orders_Panel
             return array();
         }
 
+        // Cutting master and sewing operator are two independent roles a staff login
+        // could be assigned as — "my work" means either one, not just the cutter slot.
         $items = get_posts(array(
             'post_type'      => TMR_Order_Item_Post_Type::POST_TYPE,
             'post_status'    => 'any',
             'posts_per_page' => -1,
             'meta_query'     => array(
+                'relation' => 'OR',
                 array('key' => '_tmr_cutter_name', 'value' => $display_name, 'compare' => '='),
+                array('key' => '_tmr_tailor_name', 'value' => $display_name, 'compare' => '='),
             ),
         ));
 

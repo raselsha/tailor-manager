@@ -55,11 +55,13 @@ class TMR_Print_Slips
             $cat_id = TMR_Order_Item_Post_Type::get_category_id($item->ID);
             $term   = get_term($cat_id, TMR_Category_Taxonomy::TAXONOMY);
 
+            $category_name = $term && !is_wp_error($term) ? $term->name : '';
             $dress_lines = array();
             foreach (TMR_Order_Item_Post_Type::get_dresses($item->ID) as $d) {
-                $dress = get_post($d['dress_id']);
-                if ($dress) {
-                    $dress_lines[] = $dress->post_title . '(' . (int) $d['quantity'] . ')';
+                $dress = !empty($d['dress_id']) ? get_post($d['dress_id']) : null;
+                $name  = $dress ? $dress->post_title : $category_name;
+                if ($name) {
+                    $dress_lines[] = $name . '(' . (int) $d['quantity'] . ')';
                 }
             }
 
@@ -89,6 +91,7 @@ class TMR_Print_Slips
                 'measurements' => TMR_Order_Item_Post_Type::get_measurements($item->ID),
                 'part_lines'   => $part_lines,
                 'cutter'       => get_post_meta($item->ID, '_tmr_cutter_name', true),
+                'tailor'       => get_post_meta($item->ID, '_tmr_tailor_name', true),
             );
         }
 

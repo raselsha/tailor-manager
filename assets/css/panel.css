@@ -409,10 +409,10 @@
 /* Field chip — click-to-toggle checkbox pill, shared by any screen that lets you
    pick a set of items (category assignment, design-type selection, etc.) without
    showing a raw checkbox. */
-.tmr-field-chip-grid { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 12px; }
-.tmr-field-chip { position: relative; display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid #e2e8f0; border-radius: 999px; padding: 6px 14px; background: #fff; cursor: pointer; font-size: 13px; color: #374151; transition: border-color .15s ease, background .15s ease, color .15s ease; }
-.tmr-field-chip:hover { border-color: #7c3aed; }
-.tmr-field-chip:has(input:checked) { border-color: #7c3aed; background: rgba(124,58,237,.08); color: #7c3aed; font-weight: 600; }
+.tmr-field-chip-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.tmr-field-chip { position: relative; display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid #e2e8f0; border-radius: 999px; padding: 6px 14px; background: #f8fafc; cursor: pointer; font-size: 13px; color: #374151; transition: border-color .15s ease, background .15s ease, color .15s ease; }
+.tmr-field-chip:hover { border-color: #0061d5; }
+.tmr-field-chip:has(input:checked) { border-color: #0061d5; background: #0061d5; color: #fff; font-weight: 600; }
 .tmr-field-chip input[type="checkbox"] { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
 
 .tmr-field-card-tags { display: flex; flex-wrap: wrap; gap: 3px; justify-content: center; }
@@ -439,6 +439,8 @@
 .tmr-btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 8px; }
 .tmr-btn-sm:focus,
 .tmr-btn-sm:active { border-radius: 8px; }
+.tmr-btn-outline-danger { color: #dc2626; border-color: #fecaca; }
+.tmr-btn-outline-danger:hover { background: #fef2f2; border-color: #fca5a5; }
 
 /* Modal */
 .tmr-modal {
@@ -484,6 +486,14 @@
 
 .tmr-modal-body { flex: 1; overflow-y: auto; padding: 20px 24px; }
 .tmr-modal-foot { padding: 14px 24px; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 10px; flex-shrink: 0; }
+
+/* Sectioned modal body — groups a form into clearly separated blocks (icon, name,
+   options...) with a hairline between each, instead of one undifferentiated stack of
+   fields. Reusable by any add/edit modal that wants this stronger visual hierarchy. */
+.tmr-modal-section { padding-bottom: 20px; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; }
+.tmr-modal-section:last-child { padding-bottom: 0; margin-bottom: 0; border-bottom: none; }
+.tmr-icon-picker-center { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.tmr-icon-picker-actions { display: flex; gap: 8px; }
 
 /* Form */
 .tmr-form-row { margin-bottom: 16px; }
@@ -545,6 +555,20 @@
 /* Photo / image picker */
 .tmr-photo-picker { display: flex; align-items: center; gap: 16px; }
 .tmr-photo-preview { width: 60px; height: 60px; border-radius: 12px; background: #eef1f5; color: #9ca3af; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+.tmr-photo-preview-lg { width: 76px; height: 76px; border-radius: 18px; }
+
+/* Staff (cutter/tailor) combobox — a typeable text input with a photo-illustrated
+   suggestion list beneath it, same positioning language as #tmr-customer-results. */
+.tmr-staff-field-row { display: flex; align-items: center; gap: 12px; }
+.tmr-staff-field-row + .tmr-staff-field-row { margin-top: 10px; }
+.tmr-staff-field-row .tmr-form-label { margin-bottom: 0; min-width: 130px; flex-shrink: 0; }
+.tmr-staff-select-wrap { position: relative; flex: 1; min-width: 0; }
+.tmr-staff-suggest-list { position: absolute; left: 0; right: 0; top: 100%; margin-top: 4px; display: none; background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 10px 30px rgba(15, 23, 42, .12); z-index: 20; max-height: 220px; overflow-y: auto; }
+.tmr-staff-suggest-item { display: flex; align-items: center; gap: 8px; padding: 6px 10px; cursor: pointer; font-size: 13px; color: #374151; border-bottom: 1px solid #f1f5f9; }
+.tmr-staff-suggest-item:last-child { border-bottom: none; }
+.tmr-staff-suggest-item:hover { background: #f8fafc; }
+.tmr-staff-avatar { width: 22px; height: 22px; border-radius: 50%; overflow: hidden; flex-shrink: 0; background: #eef1f5; color: #9ca3af; display: flex; align-items: center; justify-content: center; }
+.tmr-staff-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .tmr-photo-preview img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .tmr-photo-actions { display: flex; gap: 8px; }
 
@@ -723,7 +747,7 @@
     border: 1.5px solid #e2e8f0;
     border-radius: 12px;
     padding: 10px 12px 10px 16px;
-    background: #fff;
+    background: #f8fafc;
     cursor: pointer;
     transition: border-color .15s ease, background .15s ease, box-shadow .15s ease;
 }
@@ -869,7 +893,7 @@
     border: 1.5px solid #e2e8f0;
     border-radius: 12px;
     padding: 7px 12px;
-    background: #fff;
+    background: #f8fafc;
 }
 .tmr-measure-field-wrap .tmr-form-label {
     margin: 0;

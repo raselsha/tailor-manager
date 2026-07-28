@@ -24,17 +24,18 @@ class TMR_Panel_Shell
             'customers'   => array('slug' => 'tmr-customers', 'title' => __('কাস্টমার', 'tailor-manager'), 'icon' => self::icon('users')),
             // URL slugs deliberately swapped from what their array keys/classes suggest —
             // ?page=tmr-dress is the "পোশাক" (broad category, TMR_Categories_Panel) screen
-            // and ?page=tmr-categories is the "ড্রেস টাইপ" (individual garment,
+            // and ?page=tmr-categories is the "বিভিন্ন পোশাক" (individual garment,
             // TMR_Dress_Panel) screen. The array KEYS still match each screen's underlying
             // class/purpose (TMR_Dress_Panel = 'dress', TMR_Categories_Panel = 'categories')
             // so render() calls below didn't need to change — only the slug/title values did.
-            // Menu order: "পোশাক" (categories key) right after কাস্টমার, then "ড্রেস টাইপ"
+            // Menu order: "পোশাক" (categories key) right after কাস্টমার, then "বিভিন্ন পোশাক"
             // (dress key) beneath it — array order drives sidebar order (visible_nav()).
-            'categories'  => array('slug' => 'tmr-dress', 'title' => __('পোশাক', 'tailor-manager'), 'icon' => self::icon('grid')),
-            'dress'       => array('slug' => 'tmr-categories', 'title' => __('ড্রেস টাইপ', 'tailor-manager'), 'icon' => self::icon('tag')),
-            'dress-part'  => array('slug' => 'tmr-dress-part', 'title' => __('পার্ট ডিজাইন', 'tailor-manager'), 'icon' => self::icon('tag')),
-            'design-type' => array('slug' => 'tmr-design-type', 'title' => __('ডিজাইন টাইপ', 'tailor-manager'), 'icon' => self::icon('tag')),
-            'measurement-fields' => array('slug' => 'tmr-measurement-fields', 'title' => __('মাপের ফিল্ড', 'tailor-manager'), 'icon' => self::icon('tag')),
+            'categories'  => array('slug' => 'tmr-dress', 'title' => __('পোশাক', 'tailor-manager'), 'icon' => self::icon('shirt')),
+            'dress'       => array('slug' => 'tmr-categories', 'title' => __('বিভিন্ন পোশাক', 'tailor-manager'), 'icon' => self::icon('layers')),
+            'dress-part'  => array('slug' => 'tmr-dress-part', 'title' => __('পোশাকের বিভিন্ন অংশ', 'tailor-manager'), 'icon' => self::icon('scissors')),
+            'design-type' => array('slug' => 'tmr-design-type', 'title' => __('বিভিন্ন অংশের ডিজাইন', 'tailor-manager'), 'icon' => self::icon('tag')),
+            'measurement-fields' => array('slug' => 'tmr-measurement-fields', 'title' => __('পোশাকের পরিমাপ', 'tailor-manager'), 'icon' => self::icon('ruler')),
+            'staff'       => array('slug' => 'tmr-staff', 'title' => __('স্টাফ', 'tailor-manager'), 'icon' => self::icon('user')),
             'accounts'    => array('slug' => 'tmr-accounts', 'title' => __('হিসাব', 'tailor-manager'), 'icon' => self::icon('dollar')),
             'settings'    => array('slug' => 'tmr-settings', 'title' => __('সেটিংস', 'tailor-manager'), 'icon' => self::icon('settings')),
         );
@@ -63,11 +64,12 @@ class TMR_Panel_Shell
         add_submenu_page($n['dashboard']['slug'], $n['my-orders']['title'], $n['my-orders']['title'], TMR_Staff_Role::CAPABILITY, $n['my-orders']['slug'], array('TMR_My_Orders_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['orders']['title'], $n['orders']['title'], self::CAPABILITY, $n['orders']['slug'], array('TMR_Orders_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['customers']['title'], $n['customers']['title'], self::CAPABILITY, $n['customers']['slug'], array('TMR_Customers_Panel', 'render'));
-        add_submenu_page($n['dashboard']['slug'], $n['dress']['title'], __('প্রোডাক্ট ইনপুট: ড্রেস টাইপ', 'tailor-manager'), self::CAPABILITY, $n['dress']['slug'], array('TMR_Dress_Panel', 'render'));
-        add_submenu_page($n['dashboard']['slug'], $n['dress-part']['title'], __('প্রোডাক্ট ইনপুট: পার্ট ডিজাইন', 'tailor-manager'), self::CAPABILITY, $n['dress-part']['slug'], array('TMR_Dress_Part_Panel', 'render'));
-        add_submenu_page($n['dashboard']['slug'], $n['design-type']['title'], __('প্রোডাক্ট ইনপুট: ডিজাইন টাইপ', 'tailor-manager'), self::CAPABILITY, $n['design-type']['slug'], array('TMR_Design_Type_Panel', 'render'));
-        add_submenu_page($n['dashboard']['slug'], $n['measurement-fields']['title'], __('প্রোডাক্ট ইনপুট: মাপের ফিল্ড', 'tailor-manager'), self::CAPABILITY, $n['measurement-fields']['slug'], array('TMR_Measurement_Fields_Panel', 'render'));
+        add_submenu_page($n['dashboard']['slug'], $n['dress']['title'], __('প্রোডাক্ট ইনপুট: বিভিন্ন পোশাক', 'tailor-manager'), self::CAPABILITY, $n['dress']['slug'], array('TMR_Dress_Panel', 'render'));
+        add_submenu_page($n['dashboard']['slug'], $n['dress-part']['title'], __('প্রোডাক্ট ইনপুট: পোশাকের বিভিন্ন অংশ', 'tailor-manager'), self::CAPABILITY, $n['dress-part']['slug'], array('TMR_Dress_Part_Panel', 'render'));
+        add_submenu_page($n['dashboard']['slug'], $n['design-type']['title'], __('প্রোডাক্ট ইনপুট: বিভিন্ন অংশের ডিজাইন', 'tailor-manager'), self::CAPABILITY, $n['design-type']['slug'], array('TMR_Design_Type_Panel', 'render'));
+        add_submenu_page($n['dashboard']['slug'], $n['measurement-fields']['title'], __('প্রোডাক্ট ইনপুট: পোশাকের পরিমাপ', 'tailor-manager'), self::CAPABILITY, $n['measurement-fields']['slug'], array('TMR_Measurement_Fields_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['categories']['title'], $n['categories']['title'], self::CAPABILITY, $n['categories']['slug'], array('TMR_Categories_Panel', 'render'));
+        add_submenu_page($n['dashboard']['slug'], $n['staff']['title'], $n['staff']['title'], self::CAPABILITY, $n['staff']['slug'], array('TMR_Staff_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['accounts']['title'], $n['accounts']['title'], self::CAPABILITY, $n['accounts']['slug'], array('TMR_Accounts_Report', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['settings']['title'], $n['settings']['title'], self::CAPABILITY, $n['settings']['slug'], array('TMR_Settings_Page', 'render'));
     }
@@ -298,6 +300,11 @@ class TMR_Panel_Shell
             'users'    => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>',
             'tag'      => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>',
             'dollar'   => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>',
+            'shirt'    => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>',
+            'layers'   => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"></path><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"></path><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"></path></svg>',
+            'scissors' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>',
+            'ruler'    => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0z"></path><path d="M14.5 6.5l3 3"></path><path d="M11.5 9.5l1.5 1.5"></path><path d="M8.5 12.5l1.5 1.5"></path></svg>',
+            'user'     => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
             'settings' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
         );
 

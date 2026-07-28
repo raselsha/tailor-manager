@@ -44,7 +44,10 @@ defined('ABSPATH') || exit;
             <?php endforeach; ?>
 
             <?php if ($item['cutter']) : ?>
-                <p><strong><?php esc_html_e('কাটার/টেইলার', 'tailor-manager'); ?>:</strong> <?php echo esc_html($item['cutter']); ?></p>
+                <p><strong><?php esc_html_e('কাটিং মাস্টার', 'tailor-manager'); ?>:</strong> <?php echo esc_html($item['cutter']); ?></p>
+            <?php endif; ?>
+            <?php if ($item['tailor']) : ?>
+                <p><strong><?php esc_html_e('সোয়িং অপারেটর', 'tailor-manager'); ?>:</strong> <?php echo esc_html($item['tailor']); ?></p>
             <?php endif; ?>
         </div>
     <?php endforeach; ?>

@@ -176,10 +176,15 @@ class TMR_Orders_Panel
     {
         $parts = array();
         foreach (TMR_Order_Post_Type::get_items($order_id) as $item) {
+            $cat_id = TMR_Order_Item_Post_Type::get_category_id($item->ID);
+            $term   = get_term($cat_id, TMR_Category_Taxonomy::TAXONOMY);
+            $category_name = $term && !is_wp_error($term) ? $term->name : '';
+
             foreach (TMR_Order_Item_Post_Type::get_dresses($item->ID) as $d) {
-                $dress = get_post($d['dress_id']);
-                if ($dress) {
-                    $parts[] = $dress->post_title . '(' . (int) $d['quantity'] . ')';
+                $dress = !empty($d['dress_id']) ? get_post($d['dress_id']) : null;
+                $name  = $dress ? $dress->post_title : $category_name;
+                if ($name) {
+                    $parts[] = $name . '(' . (int) $d['quantity'] . ')';
                 }
             }
         }
@@ -296,8 +301,8 @@ class TMR_Orders_Panel
                 self::render_category_block($term, isset($existing_items[$term->term_id]) ? $existing_items[$term->term_id] : null);
             endforeach; ?>
 
-            <div class="tmr-card-plain">
-                <div class="tmr-step-header">
+            <div class="tmr-card-plain tmr-highlight-card">
+                <div class="tmr-step-header tmr-highlight-header">
                     <h3><?php esc_html_e('মূল্য', 'tailor-manager'); ?></h3>
                 </div>
                 <div class="tmr-form-row tmr-form-row-duo">
@@ -359,6 +364,7 @@ class TMR_Orders_Panel
 
         $selected_dresses = array();
         $cutter_name = '';
+        $tailor_name = '';
         $measurements = array();
         $part_selections = array();
 
@@ -371,7 +377,13 @@ class TMR_Orders_Panel
                 $part_selections[$sel['part_id']] = $sel;
             }
             $cutter_name = get_post_meta($existing_item->ID, '_tmr_cutter_name', true);
+            $tailor_name = get_post_meta($existing_item->ID, '_tmr_tailor_name', true);
         }
+
+        // dress_id 0 is the sentinel for "this category has no distinct dress products —
+        // take the order against the category itself" (see the empty($dresses) branch
+        // below). Only relevant/possible when there are no real dress products to check.
+        $category_only_qty = isset($selected_dresses[0]) ? (int) $selected_dresses[0]['quantity'] : 0;
         ?>
         <?php $has_data = !empty($selected_dresses); ?>
         <div class="tmr-card-plain tmr-category-block tmr-highlight-card" data-category-id="<?php echo esc_attr($term->term_id); ?>" data-category-slug="<?php echo esc_attr($term->slug); ?>">
@@ -381,38 +393,52 @@ class TMR_Orders_Panel
             </div>
 
             <div class="tmr-form-row tmr-dress-block">
-                <div class="tmr-part-block-title">
-                    <span class="tmr-part-block-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></span>
-                    <?php esc_html_e('ড্রেস ও পরিমাণ (ক্লিক করে নির্বাচন করুন)', 'tailor-manager'); ?>
-                </div>
-                <div class="tmr-checkbox-grid tmr-dress-checkbox-grid">
-                    <?php foreach ($dresses as $dress) :
-                        $checked = isset($selected_dresses[$dress->ID]);
-                        $qty = $checked ? (int) $selected_dresses[$dress->ID]['quantity'] : 0;
-                    ?>
-                        <label>
-                            <input type="checkbox" class="tmr-dress-check" data-dress-id="<?php echo esc_attr($dress->ID); ?>" <?php checked($checked); ?> />
-                            <?php if (has_post_thumbnail($dress)) : ?>
-                                <?php echo get_the_post_thumbnail($dress, array(20, 20), array('style' => 'border-radius:5px;object-fit:contain;flex-shrink:0;')); ?>
-                            <?php endif; ?>
-                            <?php echo esc_html($dress->post_title); ?>
-                            <span class="tmr-qty-stepper">
-                                <button type="button" class="tmr-qty-btn tmr-qty-minus" tabindex="-1" aria-label="<?php esc_attr_e('কমান', 'tailor-manager'); ?>">&minus;</button>
-                                <input type="number" min="0" class="tmr-dress-qty" data-dress-id="<?php echo esc_attr($dress->ID); ?>" value="<?php echo esc_attr($checked ? ($qty ?: 1) : 0); ?>" <?php echo $checked ? '' : 'disabled'; ?> />
-                                <button type="button" class="tmr-qty-btn tmr-qty-plus" tabindex="-1" aria-label="<?php esc_attr_e('বাড়ান', 'tailor-manager'); ?>">+</button>
-                            </span>
-                        </label>
-                    <?php endforeach; ?>
-                    <?php if (empty($dresses)) : ?>
-                        <span class="tmr-empty"><?php esc_html_e('এই ক্যাটাগরিতে এখনো কোনো ড্রেস যোগ করা হয়নি।', 'tailor-manager'); ?></span>
-                    <?php endif; ?>
-                </div>
+                <?php if (!empty($dresses)) : ?>
+                    <div class="tmr-part-block-title">
+                        <span class="tmr-part-block-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></span>
+                        <?php esc_html_e('ড্রেস ও পরিমাণ (ক্লিক করে নির্বাচন করুন)', 'tailor-manager'); ?>
+                    </div>
+                    <div class="tmr-checkbox-grid tmr-dress-checkbox-grid">
+                        <?php foreach ($dresses as $dress) :
+                            $checked = isset($selected_dresses[$dress->ID]);
+                            $qty = $checked ? (int) $selected_dresses[$dress->ID]['quantity'] : 0;
+                        ?>
+                            <label>
+                                <input type="checkbox" class="tmr-dress-check" data-dress-id="<?php echo esc_attr($dress->ID); ?>" <?php checked($checked); ?> />
+                                <?php if (has_post_thumbnail($dress)) : ?>
+                                    <?php echo get_the_post_thumbnail($dress, array(20, 20), array('style' => 'border-radius:5px;object-fit:contain;flex-shrink:0;')); ?>
+                                <?php endif; ?>
+                                <?php echo esc_html($dress->post_title); ?>
+                                <span class="tmr-qty-stepper">
+                                    <button type="button" class="tmr-qty-btn tmr-qty-minus" tabindex="-1" aria-label="<?php esc_attr_e('কমান', 'tailor-manager'); ?>">&minus;</button>
+                                    <input type="number" min="0" class="tmr-dress-qty" data-dress-id="<?php echo esc_attr($dress->ID); ?>" value="<?php echo esc_attr($checked ? ($qty ?: 1) : 0); ?>" <?php echo $checked ? '' : 'disabled'; ?> />
+                                    <button type="button" class="tmr-qty-btn tmr-qty-plus" tabindex="-1" aria-label="<?php esc_attr_e('বাড়ান', 'tailor-manager'); ?>">+</button>
+                                </span>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else : ?>
+                    <div class="tmr-part-block-title tmr-category-qty-direct">
+                        <span><?php esc_html_e('এই পোশাকে এখনো আলাদা কোনো প্রোডাক্ট যোগ করা হয়নি — সরাসরি পরিমাণ দিন', 'tailor-manager'); ?></span>
+                        <span class="tmr-qty-stepper">
+                            <button type="button" class="tmr-qty-btn tmr-qty-minus" tabindex="-1" aria-label="<?php esc_attr_e('কমান', 'tailor-manager'); ?>">&minus;</button>
+                            <input type="number" min="0" class="tmr-category-qty" value="<?php echo esc_attr($category_only_qty); ?>" />
+                            <button type="button" class="tmr-qty-btn tmr-qty-plus" tabindex="-1" aria-label="<?php esc_attr_e('বাড়ান', 'tailor-manager'); ?>">+</button>
+                        </span>
+                    </div>
+                <?php endif; ?>
             </div>
 
             <div class="tmr-category-collapsible" style="<?php echo $has_data ? '' : 'display:none;'; ?>">
-                <div class="tmr-form-row">
-                    <label class="tmr-form-label" for="tmr-cutter-<?php echo esc_attr($term->term_id); ?>"><?php esc_html_e('কাটার / টেইলারের নাম', 'tailor-manager'); ?></label>
-                    <input type="text" id="tmr-cutter-<?php echo esc_attr($term->term_id); ?>" class="tmr-cutter-name" value="<?php echo esc_attr($cutter_name); ?>" style="max-width:280px;" />
+                <div class="tmr-form-row tmr-part-block">
+                    <div class="tmr-part-block-title">
+                        <span class="tmr-part-block-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></span>
+                        <?php esc_html_e('স্টাফ', 'tailor-manager'); ?>
+                    </div>
+                    <?php
+                    self::render_staff_field('tmr-cutter-' . $term->term_id, 'tmr-cutter-name', __('কাটিং মাস্টার', 'tailor-manager'), $cutter_name);
+                    self::render_staff_field('tmr-tailor-' . $term->term_id, 'tmr-tailor-name', __('সোয়িং অপারেটর', 'tailor-manager'), $tailor_name);
+                    ?>
                 </div>
 
                 <?php if ($fields) : ?>
@@ -465,6 +491,40 @@ class TMR_Orders_Panel
                         <?php endif; ?>
                     </div>
                 <?php endforeach; ?>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * One label-left/field-right staff combobox row — cutting master and sewing
+     * operator are two independent roles/people in a real shop, so each gets its own
+     * row instead of sharing one free-text field.
+     *
+     * @param string $id        unique DOM id for this row's input
+     * @param string $css_class value-carrying class the submit JS/PHP reads (tmr-cutter-name or tmr-tailor-name)
+     */
+    private static function render_staff_field($id, $css_class, $label, $value)
+    {
+        ?>
+        <div class="tmr-staff-field-row">
+            <label class="tmr-form-label" for="<?php echo esc_attr($id); ?>"><?php echo esc_html($label); ?></label>
+            <div class="tmr-staff-select-wrap">
+                <input type="text" id="<?php echo esc_attr($id); ?>" class="<?php echo esc_attr($css_class); ?> tmr-staff-input" autocomplete="off" value="<?php echo esc_attr($value); ?>" placeholder="<?php esc_attr_e('নাম লিখুন বা তালিকা থেকে বেছে নিন…', 'tailor-manager'); ?>" />
+                <div class="tmr-staff-suggest-list">
+                    <?php foreach (TMR_Staff_Post_Type::get_active() as $staff_member) : ?>
+                        <div class="tmr-staff-suggest-item" data-name="<?php echo esc_attr($staff_member->post_title); ?>">
+                            <span class="tmr-staff-avatar">
+                                <?php if (has_post_thumbnail($staff_member)) : ?>
+                                    <?php echo get_the_post_thumbnail($staff_member, array(22, 22), array('style' => 'object-fit:cover;')); ?>
+                                <?php else : ?>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                                <?php endif; ?>
+                            </span>
+                            <span><?php echo esc_html($staff_member->post_title); ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
             </div>
         </div>
         <?php
@@ -628,13 +688,26 @@ class TMR_Orders_Panel
 
             $(document).on('click', '.tmr-qty-plus, .tmr-qty-minus', function (e) {
                 e.preventDefault();
-                var $input = $(this).siblings('.tmr-dress-qty');
+                var $input = $(this).siblings('.tmr-dress-qty, .tmr-category-qty');
                 if ($input.prop('disabled')) {
                     return;
                 }
                 var val = parseInt($input.val(), 10) || 0;
                 val = $(this).hasClass('tmr-qty-plus') ? val + 1 : Math.max(0, val - 1);
-                $input.val(val);
+                $input.val(val).trigger('input');
+            });
+
+            // Categories with no dress products yet skip the checkbox grid entirely (see
+            // render_category_block()) — typing a quantity directly is what "activates"
+            // that category's block, same role checking a dress checkbox plays elsewhere.
+            $(document).on('input', '.tmr-category-qty', function () {
+                var qty = parseInt($(this).val(), 10) || 0;
+                var $block = $(this).closest('.tmr-category-block');
+                var $collapsible = $block.find('.tmr-category-collapsible');
+                if (qty > 0 && !$collapsible.is(':visible')) {
+                    $collapsible.slideDown(150);
+                    $block.find('.tmr-category-chevron').addClass('is-open');
+                }
             });
 
             $(document).on('click', '.tmr-measure-plus, .tmr-measure-minus', function (e) {
@@ -643,6 +716,36 @@ class TMR_Orders_Panel
                 var val = parseInt($input.val(), 10) || 0;
                 val = $(this).hasClass('tmr-measure-plus') ? val + 1 : Math.max(0, val - 1);
                 $input.val(val);
+            });
+
+            // Cutter/tailor picker — a typeable combobox (not a rigid <select>) since
+            // cutter_name deliberately stays free text: it's what "My Orders" matches
+            // against a staff login's display name, and a shop's cutter/tailor might not
+            // have a directory entry (or account) yet. The whole staff list is already in
+            // the DOM per category block (small, bounded dataset), so filtering is a plain
+            // client-side substring match — no AJAX round-trip needed like customer search.
+            $(document).on('focus click', '.tmr-staff-input', function () {
+                $(this).siblings('.tmr-staff-suggest-list').show();
+            });
+
+            $(document).on('input', '.tmr-staff-input', function () {
+                var term = $(this).val().trim().toLowerCase();
+                $(this).siblings('.tmr-staff-suggest-list').show().find('.tmr-staff-suggest-item').each(function () {
+                    var name = ($(this).data('name') + '').toLowerCase();
+                    $(this).toggle(!term || name.indexOf(term) !== -1);
+                });
+            });
+
+            $(document).on('click', '.tmr-staff-suggest-item', function () {
+                var $wrap = $(this).closest('.tmr-staff-select-wrap');
+                $wrap.find('.tmr-staff-input').val($(this).data('name'));
+                $wrap.find('.tmr-staff-suggest-list').hide();
+            });
+
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('.tmr-staff-select-wrap').length) {
+                    $('.tmr-staff-suggest-list').hide();
+                }
             });
 
             var searchTimer;
@@ -726,6 +829,14 @@ class TMR_Orders_Panel
                         });
                     });
 
+                    var $categoryQty = $block.find('.tmr-category-qty');
+                    if ($categoryQty.length) {
+                        var directQty = parseInt($categoryQty.val(), 10) || 0;
+                        if (directQty > 0) {
+                            dresses.push({ dress_id: 0, quantity: directQty });
+                        }
+                    }
+
                     if (!dresses.length) {
                         return;
                     }
@@ -755,6 +866,7 @@ class TMR_Orders_Panel
                     categories.push({
                         category_id: $block.data('category-id'),
                         cutter_name: $block.find('.tmr-cutter-name').val() || '',
+                        tailor_name: $block.find('.tmr-tailor-name').val() || '',
                         dresses: dresses,
                         measurements: measurements,
                         part_selections: partSelections
@@ -818,14 +930,17 @@ class TMR_Orders_Panel
                 <h3 style="margin:0 0 10px;font-size:15px;"><?php echo $term && !is_wp_error($term) ? esc_html($term->name) : ''; ?></h3>
                 <p>
                     <?php foreach (TMR_Order_Item_Post_Type::get_dresses($item->ID) as $d) :
-                        $dress = get_post($d['dress_id']);
-                        if ($dress) :
+                        $dress = !empty($d['dress_id']) ? get_post($d['dress_id']) : null;
+                        $name  = $dress ? $dress->post_title : ($term && !is_wp_error($term) ? $term->name : '');
+                        if ($name) :
                     ?>
-                        <?php echo esc_html($dress->post_title . '(' . (int) $d['quantity'] . ') '); ?>
+                        <?php echo esc_html($name . '(' . (int) $d['quantity'] . ') '); ?>
                     <?php endif; endforeach; ?>
                 </p>
                 <?php $cutter = get_post_meta($item->ID, '_tmr_cutter_name', true); ?>
-                <?php if ($cutter) : ?><p><strong><?php esc_html_e('কাটার/টেইলার', 'tailor-manager'); ?>:</strong> <?php echo esc_html($cutter); ?></p><?php endif; ?>
+                <?php if ($cutter) : ?><p><strong><?php esc_html_e('কাটিং মাস্টার', 'tailor-manager'); ?>:</strong> <?php echo esc_html($cutter); ?></p><?php endif; ?>
+                <?php $tailor = get_post_meta($item->ID, '_tmr_tailor_name', true); ?>
+                <?php if ($tailor) : ?><p><strong><?php esc_html_e('সোয়িং অপারেটর', 'tailor-manager'); ?>:</strong> <?php echo esc_html($tailor); ?></p><?php endif; ?>
 
                 <?php $measurements = TMR_Order_Item_Post_Type::get_measurements($item->ID); ?>
                 <?php if ($measurements) : ?>
@@ -1046,13 +1161,14 @@ class TMR_Orders_Panel
                 continue;
             }
 
+            // dress_id 0 is a deliberate sentinel, not a missing/invalid value here — it
+            // means "this category has no distinct dress products, take the order against
+            // the category itself" (see render_category_block()'s empty($dresses) branch).
             $clean_dresses = array();
             foreach ($dresses as $d) {
                 $dress_id = isset($d['dress_id']) ? (int) $d['dress_id'] : 0;
                 $qty      = isset($d['quantity']) ? max(1, (int) $d['quantity']) : 1;
-                if ($dress_id) {
-                    $clean_dresses[] = array('dress_id' => $dress_id, 'quantity' => $qty);
-                }
+                $clean_dresses[] = array('dress_id' => $dress_id, 'quantity' => $qty);
             }
 
             if (empty($clean_dresses)) {
@@ -1073,6 +1189,7 @@ class TMR_Orders_Panel
             update_post_meta($item_id, '_tmr_category_id', $category_id);
             update_post_meta($item_id, '_tmr_dresses', $clean_dresses);
             update_post_meta($item_id, '_tmr_cutter_name', isset($item['cutter_name']) ? sanitize_text_field($item['cutter_name']) : '');
+            update_post_meta($item_id, '_tmr_tailor_name', isset($item['tailor_name']) ? sanitize_text_field($item['tailor_name']) : '');
 
             $measurements = array();
             if (isset($item['measurements']) && is_array($item['measurements'])) {

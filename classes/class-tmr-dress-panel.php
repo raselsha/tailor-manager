@@ -44,7 +44,7 @@ class TMR_Dress_Panel
 
         $header_right = '<button type="button" class="tmr-btn-outline tmr-toggle-all-btn" id="tmr-toggle-all">' . esc_html__('সব বন্ধ করুন', 'tailor-manager') . '</button>'
             . '<a href="#" class="tmr-btn-add" id="tmr-add-dress">' . esc_html__('+ ড্রেস যোগ করুন', 'tailor-manager') . '</a>';
-        TMR_Panel_Shell::header('dress', __('ড্রেস টাইপ ম্যানেজার', 'tailor-manager'), __('ড্রেস অনুযায়ী পোশাকের ধরন।', 'tailor-manager'), $header_right, true);
+        TMR_Panel_Shell::header('dress', __('বিভিন্ন পোশাক', 'tailor-manager'), __('প্রতিটি পোশাকের ধরন আলাদাভাবে যোগ করুন।', 'tailor-manager'), $header_right, true);
         ?>
         <?php if (empty($categories)) : ?>
             <div class="tmr-card"><p class="tmr-empty"><?php esc_html_e('এখনো কোনো ক্যাটাগরি তৈরি হয়নি।', 'tailor-manager'); ?></p></div>

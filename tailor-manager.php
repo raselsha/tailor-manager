@@ -43,6 +43,7 @@ if (!class_exists('TMR_Tailor_Manager')) {
             new TMR_Dress_Part_Post_Type();
             new TMR_Design_Type_Post_Type();
             new TMR_Customer_Post_Type();
+            new TMR_Staff_Post_Type();
             new TMR_Order_Post_Type();
             new TMR_Order_Item_Post_Type();
             $staff_role = new TMR_Staff_Role();
@@ -56,6 +57,7 @@ if (!class_exists('TMR_Tailor_Manager')) {
             new TMR_Design_Type_Panel();
             new TMR_Categories_Panel();
             new TMR_Measurement_Fields_Panel();
+            new TMR_Staff_Panel();
             new TMR_Accounts_Report();
             new TMR_Settings_Page();
             new TMR_Print_Slips();
@@ -81,6 +83,7 @@ if (!class_exists('TMR_Tailor_Manager')) {
             $dress_part  = new TMR_Dress_Part_Post_Type();
             $design_type = new TMR_Design_Type_Post_Type();
             $customer    = new TMR_Customer_Post_Type();
+            $staff       = new TMR_Staff_Post_Type();
             $order       = new TMR_Order_Post_Type();
             $order_item  = new TMR_Order_Item_Post_Type();
 
@@ -89,6 +92,7 @@ if (!class_exists('TMR_Tailor_Manager')) {
             $dress_part->register();
             $design_type->register();
             $customer->register();
+            $staff->register();
             $order->register();
             $order_item->register();
 

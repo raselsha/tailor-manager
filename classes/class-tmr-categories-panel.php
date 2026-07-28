@@ -65,24 +65,24 @@ class TMR_Categories_Panel
                 <form id="tmr-category-form">
                     <input type="hidden" name="id" value="0" />
                     <div class="tmr-modal-body">
-                        <div class="tmr-form-row tmr-form-row-duo">
-                            <div>
-                                <label class="tmr-form-label" for="tmr-category-name"><?php esc_html_e('নাম', 'tailor-manager'); ?> *</label>
-                                <input type="text" name="name" id="tmr-category-name" required />
-                            </div>
-                            <div>
-                                <label class="tmr-form-label"><?php esc_html_e('আইকন / ছবি', 'tailor-manager'); ?></label>
-                                <div class="tmr-photo-picker">
-                                    <div class="tmr-photo-preview tmr-cat-preview-wrap">
-                                        <img class="tmr-cat-preview" src="" style="width:100%;height:100%;object-fit:contain;display:none;" />
-                                        <svg class="tmr-cat-preview-placeholder" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
-                                    </div>
-                                    <input type="hidden" name="image_id" class="tmr-cat-image-id" value="0" />
+                        <div class="tmr-modal-section">
+                            <div class="tmr-icon-picker-center">
+                                <div class="tmr-photo-preview tmr-photo-preview-lg tmr-cat-preview-wrap">
+                                    <img class="tmr-cat-preview" src="" style="width:100%;height:100%;object-fit:contain;display:none;" />
+                                    <svg class="tmr-cat-preview-placeholder" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                                </div>
+                                <input type="hidden" name="image_id" class="tmr-cat-image-id" value="0" />
+                                <div class="tmr-icon-picker-actions">
                                     <button type="button" class="tmr-btn-outline tmr-btn-sm tmr-pick-cat-image"><?php esc_html_e('ছবি নির্বাচন', 'tailor-manager'); ?></button>
+                                    <button type="button" class="tmr-btn-outline tmr-btn-sm tmr-btn-outline-danger tmr-remove-cat-image" style="display:none;"><?php esc_html_e('ছবি সরান', 'tailor-manager'); ?></button>
                                 </div>
                             </div>
                         </div>
-                        <div class="tmr-form-row">
+                        <div class="tmr-modal-section">
+                            <label class="tmr-form-label" for="tmr-category-name"><?php esc_html_e('পোশাকের নাম', 'tailor-manager'); ?> *</label>
+                            <input type="text" name="name" id="tmr-category-name" required />
+                        </div>
+                        <div class="tmr-modal-section">
                             <label class="tmr-form-label"><?php esc_html_e('মাপের ফিল্ড — এই পোশাকে যেসব মাপ নেওয়া হবে', 'tailor-manager'); ?></label>
                             <?php if (empty($selectable_fields)) : ?>
                                 <p class="tmr-form-hint"><?php esc_html_e('এখনো কোনো সক্রিয় মাপের ফিল্ড তৈরি হয়নি।', 'tailor-manager'); ?></p>
@@ -127,12 +127,23 @@ class TMR_Categories_Panel
             var $modal = $('#tmr-category-modal');
             var $form = $('#tmr-category-form');
 
+            function setImage(imageId, url) {
+                $form.find('.tmr-cat-image-id').val(imageId);
+                if (url) {
+                    $form.find('.tmr-cat-preview').attr('src', url).show();
+                    $form.find('.tmr-cat-preview-placeholder').hide();
+                    $form.find('.tmr-remove-cat-image').show();
+                } else {
+                    $form.find('.tmr-cat-preview').attr('src', '').hide();
+                    $form.find('.tmr-cat-preview-placeholder').show();
+                    $form.find('.tmr-remove-cat-image').hide();
+                }
+            }
+
             function resetModal() {
                 $form[0].reset();
                 $form.find('[name="id"]').val(0);
-                $form.find('.tmr-cat-image-id').val(0);
-                $form.find('.tmr-cat-preview').attr('src', '').hide();
-                $form.find('.tmr-cat-preview-placeholder').show();
+                setImage(0, '');
                 $form.find('[name="active"]').prop('checked', true);
                 TMRPanel.syncStatusToggle($form.find('[name="active"]'));
             }
@@ -154,11 +165,7 @@ class TMR_Categories_Panel
                     resetModal();
                     $form.find('[name="id"]').val(data.id);
                     $form.find('[name="name"]').val(data.name);
-                    $form.find('.tmr-cat-image-id').val(data.image_id);
-                    if (data.image_url) {
-                        $form.find('.tmr-cat-preview').attr('src', data.image_url).show();
-                        $form.find('.tmr-cat-preview-placeholder').hide();
-                    }
+                    setImage(data.image_id, data.image_url);
                     $form.find('input[name="field_slugs[]"]').each(function () {
                         $(this).prop('checked', data.field_slugs.indexOf($(this).val()) !== -1);
                     });
@@ -175,11 +182,14 @@ class TMR_Categories_Panel
                 frame.on('select', function () {
                     var attachment = frame.state().get('selection').first().toJSON();
                     var url = attachment.sizes && attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url;
-                    $form.find('.tmr-cat-image-id').val(attachment.id);
-                    $form.find('.tmr-cat-preview').attr('src', url).show();
-                    $form.find('.tmr-cat-preview-placeholder').hide();
+                    setImage(attachment.id, url);
                 });
                 frame.open();
+            });
+
+            $(document).on('click', '.tmr-remove-cat-image', function (e) {
+                e.preventDefault();
+                setImage(0, '');
             });
 
             $(document).on('change', '.tmr-category-card-toggle', function () {
