@@ -1110,55 +1110,95 @@
    is redeclared (not omitted) because this shares .tmr-modal-body, whose own
    padding:20px 24px this rule would otherwise silently cancel via source order. */
 .tmr-order-confirmation { text-align: center; padding: 16px 28px 20px; max-width: 800px; margin: 0 auto; box-sizing: border-box; }
-.tmr-confirmation-shop-name { margin: 0 0 8px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #94a3b8; }
+/* Compact single-line heading — checkmark + title + shop name side by side instead
+   of three stacked centered blocks, so it stops eating vertical space that the
+   two-dress case needs to fit without scrolling. */
+.tmr-confirmation-heading { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 12px; }
 .tmr-confirmation-icon {
-    width: 40px;
-    height: 40px;
-    line-height: 40px;
-    margin: 0 auto 8px;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    flex-shrink: 0;
     background: #e6f7ed;
     color: #1a7f45;
     border-radius: 50%;
-    font-size: 19px;
+    font-size: 15px;
     font-weight: 700;
 }
-.tmr-order-confirmation h4 { margin: 0 0 14px; font-size: 16px; font-weight: 700; color: #1e293b; }
-/* Details/QR/hint stay receipt-width and centered — only the outer card and the
-   share-icon row below get to use the doubled-width space. */
-.tmr-confirmation-details { text-align: left; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 4px 16px 12px; margin: 0 auto 14px; max-width: 420px; }
-/* One container (.tmr-confirmation-details), three labeled sections inside it —
-   customer summary, payment summary, then dress & measurement data row-wise. */
-.tmr-confirmation-section { padding-top: 10px; }
-.tmr-confirmation-section + .tmr-confirmation-section { margin-top: 4px; padding-top: 12px; border-top: 1px solid #e2e8f0; }
-.tmr-confirmation-section-title { margin: 0 0 2px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: #0061d5; }
-.tmr-confirmation-row { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding: 7px 0; font-size: 13px; }
-.tmr-confirmation-row + .tmr-confirmation-row { border-top: 1px solid #e2e8f0; }
-.tmr-confirmation-row span { color: #64748b; flex-shrink: 0; }
-.tmr-confirmation-row strong { color: #1e293b; font-weight: 700; text-align: right; word-break: break-word; }
-.tmr-conf-item + .tmr-conf-item { margin-top: 8px; padding-top: 8px; border-top: 1px solid #e2e8f0; }
-.tmr-conf-item-measurements { padding-left: 12px; border-top: 1px solid #e2e8f0; margin-top: 2px; }
-.tmr-conf-item-measurements .tmr-confirmation-row { font-size: 12px; padding: 5px 0; }
-.tmr-conf-item-measurements .tmr-confirmation-row span { color: #94a3b8; }
-.tmr-confirmation-qr { margin: 0 auto 8px; display: flex; justify-content: center; }
-.tmr-confirmation-qr img { width: 130px; height: 130px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px; background: #fff; }
-.tmr-confirmation-hint { font-size: 12px; color: #94a3b8; margin: 0 0 20px; }
-/* Circular icon + label share row (copy link / WhatsApp / download / print) — same
-   language as a typical share-sheet: dark circle, white icon, label underneath. */
-.tmr-confirmation-share-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 28px; margin-bottom: 4px; }
-.tmr-confirmation-share-btn { display: flex; flex-direction: column; align-items: center; gap: 8px; background: none; border: none; cursor: pointer; font-family: inherit; padding: 0; }
-.tmr-confirmation-share-icon { width: 52px; height: 52px; border-radius: 50%; background: #1e293b; color: #fff; display: flex; align-items: center; justify-content: center; transition: background .15s ease, transform .15s ease; }
+.tmr-confirmation-heading > span:last-child { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; text-align: left; }
+.tmr-confirmation-heading strong { font-size: 15px; font-weight: 700; color: #1e293b; }
+.tmr-confirmation-shop-name { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: #94a3b8; }
+/* Stacked full-width sections: the customer+payment card, then one card per dress
+   item below it (জামা row, then পায়জামা row, …) — each its own full-width row,
+   not side-by-side columns. .tmr-confirmation-items is a plain wrapper div around
+   the JS-rendered item cards; display:contents lifts its children into this stack
+   instead of boxing them into a single nested block. */
+.tmr-confirmation-details { text-align: left; display: grid; gap: 12px; margin: 0 auto 14px; max-width: 760px; }
+.tmr-confirmation-items { display: contents; }
+/* Group-header + chip-row pattern, ported from the doctor-appointment plugin's
+   "Dr. X — 20 patients" list header + icon-chip patient rows: a highlighted heading
+   bar (order-id badge + customer name, dates on the right) sits over a 3-column
+   payment table, instead of the earlier two-column card-of-rows layout. */
+.tmr-confirmation-summary-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+.tmr-confirmation-summary-header { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; padding: 14px 16px; background: #eef4fc; border-bottom: 1px solid #e2e8f0; }
+.tmr-confirmation-summary-customer { display: flex; align-items: center; gap: 8px; }
+.tmr-confirmation-summary-customer strong { font-size: 17px; font-weight: 800; color: #0061d5; }
+.tmr-confirmation-summary-order-id { flex-shrink: 0; background: #dbe8fb; color: #0061d5; font-size: 11px; font-weight: 800; padding: 3px 9px; border-radius: 999px; }
+.tmr-confirmation-summary-dates { display: flex; flex-wrap: wrap; gap: 14px; margin-left: auto; }
+/* Payment summary as a 3-column table — one divided cell per figure instead of a
+   loosely wrapping chip row. */
+.tmr-confirmation-summary-body { display: grid; grid-template-columns: repeat(3, 1fr); }
+.tmr-confirmation-summary-body .tmr-confirmation-chip { flex-direction: column; align-items: center; gap: 4px; padding: 14px 10px; border-right: 1px solid #e2e8f0; }
+.tmr-confirmation-summary-body .tmr-confirmation-chip:last-child { border-right: none; }
+.tmr-confirmation-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #64748b; white-space: nowrap; }
+.tmr-confirmation-chip svg { color: #94a3b8; flex-shrink: 0; }
+.tmr-confirmation-chip-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; color: #64748b; }
+.tmr-confirmation-chip strong { color: #1e293b; font-weight: 700; font-size: 13px; }
+.tmr-confirmation-chip-lg strong { font-size: 15px; }
+.tmr-confirmation-chip-due strong,
+.tmr-confirmation-chip-due svg { color: #dc2626; }
+@media (max-width: 480px) {
+    .tmr-confirmation-summary-body { grid-template-columns: 1fr; }
+    .tmr-confirmation-summary-body .tmr-confirmation-chip { border-right: none; border-bottom: 1px solid #e2e8f0; }
+    .tmr-confirmation-summary-body .tmr-confirmation-chip:last-child { border-bottom: none; }
+}
+/* Dress item card body: a real table — column headers in row 1, values in row 2 —
+   wrapped so it scrolls horizontally on its own instead of wrapping to more rows
+   when a dress has many measurement fields. */
+.tmr-conf-item-measure-wrap { overflow-x: auto; }
+.tmr-conf-item-measure-table { width: 100%; border-collapse: collapse; }
+.tmr-conf-item-measure-table th,
+.tmr-conf-item-measure-table td { padding: 8px 4px; min-width: 52px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-right: 1px solid #e2e8f0; }
+.tmr-conf-item-measure-table th:last-child,
+.tmr-conf-item-measure-table td:last-child { border-right: none; }
+.tmr-conf-item-measure-table th { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; color: #64748b; border-bottom: 1px solid #e2e8f0; }
+.tmr-conf-item-measure-table td { font-size: 13px; font-weight: 700; color: #1e293b; }
+.tmr-conf-item-badge { margin-left: auto; }
+/* Footer: QR + share icons side by side in one row (was three stacked blocks —
+   QR, hint text, then a separate centered icon row), then a single link+button
+   row at the very bottom instead of two full-width stacked elements. Together
+   with the compact heading above, this is what lets the common 2-dress case fit
+   the modal's 90vh cap without scrolling; more dresses still wrap 2-per-row in
+   the grid above and the modal simply scrolls internally past that point, same
+   as any other bounded dialog. */
+.tmr-confirmation-footer { display: flex; align-items: center; justify-content: center; gap: 24px; flex-wrap: wrap; margin: 4px 0 14px; }
+.tmr-confirmation-qr { display: flex; }
+.tmr-confirmation-qr img { width: 88px; height: 88px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 5px; background: #fff; }
+.tmr-confirmation-share-actions { display: flex; flex-wrap: wrap; gap: 18px; }
+.tmr-confirmation-share-btn { display: flex; flex-direction: column; align-items: center; gap: 5px; background: none; border: none; cursor: pointer; font-family: inherit; padding: 0; }
+.tmr-confirmation-share-icon { width: 38px; height: 38px; border-radius: 50%; background: #1e293b; color: #fff; display: flex; align-items: center; justify-content: center; transition: background .15s ease, transform .15s ease; }
 .tmr-confirmation-share-btn:hover .tmr-confirmation-share-icon { background: #0061d5; transform: translateY(-2px); }
-.tmr-confirmation-share-btn span:last-child { font-size: 12px; font-weight: 600; color: #64748b; }
-.tmr-confirmation-view-link { display: block; margin-top: 10px; font-size: 13px; font-weight: 600; color: #0061d5; text-decoration: none; }
+.tmr-confirmation-share-btn span:last-child { font-size: 10px; font-weight: 600; color: #64748b; }
+.tmr-confirmation-actions-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; }
+.tmr-confirmation-view-link { font-size: 13px; font-weight: 600; color: #0061d5; text-decoration: none; }
 .tmr-confirmation-view-link:hover { text-decoration: underline; }
 .tmr-confirmation-close-btn {
-    margin-top: 12px;
-    padding: 10px 28px;
+    padding: 8px 22px;
     background: #0061d5;
     color: #fff;
     border: none;
     border-radius: 10px;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     cursor: pointer;
     font-family: inherit;

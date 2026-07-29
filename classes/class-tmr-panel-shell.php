@@ -10,7 +10,7 @@ defined('ABSPATH') || exit;
  */
 class TMR_Panel_Shell
 {
-    const CAPABILITY = 'manage_options';
+    const CAPABILITY = 'manage_tmr_shop';
 
     /** @var array<string,array{slug:string,title:string,icon:string}> */
     public static $nav = array();

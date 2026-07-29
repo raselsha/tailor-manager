@@ -48,6 +48,8 @@ if (!class_exists('TMR_Tailor_Manager')) {
             new TMR_Order_Item_Post_Type();
             $staff_role = new TMR_Staff_Role();
             $staff_role->register();
+            $manager_role = new TMR_Manager_Role();
+            $manager_role->register();
             new TMR_Panel_Shell();
             new TMR_Dashboard_Panel();
             new TMR_Orders_Panel();
