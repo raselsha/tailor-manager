@@ -62,6 +62,7 @@ if (!class_exists('TMR_Tailor_Manager')) {
             new TMR_Staff_Panel();
             new TMR_Accounts_Report();
             new TMR_Settings_Page();
+            new TMR_Profile_Panel();
             new TMR_Print_Slips();
         }
 

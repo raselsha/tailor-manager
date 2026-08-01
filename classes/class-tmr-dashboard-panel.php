@@ -7,6 +7,7 @@ class TMR_Dashboard_Panel
     {
         add_action('wp_ajax_tmr_toggle_ready', array($this, 'ajax_toggle_ready'));
         add_action('wp_ajax_tmr_toggle_delivered', array($this, 'ajax_toggle_delivered'));
+        add_action('wp_ajax_tmr_set_order_status', array($this, 'ajax_set_order_status'));
     }
 
     public static function render()
@@ -270,5 +271,53 @@ class TMR_Dashboard_Panel
         update_post_meta($id, '_tmr_delivered', $new);
 
         wp_send_json_success(array('delivered' => '1' === $new));
+    }
+
+    /**
+     * Direct status-dropdown entry point — sets the underlying _tmr_ready/
+     * _tmr_delivered/_tmr_cancelled flags to whichever combination matches the
+     * chosen single status, keeping TMR_Order_Post_Type::status_label() (and
+     * every existing is_ready()/is_delivered()/is_cancelled() reader) correct
+     * without changing the two-boolean-plus-cancelled-flag data model itself.
+     */
+    public function ajax_set_order_status()
+    {
+        check_ajax_referer('tmr_panel_nonce', 'nonce');
+
+        $id     = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+        $status = isset($_POST['status']) ? sanitize_key($_POST['status']) : '';
+
+        if (!$this->can_toggle_order($id)) {
+            wp_send_json_error(array('message' => __('অনুমতি নেই।', 'tailor-manager')));
+        }
+
+        if (!in_array($status, array('pending', 'ready', 'delivered', 'cancelled'), true)) {
+            wp_send_json_error(array('message' => __('অজানা স্ট্যাটাস।', 'tailor-manager')));
+        }
+
+        switch ($status) {
+            case 'pending':
+                update_post_meta($id, '_tmr_ready', '0');
+                update_post_meta($id, '_tmr_delivered', '0');
+                update_post_meta($id, '_tmr_cancelled', '0');
+                break;
+            case 'ready':
+                update_post_meta($id, '_tmr_ready', '1');
+                update_post_meta($id, '_tmr_delivered', '0');
+                update_post_meta($id, '_tmr_cancelled', '0');
+                break;
+            case 'delivered':
+                // Delivered implies ready — a shop wouldn't hand over an order
+                // that was never marked ready.
+                update_post_meta($id, '_tmr_ready', '1');
+                update_post_meta($id, '_tmr_delivered', '1');
+                update_post_meta($id, '_tmr_cancelled', '0');
+                break;
+            case 'cancelled':
+                update_post_meta($id, '_tmr_cancelled', '1');
+                break;
+        }
+
+        wp_send_json_success(array('status_key' => TMR_Order_Post_Type::status_label($id)));
     }
 }

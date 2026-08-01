@@ -38,6 +38,8 @@ class TMR_Panel_Shell
             'staff'       => array('slug' => 'tmr-staff', 'title' => __('স্টাফ', 'tailor-manager'), 'icon' => self::icon('user')),
             'accounts'    => array('slug' => 'tmr-accounts', 'title' => __('হিসাব', 'tailor-manager'), 'icon' => self::icon('dollar')),
             'settings'    => array('slug' => 'tmr-settings', 'title' => __('সেটিংস', 'tailor-manager'), 'icon' => self::icon('settings')),
+            'profile'     => array('slug' => 'tmr-profile', 'title' => __('প্রোফাইল', 'tailor-manager'), 'icon' => self::icon('user')),
+            'change-password' => array('slug' => 'tmr-change-password', 'title' => __('পাসওয়ার্ড পরিবর্তন', 'tailor-manager'), 'icon' => self::icon('lock')),
         );
 
         add_action('admin_menu', array($this, 'register_menu'));
@@ -50,17 +52,26 @@ class TMR_Panel_Shell
     {
         $n = self::$nav;
 
+        // 'read' (not TMR_Staff_Role::CAPABILITY) — tailor_staff and tmr_manager
+        // are deliberately disjoint capabilities (see TMR_Profile_Panel::can_access()'s
+        // own comment), so gating the top-level menu/dashboard entry on the staff
+        // capability alone silently locked a pure manager account out of the whole
+        // panel, dashboard included. render_home() already does its own real
+        // dispatch/capability check below, and both branches it can route to
+        // (TMR_Dashboard_Panel::render(), TMR_My_Orders_Panel::render()) have their
+        // own wp_die() gate — so 'read' here is safe, same loose-registration
+        // pattern as the Profile/Change-Password pages.
         add_menu_page(
             __('টেইলার প্যানেল', 'tailor-manager'),
             __('টেইলার প্যানেল', 'tailor-manager'),
-            TMR_Staff_Role::CAPABILITY,
+            'read',
             $n['dashboard']['slug'],
             array(__CLASS__, 'render_home'),
             'dashicons-store',
             3
         );
 
-        add_submenu_page($n['dashboard']['slug'], $n['dashboard']['title'], $n['dashboard']['title'], TMR_Staff_Role::CAPABILITY, $n['dashboard']['slug'], array(__CLASS__, 'render_home'));
+        add_submenu_page($n['dashboard']['slug'], $n['dashboard']['title'], $n['dashboard']['title'], 'read', $n['dashboard']['slug'], array(__CLASS__, 'render_home'));
         add_submenu_page($n['dashboard']['slug'], $n['my-orders']['title'], $n['my-orders']['title'], TMR_Staff_Role::CAPABILITY, $n['my-orders']['slug'], array('TMR_My_Orders_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['orders']['title'], $n['orders']['title'], self::CAPABILITY, $n['orders']['slug'], array('TMR_Orders_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['customers']['title'], $n['customers']['title'], self::CAPABILITY, $n['customers']['slug'], array('TMR_Customers_Panel', 'render'));
@@ -72,6 +83,15 @@ class TMR_Panel_Shell
         add_submenu_page($n['dashboard']['slug'], $n['staff']['title'], $n['staff']['title'], self::CAPABILITY, $n['staff']['slug'], array('TMR_Staff_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['accounts']['title'], $n['accounts']['title'], self::CAPABILITY, $n['accounts']['slug'], array('TMR_Accounts_Report', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['settings']['title'], $n['settings']['title'], self::CAPABILITY, $n['settings']['slug'], array('TMR_Settings_Page', 'render'));
+        // 'read' (not self::CAPABILITY or TMR_Staff_Role::CAPABILITY) — tailor_staff
+        // and tmr_manager are deliberately disjoint capabilities (only
+        // administrator has both), so neither alone covers "every logged-in panel
+        // user." Same loose-registration-plus-OR-check-in-the-callback pattern
+        // doctor-appointment uses for its own Profile/Change-Password pages — see
+        // TMR_Profile_Panel::render_profile()/render_change_password() for the
+        // real check.
+        add_submenu_page($n['dashboard']['slug'], $n['profile']['title'], $n['profile']['title'], 'read', $n['profile']['slug'], array('TMR_Profile_Panel', 'render_profile'));
+        add_submenu_page($n['dashboard']['slug'], $n['change-password']['title'], $n['change-password']['title'], 'read', $n['change-password']['slug'], array('TMR_Profile_Panel', 'render_change_password'));
     }
 
     /**
@@ -100,7 +120,11 @@ class TMR_Panel_Shell
             return $n;
         }
 
-        return array('dashboard' => array_merge($n['my-orders'], array('slug' => $n['dashboard']['slug'])));
+        return array(
+            'dashboard'        => array_merge($n['my-orders'], array('slug' => $n['dashboard']['slug'])),
+            'profile'          => $n['profile'],
+            'change-password'  => $n['change-password'],
+        );
     }
 
     public static function current_page_slug()
@@ -296,13 +320,13 @@ class TMR_Panel_Shell
                     </li>
                 <?php endforeach; ?>
             </ul>
-            <div class="tmr-sidebar-footer">
-                <div class="tmr-user-avatar"></div>
+            <a class="tmr-sidebar-footer" href="<?php echo esc_url(admin_url('admin.php?page=' . self::$nav['profile']['slug'])); ?>">
+                <?php echo TMR_Profile_Panel::avatar_html($user->ID, 32); // phpcs:ignore -- self-escaped ?>
                 <div>
                     <div style="font-weight:700;font-size:13px;"><?php echo esc_html($user->display_name); ?></div>
                     <div style="font-size:11px;opacity:0.6;"><?php echo current_user_can(self::CAPABILITY) ? esc_html__('অ্যাডমিন', 'tailor-manager') : esc_html__('টেইলার স্টাফ', 'tailor-manager'); ?></div>
                 </div>
-            </div>
+            </a>
         </div>
         <?php
     }
@@ -321,6 +345,7 @@ class TMR_Panel_Shell
             'ruler'    => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0z"></path><path d="M14.5 6.5l3 3"></path><path d="M11.5 9.5l1.5 1.5"></path><path d="M8.5 12.5l1.5 1.5"></path></svg>',
             'user'     => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>',
             'settings' => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
+            'lock'     => '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>',
         );
 
         return isset($icons[$name]) ? $icons[$name] : '';

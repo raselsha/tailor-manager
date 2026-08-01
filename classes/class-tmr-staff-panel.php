@@ -10,12 +10,23 @@ class TMR_Staff_Panel
 {
     const POST_TYPE = TMR_Staff_Post_Type::POST_TYPE;
 
+    // Bidirectional link between a tmr_staff CPT record (the plain-name directory
+    // used by the order form) and the WP_User account that logs in as that
+    // person — same pattern doctor-appointment uses to link its doctor CPT to a
+    // WP_User. display_name is kept in sync with the CPT's post_title (see
+    // ajax_save() below) since TMR_My_Orders_Panel matches an order's cutter/
+    // tailor free-text field against the logged-in user's display_name.
+    const LINKED_USER_META = '_tmr_linked_user_id';
+    const LINKED_STAFF_META = '_tmr_linked_staff_post_id';
+
     public function __construct()
     {
         add_action('wp_ajax_tmr_save_staff', array($this, 'ajax_save'));
         add_action('wp_ajax_tmr_get_staff', array($this, 'ajax_get'));
         add_action('wp_ajax_tmr_delete_staff', array($this, 'ajax_delete'));
         add_action('wp_ajax_tmr_toggle_staff_status', array($this, 'ajax_toggle_status'));
+        add_action('wp_ajax_tmr_create_staff_login', array($this, 'ajax_create_login'));
+        add_action('wp_ajax_tmr_remove_staff_login', array($this, 'ajax_remove_login'));
     }
 
     public static function render()
@@ -85,6 +96,45 @@ class TMR_Staff_Panel
                             <span class="tmr-form-label tmr-status-toggle-label" style="margin:0;"><?php esc_html_e('সক্রিয়', 'tailor-manager'); ?></span>
                         </label>
                         <button type="submit" class="tmr-btn-add"><?php esc_html_e('সেভ করুন', 'tailor-manager'); ?></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="tmr-modal" id="tmr-staff-login-modal">
+            <div class="tmr-modal-content">
+                <div class="tmr-modal-head">
+                    <h2><?php esc_html_e('লগইন অ্যাক্সেস দিন', 'tailor-manager'); ?></h2>
+                    <button type="button" class="tmr-modal-close">&times;</button>
+                </div>
+                <form id="tmr-staff-login-form">
+                    <input type="hidden" name="staff_id" id="tmr-staff-login-staff-id" value="0" />
+                    <div class="tmr-modal-body">
+                        <p class="tmr-form-hint" style="margin:0 0 16px;">
+                            <?php esc_html_e('নাম', 'tailor-manager'); ?>: <strong id="tmr-staff-login-name"></strong>
+                            — <?php esc_html_e('এই নামেই লগইন অ্যাকাউন্টের ডিসপ্লে নাম সেট হবে, যাতে "আমার অর্ডার" পেজে সঠিক অর্ডার দেখায়।', 'tailor-manager'); ?>
+                        </p>
+                        <div class="tmr-form-row">
+                            <label class="tmr-form-label" for="tmr-staff-login-username"><?php esc_html_e('ইউজারনেম', 'tailor-manager'); ?></label>
+                            <input type="text" name="username" id="tmr-staff-login-username" required autocomplete="off" />
+                        </div>
+                        <div class="tmr-form-row">
+                            <label class="tmr-form-label" for="tmr-staff-login-email"><?php esc_html_e('ইমেইল', 'tailor-manager'); ?></label>
+                            <input type="email" name="email" id="tmr-staff-login-email" required autocomplete="off" />
+                        </div>
+                        <div class="tmr-form-row">
+                            <label class="tmr-form-label" for="tmr-staff-login-password"><?php esc_html_e('পাসওয়ার্ড', 'tailor-manager'); ?></label>
+                            <div class="tmr-password-field">
+                                <input type="password" name="password" id="tmr-staff-login-password" required autocomplete="new-password" minlength="8" />
+                                <button type="button" class="tmr-password-toggle" data-target="tmr-staff-login-password" title="<?php esc_attr_e('দেখান/লুকান', 'tailor-manager'); ?>">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
+                            <p class="tmr-form-hint"><?php esc_html_e('কমপক্ষে ৮ অক্ষর।', 'tailor-manager'); ?></p>
+                        </div>
+                    </div>
+                    <div class="tmr-modal-foot">
+                        <button type="submit" class="tmr-btn-add"><?php esc_html_e('অ্যাকাউন্ট তৈরি করুন', 'tailor-manager'); ?></button>
                     </div>
                 </form>
             </div>
@@ -188,6 +238,40 @@ class TMR_Staff_Panel
                     window.location.reload();
                 });
             });
+
+            var $loginModal = $('#tmr-staff-login-modal');
+            var $loginForm = $('#tmr-staff-login-form');
+
+            $(document).on('click', '.tmr-give-staff-login', function () {
+                var id = $(this).data('id');
+                var name = $(this).closest('.tmr-dress-card').find('.tmr-dress-card-name').text();
+                $loginForm[0].reset();
+                $('#tmr-staff-login-staff-id').val(id);
+                $('#tmr-staff-login-name').text(name);
+                TMRPanel.openModal($loginModal);
+            });
+
+            $('.tmr-password-toggle').on('click', function () {
+                var $input = $('#' + $(this).data('target'));
+                $input.attr('type', 'password' === $input.attr('type') ? 'text' : 'password');
+            });
+
+            $loginForm.on('submit', function (e) {
+                e.preventDefault();
+                TMRPanel.call('tmr_create_staff_login', $(this).serialize(), function () {
+                    window.location.reload();
+                });
+            });
+
+            $(document).on('click', '.tmr-remove-staff-login', function () {
+                if (!TMRPanel.confirmDelete('<?php echo esc_js(__('এই স্টাফের লগইন অ্যাক্সেস সরাবেন? অ্যাকাউন্টটি ডিলিট হয়ে যাবে।', 'tailor-manager')); ?>')) {
+                    return;
+                }
+                var id = $(this).data('id');
+                TMRPanel.call('tmr_remove_staff_login', { staff_id: id }, function () {
+                    window.location.reload();
+                });
+            });
         });
         </script>
         <?php
@@ -196,6 +280,8 @@ class TMR_Staff_Panel
 
     private static function render_staff_card(WP_Post $staff)
     {
+        $linked_user_id = (int) get_post_meta($staff->ID, self::LINKED_USER_META, true);
+        $linked_user    = $linked_user_id ? get_userdata($linked_user_id) : false;
         ?>
         <div class="tmr-dress-card">
             <div class="tmr-dress-card-icon">
@@ -206,12 +292,22 @@ class TMR_Staff_Panel
                 <?php endif; ?>
             </div>
             <div class="tmr-dress-card-name"><?php echo esc_html(get_the_title($staff)); ?></div>
+            <?php if ($linked_user) : ?>
+                <span class="tmr-staff-login-chip tmr-staff-login-chip-on" title="<?php echo esc_attr($linked_user->user_login); ?>"><?php esc_html_e('লগইন সক্রিয়', 'tailor-manager'); ?></span>
+            <?php else : ?>
+                <span class="tmr-staff-login-chip tmr-staff-login-chip-off"><?php esc_html_e('লগইন নেই', 'tailor-manager'); ?></span>
+            <?php endif; ?>
             <div class="tmr-dress-card-footer">
                 <label class="tmr-toggle tmr-mini-toggle" title="<?php esc_attr_e('সক্রিয়/নিষ্ক্রিয়', 'tailor-manager'); ?>">
                     <input type="checkbox" class="tmr-status-toggle tmr-staff-card-toggle" data-id="<?php echo esc_attr($staff->ID); ?>" <?php checked('publish' === $staff->post_status); ?> />
                     <span class="tmr-toggle-slider"></span>
                 </label>
                 <div class="tmr-dress-card-actions">
+                    <?php if ($linked_user) : ?>
+                        <span class="tmr-action-btn tmr-action-btn-red tmr-remove-staff-login" data-id="<?php echo esc_attr($staff->ID); ?>" title="<?php esc_attr_e('লগইন সরান', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 9.9-1"></path><line x1="4" y1="4" x2="20" y2="20"></line></svg></span>
+                    <?php else : ?>
+                        <span class="tmr-action-btn tmr-give-staff-login" data-id="<?php echo esc_attr($staff->ID); ?>" title="<?php esc_attr_e('লগইন অ্যাক্সেস দিন', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></span>
+                    <?php endif; ?>
                     <span class="tmr-action-btn tmr-edit-staff" data-id="<?php echo esc_attr($staff->ID); ?>" title="<?php esc_attr_e('এডিট', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></span>
                     <span class="tmr-action-btn tmr-action-btn-red tmr-delete-staff" data-id="<?php echo esc_attr($staff->ID); ?>" title="<?php esc_attr_e('ডিলিট', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></span>
                 </div>
@@ -304,7 +400,88 @@ class TMR_Staff_Panel
             delete_post_thumbnail($result);
         }
 
+        // Keep a linked login account's display_name matched to this record's own
+        // name — TMR_My_Orders_Panel finds a staff member's orders by comparing
+        // the order's plain-text cutter/tailor field against display_name, so a
+        // rename here that didn't propagate would silently break their queue.
+        $linked_user_id = (int) get_post_meta($result, self::LINKED_USER_META, true);
+        if ($linked_user_id) {
+            wp_update_user(array('ID' => $linked_user_id, 'display_name' => $name));
+        }
+
         wp_send_json_success(array('id' => $result));
+    }
+
+    public function ajax_create_login()
+    {
+        check_ajax_referer('tmr_panel_nonce', 'nonce');
+        if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
+            wp_send_json_error(array('message' => __('অনুমতি নেই।', 'tailor-manager')));
+        }
+
+        $staff_id = isset($_POST['staff_id']) ? (int) $_POST['staff_id'] : 0;
+        $staff    = get_post($staff_id);
+        if (!$staff || self::POST_TYPE !== $staff->post_type) {
+            wp_send_json_error(array('message' => __('স্টাফ পাওয়া যায়নি।', 'tailor-manager')));
+        }
+        if (get_post_meta($staff_id, self::LINKED_USER_META, true)) {
+            wp_send_json_error(array('message' => __('এই স্টাফের ইতিমধ্যে একটি লগইন অ্যাকাউন্ট আছে।', 'tailor-manager')));
+        }
+
+        $username = isset($_POST['username']) ? sanitize_user(wp_unslash($_POST['username']), true) : '';
+        $email    = isset($_POST['email']) ? sanitize_email(wp_unslash($_POST['email'])) : '';
+        $password = isset($_POST['password']) ? (string) $_POST['password'] : '';
+
+        if ('' === $username || !validate_username($username)) {
+            wp_send_json_error(array('message' => __('সঠিক ইউজারনেম দিন (শুধু অক্ষর, সংখ্যা, ., -, _)।', 'tailor-manager')));
+        }
+        if (username_exists($username)) {
+            wp_send_json_error(array('message' => __('এই ইউজারনেম আগে থেকেই আছে।', 'tailor-manager')));
+        }
+        if (!is_email($email) || email_exists($email)) {
+            wp_send_json_error(array('message' => __('সঠিক ও নতুন ইমেইল দিন — এই ইমেইল হয়তো আগে থেকেই ব্যবহৃত।', 'tailor-manager')));
+        }
+        if (strlen($password) < 8) {
+            wp_send_json_error(array('message' => __('পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।', 'tailor-manager')));
+        }
+
+        $user_id = wp_insert_user(array(
+            'user_login'   => $username,
+            'user_email'   => $email,
+            'user_pass'    => $password,
+            'display_name' => $staff->post_title,
+            'role'         => TMR_Staff_Role::ROLE,
+        ));
+
+        if (is_wp_error($user_id)) {
+            wp_send_json_error(array('message' => $user_id->get_error_message()));
+        }
+
+        update_post_meta($staff_id, self::LINKED_USER_META, $user_id);
+        update_user_meta($user_id, self::LINKED_STAFF_META, $staff_id);
+
+        wp_send_json_success(array('user_id' => $user_id));
+    }
+
+    public function ajax_remove_login()
+    {
+        check_ajax_referer('tmr_panel_nonce', 'nonce');
+        if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
+            wp_send_json_error(array('message' => __('অনুমতি নেই।', 'tailor-manager')));
+        }
+
+        $staff_id = isset($_POST['staff_id']) ? (int) $_POST['staff_id'] : 0;
+        $user_id  = (int) get_post_meta($staff_id, self::LINKED_USER_META, true);
+
+        if (!$user_id) {
+            wp_send_json_error(array('message' => __('এই স্টাফের কোনো লগইন অ্যাকাউন্ট নেই।', 'tailor-manager')));
+        }
+
+        require_once ABSPATH . 'wp-admin/includes/user.php';
+        wp_delete_user($user_id);
+        delete_post_meta($staff_id, self::LINKED_USER_META);
+
+        wp_send_json_success();
     }
 
     public function ajax_delete()

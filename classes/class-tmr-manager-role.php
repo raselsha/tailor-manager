@@ -21,7 +21,17 @@ class TMR_Manager_Role
                 'read'                      => true,
                 'level_0'                   => true,
                 TMR_Panel_Shell::CAPABILITY => true,
+                // Needed for the Profile page's wp.media() avatar picker — unlike
+                // tailor_staff, a manager isn't restricted to "own uploads only"
+                // (TMR_Profile_Panel's media query filters exempt this role), same
+                // as doctor-appointment's own manager-role exemption.
+                'upload_files'              => true,
             ));
+        } else {
+            $role = get_role(self::ROLE);
+            if ($role && !$role->has_cap('upload_files')) {
+                $role->add_cap('upload_files');
+            }
         }
 
         $admin = get_role('administrator');

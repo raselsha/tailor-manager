@@ -21,13 +21,14 @@ class TMR_Print_Slips
 
         $order_id = isset($_GET['order_id']) ? (int) $_GET['order_id'] : 0;
         $type     = isset($_GET['type']) ? (int) $_GET['type'] : 1;
+        $item_id  = isset($_GET['item_id']) ? (int) $_GET['item_id'] : 0;
         $order    = get_post($order_id);
 
         if (!$order || TMR_Order_Post_Type::POST_TYPE !== $order->post_type) {
             wp_die(esc_html__('অর্ডার পাওয়া যায়নি।', 'tailor-manager'));
         }
 
-        $data = self::prepare_order_data($order_id);
+        $data = self::prepare_order_data($order_id, $item_id);
 
         $template = 'print-receipt.php';
         if (2 === $type) {
@@ -46,12 +47,21 @@ class TMR_Print_Slips
         exit;
     }
 
-    public static function prepare_order_data($order_id)
+    /**
+     * @param int $only_item_id Scope the slip to a single order item (0 = every
+     *                          item in the order, the original whole-order slip).
+     */
+    public static function prepare_order_data($order_id, $only_item_id = 0)
     {
-        $customer_id = (int) get_post_meta($order_id, '_tmr_customer_id', true);
+        $customer_id  = (int) get_post_meta($order_id, '_tmr_customer_id', true);
+        $field_labels = TMR_Measurement_Fields::get_library();
 
         $items = array();
         foreach (TMR_Order_Post_Type::get_items($order_id) as $item) {
+            if ($only_item_id && $only_item_id !== $item->ID) {
+                continue;
+            }
+
             $cat_id = TMR_Order_Item_Post_Type::get_category_id($item->ID);
             $term   = get_term($cat_id, TMR_Category_Taxonomy::TAXONOMY);
 
@@ -85,10 +95,23 @@ class TMR_Print_Slips
                 );
             }
 
+            $measurements = array();
+            foreach (TMR_Order_Item_Post_Type::get_measurements($item->ID) as $slug => $val) {
+                $val = trim((string) $val);
+                if ('' === $val || '0' === $val) {
+                    continue;
+                }
+                $measurements[] = array(
+                    'label' => isset($field_labels[$slug]) ? $field_labels[$slug] : $slug,
+                    'value' => $val,
+                );
+            }
+
             $items[] = array(
+                'item_id'      => $item->ID,
                 'category'     => $term && !is_wp_error($term) ? $term->name : '',
                 'dress_lines'  => $dress_lines,
-                'measurements' => TMR_Order_Item_Post_Type::get_measurements($item->ID),
+                'measurements' => $measurements,
                 'part_lines'   => $part_lines,
                 'cutter'       => get_post_meta($item->ID, '_tmr_cutter_name', true),
                 'tailor'       => get_post_meta($item->ID, '_tmr_tailor_name', true),

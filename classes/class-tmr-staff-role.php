@@ -20,7 +20,17 @@ class TMR_Staff_Role
                 'read'            => true,
                 'level_0'         => true,
                 self::CAPABILITY => true,
+                // Needed for the Profile page's wp.media() avatar picker — scoped
+                // back down to "own uploads only" by TMR_Profile_Panel's media
+                // query filters, same trust-boundary pattern as doctor-appointment's
+                // mdbk_doctor_role.
+                'upload_files'    => true,
             ));
+        } else {
+            $role = get_role(self::ROLE);
+            if ($role && !$role->has_cap('upload_files')) {
+                $role->add_cap('upload_files');
+            }
         }
 
         $admin = get_role('administrator');
