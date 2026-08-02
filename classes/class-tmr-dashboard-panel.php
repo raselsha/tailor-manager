@@ -28,8 +28,11 @@ class TMR_Dashboard_Panel
 
         $groups = self::get_pending_grouped_by_cutter();
 
-        $header_right = '<input type="text" class="tmr-search-box" id="tmr-dash-search" placeholder="'
+        $header_right = '<div class="tmr-filter-input-wrap" style="flex:0 0 260px;">'
+            . '<svg class="tmr-filter-input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'
+            . '<input type="text" class="tmr-filter-input" id="tmr-dash-search" placeholder="'
             . esc_attr__('দ্রুত খুঁজুন…', 'tailor-manager') . '" />'
+            . '</div>'
             . '<a href="' . esc_url(admin_url('admin.php?page=tmr-orders&action=add')) . '" class="tmr-btn-add">'
             . esc_html__('+ অর্ডার নিন', 'tailor-manager') . '</a>';
 

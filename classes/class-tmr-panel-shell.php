@@ -43,9 +43,65 @@ class TMR_Panel_Shell
         );
 
         add_action('admin_menu', array($this, 'register_menu'));
+        add_action('admin_menu', array($this, 'remove_native_profile_menu'), 999);
+        add_action('admin_bar_menu', array($this, 'remove_wp_logo_from_admin_bar'), 999);
+        add_filter('edit_profile_url', array($this, 'redirect_profile_url'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
         add_action('admin_head', array($this, 'maybe_collapse_wp_chrome'));
         add_filter('admin_body_class', array($this, 'filter_body_class'));
+    }
+
+    /**
+     * True for tailor_staff/tmr_manager accounts — the two roles this plugin's own
+     * "app shell" is meant to fully replace WordPress's native admin chrome for.
+     * A real administrator keeps the normal WP experience untouched. Same idea as
+     * doctor-appointment's own is_restricted_panel_user() helper.
+     */
+    public static function is_restricted_panel_user()
+    {
+        return (TMR_Staff_Role::is_staff() || TMR_Manager_Role::is_manager()) && !current_user_can('manage_options');
+    }
+
+    /**
+     * WP core always adds a "Profile" item under Users/Dashboard pointing at
+     * wp-admin/profile.php — redundant (and confusing) next to our own Profile
+     * page, so it's removed for staff/manager the same way doctor-appointment
+     * removes it for its own restricted roles.
+     */
+    public function remove_native_profile_menu()
+    {
+        if (self::is_restricted_panel_user()) {
+            remove_menu_page('profile.php');
+        }
+    }
+
+    /**
+     * The WordPress-logo dropdown (About WordPress / WordPress.org / Documentation
+     * / Support / Feedback) in the admin bar's far top-left — not relevant chrome
+     * for a shop-panel-only account.
+     */
+    public function remove_wp_logo_from_admin_bar($wp_admin_bar)
+    {
+        if (self::is_restricted_panel_user()) {
+            $wp_admin_bar->remove_node('wp-logo');
+        }
+    }
+
+
+    /**
+     * Every "Edit Profile" link WP core builds (the admin-bar "Howdy" avatar/name
+     * itself, and its dropdown's own "Edit Profile" row) is built from
+     * get_edit_profile_url() (which applies the 'edit_profile_url' filter, despite
+     * the mismatched name) — filtering it here retargets both to our own
+     * Profile page instead of wp-admin/profile.php, without needing to touch
+     * core's admin-bar markup directly.
+     */
+    public function redirect_profile_url($url)
+    {
+        if (self::is_restricted_panel_user()) {
+            return admin_url('admin.php?page=' . self::$nav['profile']['slug']);
+        }
+        return $url;
     }
 
     public function register_menu()
@@ -200,7 +256,11 @@ class TMR_Panel_Shell
     {
         if (self::is_tmr_screen()) {
             $classes .= ' tmr-panel-chrome';
-            if (!current_user_can(self::CAPABILITY)) {
+            // Was gated on "lacks the manager+ capability" (tailor_staff only) —
+            // a pure manager account has that capability by design, so it never
+            // got this treatment and kept seeing WP's native left sidebar
+            // alongside our own. is_restricted_panel_user() covers both roles.
+            if (self::is_restricted_panel_user()) {
                 $classes .= ' tmr-staff-chrome';
             }
         }
@@ -218,9 +278,12 @@ class TMR_Panel_Shell
      */
     public function maybe_collapse_wp_chrome()
     {
-        if (!self::is_tmr_screen()) {
-            return;
-        }
+        // The "টেইলার প্যানেল" top-level item (and its native flyout submenu) sits
+        // in WP's own left sidebar on every wp-admin screen, not just our own —
+        // so this rule has to run unconditionally, every admin_head. Our own
+        // in-panel sidebar (render_sidebar()) already duplicates every one of
+        // those submenu links, so the native flyout is always redundant, not
+        // just while already inside the plugin.
         ?>
         <style>
             #adminmenu #toplevel_page_tmr-panel .wp-submenu,
@@ -231,6 +294,13 @@ class TMR_Panel_Shell
                 display: none !important;
                 visibility: hidden !important;
             }
+        </style>
+        <?php
+        if (!self::is_tmr_screen()) {
+            return;
+        }
+        ?>
+        <style>
             body.tmr-staff-chrome #adminmenumain,
             body.tmr-staff-chrome #adminmenuback,
             body.tmr-staff-chrome #adminmenuwrap {
@@ -239,6 +309,22 @@ class TMR_Panel_Shell
             body.tmr-staff-chrome #wpcontent,
             body.tmr-staff-chrome #wpfooter {
                 margin-left: 0 !important;
+            }
+            /* The top #wpadminbar (WP logo, site name, comments, "+New",
+               "Howdy"/avatar) — show_admin_bar(false) can't do this from PHP
+               because is_admin_bar_showing() hardcodes true for every wp-admin
+               screen (see wp-includes/admin-bar.php), so it has to be hidden the
+               same way the rest of this native chrome already is: CSS scoped to
+               tmr-staff-chrome. The 32px/46px top padding WP reserves for it is
+               on <html class="wp-toolbar">, not <body>, so reclaiming it needs
+               :has() to reach html from the body class — universally supported
+               by now. .tmr-admin-wrapper's own height calc is adjusted to match
+               in panel.css (search "40px" near .tmr-admin-wrapper). */
+            body.tmr-staff-chrome #wpadminbar {
+                display: none !important;
+            }
+            html:has(body.tmr-staff-chrome) {
+                padding-top: 0 !important;
             }
             @media print {
                 #wpadminbar, #adminmenumain, #wpfooter,
@@ -264,28 +350,43 @@ class TMR_Panel_Shell
     private static $fixed_header_open = false;
 
     /**
-     * @param bool $fixed_header keeps the title/subtitle/header-right row pinned in
+     * @param bool   $fixed_header keeps the title/subtitle/header-right row pinned in
      * place while everything below it scrolls in its own contained area — for pages
      * whose content (collapsible category/part sections, grid cards) can get long
      * enough to otherwise push the sidebar out of view. Same pattern already used for
      * doctor-appointment's schedule view (.mdbk-main-content-fixed-header).
+     * @param string $sticky_content raw HTML (caller-escaped) rendered right after the
+     * title row but still *outside* .tmr-scroll-wrap — e.g. a filter/tabs bar that
+     * should stay pinned alongside the title while only the list/table below it
+     * scrolls. Only meaningful when $fixed_header is true; a flex-based "pin above,
+     * scroll below" split, not a guessed pixel offset, so it stays correct
+     * regardless of how tall the title/filter content actually renders.
      */
-    public static function header($active, $title, $subtitle = '', $header_right = '', $fixed_header = false)
+    public static function header($active, $title, $subtitle = '', $header_right = '', $fixed_header = false, $sticky_content = '')
     {
         self::$fixed_header_open = $fixed_header;
         ?>
         <div id="tmr-admin-dashboard"><div class="tmr-admin-wrapper">
             <?php self::render_sidebar($active); ?>
+            <div class="tmr-sidebar-backdrop" id="tmr-sidebar-backdrop"></div>
             <div class="tmr-main-content<?php echo $fixed_header ? ' tmr-main-content-fixed-header' : ''; ?>">
                 <div class="tmr-header">
                     <div class="tmr-header-left">
-                        <h1><?php echo esc_html($title); ?></h1>
-                        <?php if ($subtitle) : ?><p><?php echo esc_html($subtitle); ?></p><?php endif; ?>
+                        <button type="button" class="tmr-header-hamburger" id="tmr-mobile-menu-toggle" aria-label="<?php esc_attr_e('মেনু', 'tailor-manager'); ?>">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                        </button>
+                        <div>
+                            <h1><?php echo esc_html($title); ?></h1>
+                            <?php if ($subtitle) : ?><p><?php echo esc_html($subtitle); ?></p><?php endif; ?>
+                        </div>
                     </div>
                     <?php if ($header_right) : ?>
                         <div class="tmr-header-right"><?php echo $header_right; // phpcs:ignore -- caller-escaped ?></div>
                     <?php endif; ?>
                 </div>
+                <?php if ($sticky_content) : ?>
+                    <?php echo $sticky_content; // phpcs:ignore -- caller-escaped ?>
+                <?php endif; ?>
                 <?php if ($fixed_header) : ?>
                 <div class="tmr-scroll-wrap">
                 <?php endif; ?>
@@ -305,11 +406,15 @@ class TMR_Panel_Shell
 
     private static function render_sidebar($active)
     {
-        $shop_name = get_option('tmr_shop_name', get_bloginfo('name'));
-        $user      = wp_get_current_user();
+        $shop_name  = get_option('tmr_shop_name', get_bloginfo('name'));
+        $shop_phone = get_option('tmr_shop_phone', '');
+        $user       = wp_get_current_user();
         ?>
         <div class="tmr-sidebar">
-            <div class="tmr-sidebar-logo"><?php echo esc_html($shop_name); ?></div>
+            <div class="tmr-sidebar-logo">
+                <span id="tmr-sidebar-shop-name"><?php echo esc_html($shop_name); ?></span>
+                <div class="tmr-sidebar-shop-phone" id="tmr-sidebar-shop-phone" style="<?php echo $shop_phone ? '' : 'display:none;'; ?>"><?php echo esc_html($shop_phone); ?></div>
+            </div>
             <ul class="tmr-sidebar-menu">
                 <?php foreach (self::visible_nav() as $key => $item) : ?>
                     <li>
@@ -326,6 +431,10 @@ class TMR_Panel_Shell
                     <div style="font-weight:700;font-size:13px;"><?php echo esc_html($user->display_name); ?></div>
                     <div style="font-size:11px;opacity:0.6;"><?php echo current_user_can(self::CAPABILITY) ? esc_html__('অ্যাডমিন', 'tailor-manager') : esc_html__('টেইলার স্টাফ', 'tailor-manager'); ?></div>
                 </div>
+            </a>
+            <a class="tmr-sidebar-logout" href="<?php echo esc_url(wp_logout_url(home_url('/'))); ?>">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                <?php esc_html_e('লগআউট', 'tailor-manager'); ?>
             </a>
         </div>
         <?php

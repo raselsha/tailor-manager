@@ -92,4 +92,18 @@
         }
     });
 
+    // Mobile sidebar drawer — toggled by the hamburger button that only renders
+    // (and is only visible) under the panel's own 900px mobile breakpoint.
+    $(document).on('click', '#tmr-mobile-menu-toggle', function () {
+        $('.tmr-admin-wrapper').toggleClass('tmr-sidebar-open');
+    });
+    $(document).on('click', '#tmr-sidebar-backdrop, .tmr-sidebar-menu a, .tmr-sidebar-footer', function () {
+        $('.tmr-admin-wrapper').removeClass('tmr-sidebar-open');
+    });
+    $(document).on('keydown', function (e) {
+        if (e.key === 'Escape') {
+            $('.tmr-admin-wrapper').removeClass('tmr-sidebar-open');
+        }
+    });
+
 }(jQuery));

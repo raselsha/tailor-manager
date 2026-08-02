@@ -39,7 +39,10 @@ class TMR_Customers_Panel
 
         $header_right = '<form method="get" style="display:flex;gap:10px;">'
             . '<input type="hidden" name="page" value="tmr-customers" />'
-            . '<input type="text" name="s" class="tmr-search-box" value="' . esc_attr($search) . '" placeholder="' . esc_attr__('নাম বা ফোন খুঁজুন…', 'tailor-manager') . '" />'
+            . '<div class="tmr-filter-input-wrap" style="flex:0 0 260px;">'
+            . '<svg class="tmr-filter-input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'
+            . '<input type="text" name="s" class="tmr-filter-input" value="' . esc_attr($search) . '" placeholder="' . esc_attr__('নাম বা ফোন খুঁজুন…', 'tailor-manager') . '" />'
+            . '</div>'
             . '</form>'
             . '<a href="#" class="tmr-btn-add" id="tmr-add-customer">' . esc_html__('+ কাস্টমার যোগ করুন', 'tailor-manager') . '</a>';
 
@@ -176,14 +179,24 @@ class TMR_Customers_Panel
         TMR_Panel_Shell::footer();
     }
 
-    public static function render_pagination($max_pages, $current)
+    /**
+     * $base_args, when given, builds each page link against admin_url('admin.php')
+     * with those args explicitly merged in, instead of the default of merging
+     * 'paged' onto the current request's own URL. Callers that can also render
+     * this same fragment from an AJAX handler (e.g. TMR_Orders_Panel::ajax_search())
+     * must pass $base_args — inside admin-ajax.php, "the current request's URL" is
+     * admin-ajax.php itself, which would silently produce broken pagination links.
+     */
+    public static function render_pagination($max_pages, $current, $base_args = null)
     {
         if ($max_pages <= 1) {
             return;
         }
         echo '<div class="tmr-pagination">';
         for ($i = 1; $i <= $max_pages; $i++) {
-            $url = esc_url(add_query_arg(array('paged' => $i)));
+            $url = null === $base_args
+                ? esc_url(add_query_arg(array('paged' => $i)))
+                : esc_url(add_query_arg(array_merge($base_args, array('paged' => $i)), admin_url('admin.php')));
             $class = 'tmr-page-btn' . ($i === $current ? ' is-active' : '');
             echo '<a href="' . $url . '" class="' . esc_attr($class) . '">' . esc_html($i) . '</a>';
         }

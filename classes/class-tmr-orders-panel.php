@@ -19,6 +19,7 @@ class TMR_Orders_Panel
         add_action('wp_ajax_tmr_quick_add_customer', array($this, 'ajax_quick_add_customer'));
         add_action('wp_ajax_tmr_get_order_form', array($this, 'ajax_get_order_form'));
         add_action('wp_ajax_tmr_get_order_summary', array($this, 'ajax_get_order_summary'));
+        add_action('wp_ajax_tmr_search_orders', array($this, 'ajax_search'));
     }
 
     public static function render()
@@ -46,12 +47,13 @@ class TMR_Orders_Panel
     /* List                                                              */
     /* ---------------------------------------------------------------- */
 
-    private static function render_list($auto_open_id = 0)
+    /**
+     * Builds the WP_Query behind the list — shared by the normal page-load
+     * render and the live-search AJAX handler (ajax_search()) so both stay in
+     * sync automatically instead of duplicating the meta_query logic.
+     */
+    private static function build_query($search, $status, $paged)
     {
-        $search = isset($_GET['s']) ? sanitize_text_field(wp_unslash($_GET['s'])) : '';
-        $status = isset($_GET['status']) ? sanitize_key($_GET['status']) : 'all';
-        $paged  = isset($_GET['paged']) ? max(1, (int) $_GET['paged']) : 1;
-
         // Cancelled takes priority over ready/delivered in TMR_Order_Post_Type::
         // status_label() (an order can be cancelled after being marked ready or
         // even delivered — the flags aren't reset on cancel), so every other tab
@@ -85,14 +87,50 @@ class TMR_Orders_Panel
         );
 
         if ($search) {
-            $customer_ids = get_posts(array(
+            $matched_order_ids = array();
+
+            // Order ID match — typing "116" or "#116" finds that order directly.
+            // WP_Query's own 's' only ever matches post_title (tmr_order posts have
+            // no title), so this has to be resolved by hand.
+            $numeric_search = ltrim($search, '#');
+            if (ctype_digit($numeric_search)) {
+                $possible_order = get_post((int) $numeric_search);
+                if ($possible_order && self::POST_TYPE === $possible_order->post_type) {
+                    $matched_order_ids[] = (int) $numeric_search;
+                }
+            }
+
+            // Customer name (WP's own 's', matches post_title) OR phone number
+            // (stored as postmeta, so 's' alone never matches it) — either one
+            // resolves to the customer's own orders.
+            $name_matched_ids = get_posts(array(
                 'post_type'      => TMR_Customer_Post_Type::POST_TYPE,
                 'post_status'    => array('publish', 'draft'),
                 's'              => $search,
                 'posts_per_page' => -1,
                 'fields'         => 'ids',
             ));
-            $args['meta_query'][] = array('key' => '_tmr_customer_id', 'value' => empty($customer_ids) ? array(0) : $customer_ids, 'compare' => 'IN');
+            $phone_matched_ids = get_posts(array(
+                'post_type'      => TMR_Customer_Post_Type::POST_TYPE,
+                'post_status'    => array('publish', 'draft'),
+                'posts_per_page' => -1,
+                'fields'         => 'ids',
+                'meta_query'     => array(array('key' => '_tmr_phone', 'value' => $search, 'compare' => 'LIKE')),
+            ));
+            $customer_ids = array_unique(array_merge($name_matched_ids, $phone_matched_ids));
+
+            if ($customer_ids) {
+                $orders_by_customer = get_posts(array(
+                    'post_type'      => self::POST_TYPE,
+                    'post_status'    => 'any',
+                    'posts_per_page' => -1,
+                    'fields'         => 'ids',
+                    'meta_query'     => array(array('key' => '_tmr_customer_id', 'value' => $customer_ids, 'compare' => 'IN')),
+                ));
+                $matched_order_ids = array_merge($matched_order_ids, $orders_by_customer);
+            }
+
+            $args['post__in'] = empty($matched_order_ids) ? array(0) : array_unique($matched_order_ids);
         }
 
         if ($meta_query) {
@@ -100,58 +138,50 @@ class TMR_Orders_Panel
             $args['meta_query']['relation'] = 'AND';
         }
 
-        $query = new WP_Query($args);
+        return new WP_Query($args);
+    }
 
-        $header_right = '<button type="button" class="tmr-btn-add" id="tmr-open-order-modal">' . esc_html__('+ অর্ডার নিন', 'tailor-manager') . '</button>';
-        TMR_Panel_Shell::header('orders', __('অর্ডার ম্যানেজার', 'tailor-manager'), __('সকল কাস্টমার অর্ডার।', 'tailor-manager'), $header_right);
+    /**
+     * The table + pagination fragment inside #tmr-orders-list-wrap — rendered
+     * both on the normal page load (render_list()) and, unchanged, as the
+     * response HTML for ajax_search()'s live-search-as-you-type requests.
+     */
+    private static function render_table($query, $search, $status, $paged)
+    {
         ?>
-        <div class="tmr-filters-bar">
-            <div class="tmr-tabs">
-                <?php
-                $tabs = array('all' => __('সব', 'tailor-manager'), 'pending' => __('পেন্ডিং', 'tailor-manager'), 'ready' => __('রেডি', 'tailor-manager'), 'delivered' => __('ডেলিভারড', 'tailor-manager'), 'cancelled' => __('বাতিলকৃত', 'tailor-manager'));
-                foreach ($tabs as $key => $label) :
-                    $url = esc_url(add_query_arg(array('page' => 'tmr-orders', 'status' => $key), admin_url('admin.php')));
-                    ?>
-                    <a href="<?php echo $url; ?>" class="<?php echo $status === $key ? 'is-active' : ''; ?>"><?php echo esc_html($label); ?></a>
-                <?php endforeach; ?>
-            </div>
-            <div class="tmr-filters-spacer"></div>
-            <form method="get" style="display:flex;">
-                <input type="hidden" name="page" value="tmr-orders" />
-                <input type="hidden" name="status" value="<?php echo esc_attr($status); ?>" />
-                <input type="text" name="s" class="tmr-filters-search" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_attr_e('কাস্টমারের নাম বা ফোন খুঁজুন…', 'tailor-manager'); ?>" />
-            </form>
-        </div>
-
         <div class="tmr-card">
+            <div class="tmr-table-cards">
             <table class="tmr-table">
                 <thead>
                     <tr>
+                        <th><?php esc_html_e('অর্ডার আইডি', 'tailor-manager'); ?></th>
                         <th><?php esc_html_e('কাস্টমার', 'tailor-manager'); ?></th>
                         <th><?php esc_html_e('ড্রেস ও পরিমাণ', 'tailor-manager'); ?></th>
+                        <th><?php esc_html_e('স্টাফ', 'tailor-manager'); ?></th>
                         <th><?php esc_html_e('ডেলিভারি তারিখ', 'tailor-manager'); ?></th>
                         <th><?php esc_html_e('ডেলিভারি স্ট্যাটাস', 'tailor-manager'); ?></th>
-                        <th><?php esc_html_e('অর্ডার আইডি', 'tailor-manager'); ?></th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (!$query->have_posts()) : ?>
-                        <tr><td colspan="6" class="tmr-empty"><?php esc_html_e('কোনো অর্ডার পাওয়া যায়নি।', 'tailor-manager'); ?></td></tr>
+                        <tr><td colspan="7" class="tmr-empty"><?php esc_html_e('কোনো অর্ডার পাওয়া যায়নি।', 'tailor-manager'); ?></td></tr>
                     <?php else : ?>
                         <?php foreach ($query->posts as $order) :
                             $customer_id = (int) get_post_meta($order->ID, '_tmr_customer_id', true);
                             $phone       = $customer_id ? TMR_Customer_Post_Type::get_phone($customer_id) : '';
                             $name        = $customer_id ? get_the_title($customer_id) : __('ওয়াক-ইন', 'tailor-manager');
                             $status_key  = TMR_Order_Post_Type::status_label($order->ID);
+                            $staff       = self::staff_summary($order->ID);
                         ?>
                             <tr>
-                                <td><a href="#" class="tmr-view-order-trigger" data-id="<?php echo esc_attr($order->ID); ?>" style="color:#1e293b;font-weight:600;text-decoration:none;"><?php echo esc_html($name . ($phone ? ' (' . $phone . ')' : '')); ?></a></td>
-                                <td><?php echo esc_html(self::dress_summary($order->ID)); ?></td>
-                                <td><?php echo esc_html(get_post_meta($order->ID, '_tmr_delivery_date', true)); ?></td>
-                                <td><span class="tmr-badge tmr-badge-<?php echo esc_attr($status_key); ?>"><?php echo esc_html(ucfirst($status_key)); ?></span></td>
-                                <td>#<?php echo esc_html($order->ID); ?></td>
-                                <td>
+                                <td data-label="<?php esc_attr_e('অর্ডার আইডি', 'tailor-manager'); ?>">#<?php echo esc_html($order->ID); ?></td>
+                                <td data-label="<?php esc_attr_e('কাস্টমার', 'tailor-manager'); ?>"><a href="#" class="tmr-view-order-trigger" data-id="<?php echo esc_attr($order->ID); ?>" style="color:#1e293b;font-weight:600;text-decoration:none;"><?php echo esc_html($name . ($phone ? ' (' . $phone . ')' : '')); ?></a></td>
+                                <td data-label="<?php esc_attr_e('ড্রেস ও পরিমাণ', 'tailor-manager'); ?>"><?php echo esc_html(self::dress_summary($order->ID)); ?></td>
+                                <td data-label="<?php esc_attr_e('স্টাফ', 'tailor-manager'); ?>"><?php echo $staff ? esc_html($staff) : '<span class="tmr-empty-inline">' . esc_html__('অনির্ধারিত', 'tailor-manager') . '</span>'; // phpcs:ignore -- self-escaped ?></td>
+                                <td data-label="<?php esc_attr_e('ডেলিভারি তারিখ', 'tailor-manager'); ?>"><?php echo esc_html(get_post_meta($order->ID, '_tmr_delivery_date', true)); ?></td>
+                                <td data-label="<?php esc_attr_e('ডেলিভারি স্ট্যাটাস', 'tailor-manager'); ?>"><span class="tmr-badge tmr-badge-<?php echo esc_attr($status_key); ?>"><?php echo esc_html(ucfirst($status_key)); ?></span></td>
+                                <td class="tmr-orders-actions-cell">
                                     <div class="tmr-actions">
                                         <a class="tmr-icon-btn tmr-view-order-trigger" href="#" data-id="<?php echo esc_attr($order->ID); ?>" title="<?php esc_attr_e('দেখুন', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></a>
                                         <button type="button" class="tmr-icon-btn tmr-open-order-modal-edit" data-id="<?php echo esc_attr($order->ID); ?>" title="<?php esc_attr_e('এডিট', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>
@@ -163,9 +193,59 @@ class TMR_Orders_Panel
                     <?php endif; ?>
                 </tbody>
             </table>
+            </div>
         </div>
 
-        <?php TMR_Customers_Panel::render_pagination($query->max_num_pages, $paged); ?>
+        <?php TMR_Customers_Panel::render_pagination($query->max_num_pages, $paged, array('page' => 'tmr-orders', 'status' => $status, 's' => $search)); ?>
+        <?php
+    }
+
+    private static function render_list($auto_open_id = 0)
+    {
+        $search = isset($_GET['s']) ? sanitize_text_field(wp_unslash($_GET['s'])) : '';
+        $status = isset($_GET['status']) ? sanitize_key($_GET['status']) : 'all';
+        $paged  = isset($_GET['paged']) ? max(1, (int) $_GET['paged']) : 1;
+
+        $query = self::build_query($search, $status, $paged);
+
+        $header_right = '<button type="button" class="tmr-btn-add" id="tmr-open-order-modal">' . esc_html__('+ অর্ডার নিন', 'tailor-manager') . '</button>';
+
+        // Rendered as $sticky_content (not inline below) so it renders *outside*
+        // TMR_Panel_Shell's .tmr-scroll-wrap, alongside the pinned title — only the
+        // order table/cards inside .tmr-scroll-wrap scroll, the filter bar (and the
+        // rest of the page) never does.
+        ob_start();
+        ?>
+        <div class="tmr-filters-bar tmr-orders-filters-bar">
+            <div class="tmr-tabs-scroll">
+                <div class="tmr-tabs">
+                    <?php
+                    $tabs = array('all' => __('সব', 'tailor-manager'), 'pending' => __('পেন্ডিং', 'tailor-manager'), 'ready' => __('রেডি', 'tailor-manager'), 'delivered' => __('ডেলিভারড', 'tailor-manager'), 'cancelled' => __('বাতিলকৃত', 'tailor-manager'));
+                    foreach ($tabs as $key => $label) :
+                        $url = esc_url(add_query_arg(array('page' => 'tmr-orders', 'status' => $key), admin_url('admin.php')));
+                        ?>
+                        <a href="<?php echo $url; ?>" class="<?php echo $status === $key ? 'is-active' : ''; ?>"><?php echo esc_html($label); ?></a>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <form method="get" class="tmr-orders-search-form">
+                <input type="hidden" name="page" value="tmr-orders" />
+                <input type="hidden" name="status" value="<?php echo esc_attr($status); ?>" />
+                <div class="tmr-filter-input-wrap">
+                    <svg class="tmr-filter-input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" name="s" class="tmr-filter-input" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_attr_e('কাস্টমারের নাম বা ফোন খুঁজুন…', 'tailor-manager'); ?>" />
+                </div>
+            </form>
+        </div>
+        <?php
+        $filter_bar_html = ob_get_clean();
+
+        TMR_Panel_Shell::header('orders', __('অর্ডার ম্যানেজার', 'tailor-manager'), __('সকল কাস্টমার অর্ডার।', 'tailor-manager'), $header_right, true, $filter_bar_html);
+        ?>
+
+        <div id="tmr-orders-list-wrap">
+            <?php self::render_table($query, $search, $status, $paged); ?>
+        </div>
 
         <div class="tmr-modal" id="tmr-order-modal">
             <div class="tmr-modal-content tmr-modal-content-lg">
@@ -340,6 +420,29 @@ class TMR_Orders_Panel
             }
         }
         return implode(' ', $parts);
+    }
+
+    /**
+     * @return string deduplicated "কাটিং মাস্টার/সোয়িং অপারেটর" names across every
+     *                 item on this order — a multi-item order can have different
+     *                 staff per item (or one person doing both roles), so this
+     *                 collapses them into one unique, comma-separated list rather
+     *                 than repeating the same name per item.
+     */
+    private static function staff_summary($order_id)
+    {
+        $names = array();
+        foreach (TMR_Order_Post_Type::get_items($order_id) as $item) {
+            $cutter = trim((string) get_post_meta($item->ID, '_tmr_cutter_name', true));
+            $tailor = trim((string) get_post_meta($item->ID, '_tmr_tailor_name', true));
+            if ('' !== $cutter) {
+                $names[$cutter] = true;
+            }
+            if ('' !== $tailor) {
+                $names[$tailor] = true;
+            }
+        }
+        return implode(', ', array_keys($names));
     }
 
     /**
@@ -782,6 +885,33 @@ class TMR_Orders_Panel
                 cancelled: '<?php echo esc_js(__('বাতিল', 'tailor-manager')); ?>'
             };
 
+            // Live search: debounced AJAX re-render of #tmr-orders-list-wrap as the
+            // customer search box is typed into, instead of requiring Enter/submit.
+            // The input itself lives in the sticky filter bar *outside*
+            // #tmr-orders-list-wrap, so re-rendering the wrap on every keystroke never
+            // touches (and so never steals focus from) the input being typed into.
+            var ordersSearchTimer = null;
+            $(document).on('input', '.tmr-orders-search-form input[name="s"]', function () {
+                var search = $(this).val();
+                var status = $('.tmr-orders-search-form input[name="status"]').val();
+
+                clearTimeout(ordersSearchTimer);
+                ordersSearchTimer = setTimeout(function () {
+                    TMRPanel.call('tmr_search_orders', { s: search, status: status, paged: 1 }, function (data) {
+                        $('#tmr-orders-list-wrap').html(data.html);
+
+                        var url = new URL(window.location.href);
+                        if (search) {
+                            url.searchParams.set('s', search);
+                        } else {
+                            url.searchParams.delete('s');
+                        }
+                        url.searchParams.set('paged', '1');
+                        window.history.replaceState(null, '', url.toString());
+                    });
+                }, 350);
+            });
+
             // Shared by both the modal toolbar's #tmr-conf-status-dropdown and the
             // standalone order-view page's .tmr-view-status-dropdown — updates the
             // trigger button's color/label and which menu item shows as active.
@@ -965,7 +1095,13 @@ class TMR_Orders_Panel
                 $('#tmr-delivery-cal-popover').toggle();
             });
 
-            $(document).on('click', '#tmr-delivery-cal-popover .tmr-cal-nav-btn', function () {
+            $(document).on('click', '#tmr-delivery-cal-popover .tmr-cal-nav-btn', function (e) {
+                // Re-rendering below replaces this very button's DOM node, so it must
+                // stop the event from reaching the "click outside closes the popover"
+                // handler further down — otherwise that handler inspects e.target
+                // *after* it's already been detached from the document, closest()
+                // finds nothing, and the popover incorrectly closes on every nav click.
+                e.stopPropagation();
                 if ($(this).data('action') === 'prev') {
                     calMonth--;
                     if (calMonth < 0) { calMonth = 11; calYear--; }
@@ -976,7 +1112,8 @@ class TMR_Orders_Panel
                 renderDeliveryCalendar();
             });
 
-            $(document).on('click', '#tmr-delivery-cal-popover .tmr-cal-day:not(.empty):not(.past)', function () {
+            $(document).on('click', '#tmr-delivery-cal-popover .tmr-cal-day:not(.empty):not(.past)', function (e) {
+                e.stopPropagation();
                 calSelected = $(this).data('date');
                 $('#tmr-delivery-date').val(calSelected);
                 $('#tmr-delivery-date-display').val(formatDeliveryDisplay(calSelected));
@@ -2137,6 +2274,32 @@ class TMR_Orders_Panel
      * render_form_body() as-is (same PHP that used to render a full standalone page),
      * just captured via output buffering instead of echoed directly.
      */
+    /**
+     * Powers the "search as you type" customer search box on the list —
+     * re-runs the exact same query/render as a normal page load (build_query()
+     * + render_table()) and returns just the #tmr-orders-list-wrap fragment, so
+     * the JS side can swap it in without a full page reload.
+     */
+    public function ajax_search()
+    {
+        check_ajax_referer('tmr_panel_nonce', 'nonce');
+        if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
+            wp_send_json_error(array('message' => __('অনুমতি নেই।', 'tailor-manager')));
+        }
+
+        $search = isset($_POST['s']) ? sanitize_text_field(wp_unslash($_POST['s'])) : '';
+        $status = isset($_POST['status']) ? sanitize_key($_POST['status']) : 'all';
+        $paged  = isset($_POST['paged']) ? max(1, (int) $_POST['paged']) : 1;
+
+        $query = self::build_query($search, $status, $paged);
+
+        ob_start();
+        self::render_table($query, $search, $status, $paged);
+        $html = ob_get_clean();
+
+        wp_send_json_success(array('html' => $html));
+    }
+
     public function ajax_get_order_form()
     {
         check_ajax_referer('tmr_panel_nonce', 'nonce');

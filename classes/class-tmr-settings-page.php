@@ -27,26 +27,34 @@ class TMR_Settings_Page
 
         TMR_Panel_Shell::header('settings', __('সেটিংস', 'tailor-manager'), __('দোকানের তথ্য পরিচালনা করুন।', 'tailor-manager'));
         ?>
-        <div class="tmr-card-plain" style="max-width:480px;">
-            <h3 style="margin:0 0 16px;font-size:15px;"><?php esc_html_e('দোকানের তথ্য', 'tailor-manager'); ?></h3>
-            <form id="tmr-shop-info-form">
-                <div class="tmr-form-row"><label class="tmr-form-label"><?php esc_html_e('দোকানের নাম', 'tailor-manager'); ?></label><input type="text" name="shop_name" value="<?php echo esc_attr($shop_name); ?>" /></div>
-                <div class="tmr-form-row"><label class="tmr-form-label"><?php esc_html_e('ঠিকানা', 'tailor-manager'); ?></label><textarea name="shop_address" rows="2"><?php echo esc_textarea($shop_address); ?></textarea></div>
-                <div class="tmr-form-row"><label class="tmr-form-label"><?php esc_html_e('ফোন', 'tailor-manager'); ?></label><input type="text" name="shop_phone" value="<?php echo esc_attr($shop_phone); ?>" /></div>
-                <button type="submit" class="tmr-btn-add"><?php esc_html_e('সেভ করুন', 'tailor-manager'); ?></button>
-            </form>
-        </div>
+        <div class="tmr-settings-grid">
+            <div class="tmr-card-plain">
+                <h3 style="margin:0 0 16px;font-size:15px;"><?php esc_html_e('দোকানের তথ্য', 'tailor-manager'); ?></h3>
+                <form id="tmr-shop-info-form">
+                    <div class="tmr-form-row"><label class="tmr-form-label"><?php esc_html_e('দোকানের নাম', 'tailor-manager'); ?></label><input type="text" name="shop_name" value="<?php echo esc_attr($shop_name); ?>" /></div>
+                    <div class="tmr-form-row"><label class="tmr-form-label"><?php esc_html_e('ঠিকানা', 'tailor-manager'); ?></label><textarea name="shop_address" rows="2"><?php echo esc_textarea($shop_address); ?></textarea></div>
+                    <div class="tmr-form-row"><label class="tmr-form-label"><?php esc_html_e('ফোন', 'tailor-manager'); ?></label><input type="text" name="shop_phone" value="<?php echo esc_attr($shop_phone); ?>" /></div>
+                    <div class="tmr-form-save-row">
+                        <button type="submit" class="tmr-btn-add"><?php esc_html_e('সেভ করুন', 'tailor-manager'); ?></button>
+                        <span class="tmr-inline-save-msg" id="tmr-shop-info-msg"><span>&#10003;</span> <?php esc_html_e('সেভ হয়েছে।', 'tailor-manager'); ?></span>
+                    </div>
+                </form>
+            </div>
 
-        <div class="tmr-card-plain" style="max-width:480px;">
-            <h3 style="margin:0 0 16px;font-size:15px;"><?php esc_html_e('ডেলিভারি সেটিংস', 'tailor-manager'); ?></h3>
-            <form id="tmr-delivery-settings-form">
-                <div class="tmr-form-row">
-                    <label class="tmr-form-label"><?php esc_html_e('ডিফল্ট ডেলিভারি সময় (দিনে)', 'tailor-manager'); ?></label>
-                    <input type="number" min="0" step="1" name="default_delivery_days" value="<?php echo esc_attr($default_delivery_days); ?>" style="max-width:140px;" />
-                    <p class="tmr-form-hint"><?php esc_html_e('নতুন অর্ডার নেওয়ার সময় ডেলিভারি তারিখ আজ থেকে এত দিন পরে স্বয়ংক্রিয়ভাবে নির্বাচিত থাকবে।', 'tailor-manager'); ?></p>
-                </div>
-                <button type="submit" class="tmr-btn-add"><?php esc_html_e('সেভ করুন', 'tailor-manager'); ?></button>
-            </form>
+            <div class="tmr-card-plain">
+                <h3 style="margin:0 0 16px;font-size:15px;"><?php esc_html_e('ডেলিভারি সেটিংস', 'tailor-manager'); ?></h3>
+                <form id="tmr-delivery-settings-form">
+                    <div class="tmr-form-row">
+                        <label class="tmr-form-label"><?php esc_html_e('ডিফল্ট ডেলিভারি সময় (দিনে)', 'tailor-manager'); ?></label>
+                        <input type="number" min="0" step="1" name="default_delivery_days" value="<?php echo esc_attr($default_delivery_days); ?>" style="max-width:140px;" />
+                        <p class="tmr-form-hint"><?php esc_html_e('নতুন অর্ডার নেওয়ার সময় ডেলিভারি তারিখ আজ থেকে এত দিন পরে স্বয়ংক্রিয়ভাবে নির্বাচিত থাকবে।', 'tailor-manager'); ?></p>
+                    </div>
+                    <div class="tmr-form-save-row">
+                        <button type="submit" class="tmr-btn-add"><?php esc_html_e('সেভ করুন', 'tailor-manager'); ?></button>
+                        <span class="tmr-inline-save-msg" id="tmr-delivery-settings-msg"><span>&#10003;</span> <?php esc_html_e('সেভ হয়েছে।', 'tailor-manager'); ?></span>
+                    </div>
+                </form>
+            </div>
         </div>
 
         <p style="color:#94a3b8;font-size:13px;">
@@ -62,17 +70,31 @@ class TMR_Settings_Page
 
         <script>
         jQuery(function ($) {
+            // Briefly shows the small inline "✓ সেভ হয়েছে।" next to the button that
+            // was just clicked, instead of a native window.alert() popup.
+            function flashSaveMessage($msg) {
+                $msg.stop(true, true).css('display', 'inline-flex').hide().fadeIn(150).delay(1800).fadeOut(400);
+            }
+
             $('#tmr-shop-info-form').on('submit', function (e) {
                 e.preventDefault();
-                TMRPanel.call('tmr_save_shop_info', $(this).serialize(), function () {
-                    window.alert('<?php echo esc_js(__('সেভ হয়েছে।', 'tailor-manager')); ?>');
+                var newShopName = $(this).find('input[name="shop_name"]').val();
+                var newShopPhone = $(this).find('input[name="shop_phone"]').val();
+                var $form = $(this);
+                TMRPanel.call('tmr_save_shop_info', $form.serialize(), function () {
+                    // render_sidebar() only re-reads these options on the next full
+                    // page load — this AJAX save never triggers one, so the sidebar
+                    // logo/phone are patched here directly for an instant update.
+                    $('#tmr-sidebar-shop-name').text(newShopName || '<?php echo esc_js(get_bloginfo('name')); ?>');
+                    $('#tmr-sidebar-shop-phone').text(newShopPhone).toggle(!!newShopPhone);
+                    flashSaveMessage($('#tmr-shop-info-msg'));
                 });
             });
 
             $('#tmr-delivery-settings-form').on('submit', function (e) {
                 e.preventDefault();
                 TMRPanel.call('tmr_save_delivery_settings', $(this).serialize(), function () {
-                    window.alert('<?php echo esc_js(__('সেভ হয়েছে।', 'tailor-manager')); ?>');
+                    flashSaveMessage($('#tmr-delivery-settings-msg'));
                 });
             });
         });
