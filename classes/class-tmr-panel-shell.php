@@ -12,10 +12,42 @@ class TMR_Panel_Shell
 {
     const CAPABILITY = 'manage_tmr_shop';
 
+    /**
+     * User meta key storing this plugin's own UI language choice ('en' or 'bn') —
+     * deliberately its own meta key, not core's 'locale' user meta (the Site
+     * Language field on wp-admin/profile.php), since that native field is
+     * unreachable for tailor_staff/tmr_manager anyway (enforce_panel_only_access()
+     * blocks profile.php) and forcing core's own locale would also retranslate
+     * unrelated wp-admin/core strings this plugin doesn't own.
+     */
+    const LOCALE_META = 'tmr_ui_lang';
+
     /** @var array<string,array{slug:string,title:string,icon:string}> */
     public static $nav = array();
 
     public function __construct()
+    {
+        // Deferred to 'init' (priority 20, after TMR_Tailor_Manager::load_textdomain()'s
+        // default-priority 10 call) instead of being built here in the constructor —
+        // this class is instantiated while WordPress is still including active plugin
+        // files, long before 'init' fires, so every __() call here used to run before
+        // the language switcher's chosen textdomain was even loaded and permanently
+        // baked Bangla into this static array regardless of the user's own choice.
+        add_action('init', array($this, 'build_nav'), 20);
+
+        add_action('admin_menu', array($this, 'register_menu'));
+        add_action('admin_menu', array($this, 'remove_native_profile_menu'), 999);
+        add_action('admin_bar_menu', array($this, 'remove_wp_logo_from_admin_bar'), 999);
+        add_filter('edit_profile_url', array($this, 'redirect_profile_url'));
+        add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
+        add_action('admin_head', array($this, 'maybe_collapse_wp_chrome'));
+        add_filter('admin_body_class', array($this, 'filter_body_class'));
+        add_action('admin_init', array($this, 'enforce_panel_only_access'));
+        add_filter('login_redirect', array($this, 'redirect_after_login'), 10, 3);
+        add_action('wp_ajax_tmr_save_ui_lang', array($this, 'ajax_save_ui_lang'));
+    }
+
+    public function build_nav()
     {
         self::$nav = array(
             'dashboard'   => array('slug' => 'tmr-panel', 'title' => __('ড্যাশবোর্ড', 'tailor-manager'), 'icon' => self::icon('grid')),
@@ -41,14 +73,33 @@ class TMR_Panel_Shell
             'profile'     => array('slug' => 'tmr-profile', 'title' => __('প্রোফাইল', 'tailor-manager'), 'icon' => self::icon('user')),
             'change-password' => array('slug' => 'tmr-change-password', 'title' => __('পাসওয়ার্ড পরিবর্তন', 'tailor-manager'), 'icon' => self::icon('lock')),
         );
+    }
 
-        add_action('admin_menu', array($this, 'register_menu'));
-        add_action('admin_menu', array($this, 'remove_native_profile_menu'), 999);
-        add_action('admin_bar_menu', array($this, 'remove_wp_logo_from_admin_bar'), 999);
-        add_filter('edit_profile_url', array($this, 'redirect_profile_url'));
-        add_action('admin_enqueue_scripts', array($this, 'enqueue_assets'));
-        add_action('admin_head', array($this, 'maybe_collapse_wp_chrome'));
-        add_filter('admin_body_class', array($this, 'filter_body_class'));
+    /**
+     * @return string current user's saved UI language, 'en' or 'bn' (default —
+     *                 preserves the plugin's original Bangla-only behavior for
+     *                 every account that has never touched the new switcher).
+     */
+    public static function current_ui_lang()
+    {
+        $user_id = get_current_user_id();
+        $lang    = $user_id ? get_user_meta($user_id, self::LOCALE_META, true) : '';
+        return ('en' === $lang) ? 'en' : 'bn';
+    }
+
+    public function ajax_save_ui_lang()
+    {
+        check_ajax_referer('tmr_panel_nonce', 'nonce');
+
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error();
+        }
+
+        $lang = isset($_POST['lang']) && 'en' === $_POST['lang'] ? 'en' : 'bn';
+        update_user_meta($user_id, self::LOCALE_META, $lang);
+
+        wp_send_json_success(array('lang' => $lang));
     }
 
     /**
@@ -57,9 +108,56 @@ class TMR_Panel_Shell
      * A real administrator keeps the normal WP experience untouched. Same idea as
      * doctor-appointment's own is_restricted_panel_user() helper.
      */
-    public static function is_restricted_panel_user()
+    public static function is_restricted_panel_user($user = null)
     {
-        return (TMR_Staff_Role::is_staff() || TMR_Manager_Role::is_manager()) && !current_user_can('manage_options');
+        $user = $user ? $user : wp_get_current_user();
+        return (TMR_Staff_Role::is_staff($user) || TMR_Manager_Role::is_manager($user)) && !user_can($user, 'manage_options');
+    }
+
+    /**
+     * Bounces tailor_staff/tmr_manager accounts off every wp-admin screen this
+     * plugin doesn't own — direct-URL access to core screens (Dashboard, Posts,
+     * Media, Users, Plugins, Themes, Settings, Tools, profile.php, another
+     * plugin's own admin.php page, etc.) redirects back into the panel instead
+     * of rendering WordPress's native UI. Without this, maybe_collapse_wp_chrome()'s
+     * CSS-only hiding only fires on our own tmr-* screens, so typing any other
+     * wp-admin URL would still show the full native chrome underneath.
+     * admin-ajax.php/admin-post.php/async-upload.php stay open since this
+     * plugin's own AJAX handlers, password-change form, and print-slip links
+     * run through them and render no visible chrome anyway.
+     */
+    public function enforce_panel_only_access()
+    {
+        if (!self::is_restricted_panel_user()) {
+            return;
+        }
+
+        global $pagenow;
+
+        if (in_array($pagenow, array('admin-ajax.php', 'admin-post.php', 'async-upload.php'), true)) {
+            return;
+        }
+
+        if ('admin.php' === $pagenow && self::is_tmr_screen()) {
+            return;
+        }
+
+        wp_safe_redirect(admin_url('admin.php?page=' . self::$nav['dashboard']['slug']));
+        exit;
+    }
+
+    /**
+     * Sends tailor_staff/tmr_manager straight into their own panel after login
+     * instead of WordPress's native Dashboard — the Dashboard is one of the
+     * screens enforce_panel_only_access() immediately bounces away from anyway,
+     * so landing there first would just cost an extra redirect.
+     */
+    public function redirect_after_login($redirect_to, $requested_redirect_to, $user)
+    {
+        if ($user instanceof WP_User && self::is_restricted_panel_user($user)) {
+            return admin_url('admin.php?page=' . self::$nav['dashboard']['slug']);
+        }
+        return $redirect_to;
     }
 
     /**
@@ -197,9 +295,15 @@ class TMR_Panel_Shell
      * date_i18n('l, M j') still renders English day/month names unless the whole site's
      * locale is switched to bn_BD (a bigger, site-wide change beyond this plugin) — so
      * dates shown in the panel are formatted through this small fixed map instead.
+     * Dispatches on current_ui_lang() so the panel's own English mode gets plain
+     * "Sun, 9 Aug" instead of Bangla day/month names.
      */
     public static function bangla_date($timestamp)
     {
+        if ('en' === self::current_ui_lang()) {
+            return gmdate('D, j M', $timestamp);
+        }
+
         $days = array(
             'Sunday' => 'রবিবার', 'Monday' => 'সোমবার', 'Tuesday' => 'মঙ্গলবার',
             'Wednesday' => 'বুধবার', 'Thursday' => 'বৃহস্পতিবার', 'Friday' => 'শুক্রবার', 'Saturday' => 'শনিবার',
@@ -301,6 +405,16 @@ class TMR_Panel_Shell
         }
         ?>
         <style>
+            /* Any core/plugin admin notice (update nags, "Thank you for creating
+               with WordPress", etc.) prints into #wpbody-content ahead of our own
+               render() output — hiding everything there except our own root div
+               keeps the panel's "shows nothing WordPress" promise regardless of
+               what notices happen to be registered. Applies on every tmr-* screen,
+               not just staff/manager, since a true admin gets the normal WP
+               experience back the moment they leave this plugin's own pages. */
+            body.tmr-panel-chrome #wpbody-content > *:not(#tmr-admin-dashboard) {
+                display: none !important;
+            }
             body.tmr-staff-chrome #adminmenumain,
             body.tmr-staff-chrome #adminmenuback,
             body.tmr-staff-chrome #adminmenuwrap {
@@ -309,6 +423,9 @@ class TMR_Panel_Shell
             body.tmr-staff-chrome #wpcontent,
             body.tmr-staff-chrome #wpfooter {
                 margin-left: 0 !important;
+            }
+            body.tmr-staff-chrome #wpfooter {
+                display: none !important;
             }
             /* The top #wpadminbar (WP logo, site name, comments, "+New",
                "Howdy"/avatar) — show_admin_bar(false) can't do this from PHP

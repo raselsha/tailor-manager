@@ -89,6 +89,28 @@ class TMR_Profile_Panel
             </form>
         </div>
 
+        <div class="tmr-card-plain" style="max-width:480px;">
+            <div class="tmr-form-row">
+                <label class="tmr-form-label"><?php esc_html_e('প্যানেলের ভাষা', 'tailor-manager'); ?></label>
+                <div class="tmr-lang-toggle" id="tmr-lang-toggle">
+                    <button type="button" class="tmr-lang-option<?php echo 'bn' === TMR_Panel_Shell::current_ui_lang() ? ' is-active' : ''; ?>" data-lang="bn">বাংলা</button>
+                    <button type="button" class="tmr-lang-option<?php echo 'en' === TMR_Panel_Shell::current_ui_lang() ? ' is-active' : ''; ?>" data-lang="en">English</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        jQuery(function ($) {
+            $('#tmr-lang-toggle .tmr-lang-option').on('click', function () {
+                var lang = $(this).data('lang');
+                if ($(this).hasClass('is-active')) { return; }
+                TMRPanel.call('tmr_save_ui_lang', { lang: lang }, function () {
+                    window.location.reload();
+                });
+            });
+        });
+        </script>
+
         <script>
         jQuery(function ($) {
             var frame;
@@ -199,11 +221,17 @@ class TMR_Profile_Panel
                 <div class="tmr-form-row">
                     <label class="tmr-form-label" for="tmr-new-password"><?php esc_html_e('নতুন পাসওয়ার্ড', 'tailor-manager'); ?></label>
                     <div class="tmr-password-field">
-                        <input type="password" name="new_password" id="tmr-new-password" required autocomplete="new-password" minlength="8" />
+                        <input type="password" name="new_password" id="tmr-new-password" required autocomplete="new-password" minlength="8" aria-describedby="tmr-pass-length-hint" />
                         <button type="button" class="tmr-password-toggle" data-target="tmr-new-password" title="<?php esc_attr_e('দেখান/লুকান', 'tailor-manager'); ?>">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                         </button>
                     </div>
+                    <!-- Browser's own minlength="8" silently blocks a too-short
+                         submission with an easy-to-miss native tooltip — this
+                         always-visible counter spells out the same "8 আরও/8
+                         লাগবে" requirement so a short password never reads as
+                         "the button just doesn't work." -->
+                    <p class="tmr-form-hint" id="tmr-pass-length-hint"></p>
                     <p class="tmr-pass-strength" id="tmr-pass-strength-result"></p>
                 </div>
 
@@ -238,12 +266,27 @@ class TMR_Profile_Panel
             ];
             var classes = ['bad', 'bad', 'short', 'good', 'strong'];
 
+            function checkLength() {
+                var len = $('#tmr-new-password').val().length;
+                var $hint = $('#tmr-pass-length-hint');
+                if (len >= 8) { $hint.text(''); return; }
+                $hint.text(len + '/৮ — <?php echo esc_js(__('কমপক্ষে ৮ অক্ষর প্রয়োজন।', 'tailor-manager')); ?>');
+            }
+
             function checkStrength() {
                 var pass1 = $('#tmr-new-password').val();
                 var $result = $('#tmr-pass-strength-result');
                 if (!pass1) { $result.text('').attr('class', 'tmr-pass-strength'); return; }
                 var disallowed = wp.passwordStrength.userInputDisallowedList ? wp.passwordStrength.userInputDisallowedList() : wp.passwordStrength.userInputBlacklist();
                 var strength = wp.passwordStrength.meter(pass1, disallowed, '');
+                // -1 means zxcvbn (fetched async) hasn't finished loading yet —
+                // treat that as "not known" instead of Math.max()-clamping it
+                // into index 0 ("খুবই দুর্বল"/Very Weak), which would flash a
+                // false verdict before the real score is ready.
+                if (-1 === strength) {
+                    $result.text('<?php echo esc_js(__('যাচাই করা হচ্ছে…', 'tailor-manager')); ?>').attr('class', 'tmr-pass-strength');
+                    return;
+                }
                 var idx = Math.max(0, Math.min(4, strength));
                 $result.text(labels[idx]).attr('class', 'tmr-pass-strength tmr-pass-strength-' + classes[idx]);
             }
@@ -260,8 +303,9 @@ class TMR_Profile_Panel
                 }
             }
 
-            $('#tmr-new-password').on('input', function () { checkStrength(); checkMatch(); });
+            $('#tmr-new-password').on('input', function () { checkLength(); checkStrength(); checkMatch(); });
             $('#tmr-confirm-password').on('input', checkMatch);
+            checkLength();
         });
         </script>
         <?php

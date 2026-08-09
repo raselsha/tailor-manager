@@ -24,6 +24,31 @@ if (!class_exists('TMR_Tailor_Manager')) {
         {
             $this->define_constants();
             $this->include_plugin_files();
+            add_action('init', array($this, 'load_textdomain'));
+        }
+
+        /**
+         * Loads this plugin's own translations directly off TMR_Panel_Shell's
+         * per-user language switcher instead of the site's global locale —
+         * 'en' loads languages/tailor-manager-tmr_en.mo; 'bn' (the default for
+         * every account that has never touched the switcher) points at a file
+         * that's deliberately never shipped, so __()/_e() just fall through to
+         * the original Bangla msgid unchanged, exactly like before this feature
+         * existed. The locale slug is deliberately NOT 'en_US': this site's own
+         * WordPress locale already IS en_US, and WordPress's built-in
+         * just-in-time textdomain loader auto-discovers
+         * languages/{domain}-{site-locale}.mo for any plugin that declares a
+         * Domain Path — a real 'en_US.mo' file here would get silently loaded
+         * for every account regardless of their own switcher choice, the exact
+         * bug this custom slug avoids. Bypassing get_locale()/
+         * load_plugin_textdomain() is deliberate too: this plugin's own strings
+         * must follow its own switcher regardless of the site's locale or which
+         * page is loading.
+         */
+        public function load_textdomain()
+        {
+            $locale = ('en' === TMR_Panel_Shell::current_ui_lang()) ? 'tmr_en' : 'tmr_bn';
+            load_textdomain('tailor-manager', TMR_PLUGIN_PATH . 'languages/tailor-manager-' . $locale . '.mo');
         }
 
         public function define_constants()

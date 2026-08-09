@@ -205,13 +205,27 @@ class TMR_My_Orders_Panel
             </div>
         </div>
 
+        <?php
+        // Calendar-popover month/day labels — routed through __() (not a separate
+        // hardcoded English array) so the panel's language switcher covers this
+        // JS-rendered calendar the same way it covers every PHP-rendered string.
+        $cal_months = array(
+            __('জানুয়ারি', 'tailor-manager'), __('ফেব্রুয়ারি', 'tailor-manager'), __('মার্চ', 'tailor-manager'), __('এপ্রিল', 'tailor-manager'),
+            __('মে', 'tailor-manager'), __('জুন', 'tailor-manager'), __('জুলাই', 'tailor-manager'), __('আগস্ট', 'tailor-manager'),
+            __('সেপ্টেম্বর', 'tailor-manager'), __('অক্টোবর', 'tailor-manager'), __('নভেম্বর', 'tailor-manager'), __('ডিসেম্বর', 'tailor-manager'),
+        );
+        $cal_day_headers = array(
+            __('রবি', 'tailor-manager'), __('সোম', 'tailor-manager'), __('মঙ্গল', 'tailor-manager'),
+            __('বুধ', 'tailor-manager'), __('বৃহ', 'tailor-manager'), __('শুক্র', 'tailor-manager'), __('শনি', 'tailor-manager'),
+        );
+        ?>
         <script>
         jQuery(function ($) {
             // Delivery-date filter — same self-built calendar-popover pattern as the
             // order form's own delivery-date picker (.tmr-cal-popover), not a native
             // <input type="date">.
-            var bnMonths = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
-            var bnDayHeaders = ['রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহ', 'শুক্র', 'শনি'];
+            var bnMonths = <?php echo wp_json_encode($cal_months); ?>;
+            var bnDayHeaders = <?php echo wp_json_encode($cal_day_headers); ?>;
             var mcalYear, mcalMonth, mcalSelected;
 
             function mcalPad2(n) { return n < 10 ? '0' + n : '' + n; }

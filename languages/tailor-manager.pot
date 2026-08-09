@@ -1,0 +1,1758 @@
+# Copyright (C) 2026 Shahadat Hossain
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Tailor Manager – Measurement, Orders & Delivery 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/tailor-manager\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-08-09T16:10:00+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: tailor-manager\n"
+
+#. Plugin Name of the plugin
+#: tailor-manager.php
+msgid "Tailor Manager – Measurement, Orders & Delivery"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: tailor-manager.php
+msgid "https://lieusoft.com/plugins/tailor-manager/"
+msgstr ""
+
+#. Description of the plugin
+#: tailor-manager.php
+msgid "Complete tailor shop management solution for WordPress. Manage customers, measurements, dress orders, payments, invoices, trials, and deliveries from one dashboard."
+msgstr ""
+
+#. Author of the plugin
+#: tailor-manager.php
+msgid "Shahadat Hossain"
+msgstr ""
+
+#. Author URI of the plugin
+#: tailor-manager.php
+msgid "https://lieusoft.com"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:20
+#: classes/class-tmr-categories-panel.php:24
+#: classes/class-tmr-customers-panel.php:24
+#: classes/class-tmr-dashboard-panel.php:16
+#: classes/class-tmr-design-type-panel.php:19
+#: classes/class-tmr-dress-panel.php:19
+#: classes/class-tmr-dress-part-panel.php:19
+#: classes/class-tmr-measurement-fields-panel.php:23
+#: classes/class-tmr-my-orders-panel.php:22
+#: classes/class-tmr-orders-panel.php:28
+#: classes/class-tmr-profile-panel.php:61
+#: classes/class-tmr-profile-panel.php:195
+#: classes/class-tmr-settings-page.php:20
+#: classes/class-tmr-staff-panel.php:35
+msgid "এই পেজ দেখার অনুমতি আপনার নেই।"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:63
+msgid "হিসাব রিপোর্ট"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:63
+msgid "তারিখ অনুযায়ী আয়, অগ্রিম ও বাকির হিসাব।"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:68
+msgid "শুরু"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:70
+msgid "শেষ"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:72
+msgid "যান"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:75
+msgid "এই মাস"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:76
+msgid "গত মাস"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:77
+#: classes/class-tmr-dashboard-panel.php:58
+msgid "সর্বমোট"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:84
+#: classes/class-tmr-my-orders-panel.php:105
+msgid "তারিখ"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:85
+#: classes/class-tmr-my-orders-panel.php:148
+#: classes/class-tmr-my-orders-panel.php:162
+#: classes/class-tmr-order-post-type.php:21
+#: classes/class-tmr-orders-panel.php:353
+#: classes/class-tmr-orders-panel.php:1943
+#: classes/class-tmr-panel-shell.php:54
+msgid "অর্ডার"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:86
+#: classes/class-tmr-orders-panel.php:626
+#: classes/class-tmr-orders-panel.php:2005
+#: templates/print-full.php:87
+#: templates/print-receipt.php:65
+msgid "মজুরি"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:87
+#: classes/class-tmr-orders-panel.php:630
+#: classes/class-tmr-orders-panel.php:2009
+#: templates/print-full.php:88
+#: templates/print-receipt.php:66
+msgid "কাপড়ের দাম"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:88
+#: classes/class-tmr-orders-panel.php:376
+#: classes/class-tmr-orders-panel.php:634
+#: classes/class-tmr-orders-panel.php:644
+#: classes/class-tmr-orders-panel.php:2017
+#: templates/print-full.php:90
+#: templates/print-receipt.php:67
+msgid "অগ্রিম"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:89
+#: classes/class-tmr-orders-panel.php:385
+#: classes/class-tmr-orders-panel.php:648
+#: classes/class-tmr-orders-panel.php:1849
+#: classes/class-tmr-orders-panel.php:2021
+#: templates/print-full.php:91
+#: templates/print-receipt.php:68
+msgid "বাকি"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:90
+#: classes/class-tmr-accounts-report.php:109
+#: classes/class-tmr-orders-panel.php:367
+#: classes/class-tmr-orders-panel.php:640
+#: classes/class-tmr-orders-panel.php:2013
+#: templates/print-full.php:89
+#: templates/print-receipt.php:69
+msgid "মোট"
+msgstr ""
+
+#: classes/class-tmr-accounts-report.php:95
+msgid "এই সময়ে কোনো অর্ডার নেই।"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:35
+msgid "+ পোশাক যোগ করুন"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:36
+#: classes/class-tmr-orders-panel.php:2029
+#: classes/class-tmr-panel-shell.php:65
+msgid "পোশাক"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:36
+msgid "আপনার সব পোশাক ক্যাটাগরি এখানে পরিচালনা করুন।"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:41
+#: classes/class-tmr-measurement-fields-panel.php:84
+msgid "এখনো কোনো পোশাক তৈরি হয়নি।"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:54
+#: classes/class-tmr-design-type-panel.php:261
+#: classes/class-tmr-dress-panel.php:257
+#: classes/class-tmr-dress-part-panel.php:229
+#: classes/class-tmr-measurement-fields-panel.php:63
+#: classes/class-tmr-staff-panel.php:60
+msgid "যোগ করুন"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:62
+#: classes/class-tmr-categories-panel.php:153
+msgid "পোশাক যোগ করুন"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:76
+#: classes/class-tmr-profile-panel.php:80
+#: classes/class-tmr-staff-panel.php:82
+msgid "ছবি নির্বাচন"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:77
+#: classes/class-tmr-profile-panel.php:81
+#: classes/class-tmr-staff-panel.php:83
+msgid "ছবি সরান"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:82
+msgid "পোশাকের নাম"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:86
+msgid "মাপের ফিল্ড — এই পোশাকে যেসব মাপ নেওয়া হবে"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:88
+msgid "এখনো কোনো সক্রিয় মাপের ফিল্ড তৈরি হয়নি।"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:100
+#, php-format
+msgid "এগুলো সব পোশাকে স্বয়ংক্রিয়ভাবে যুক্ত থাকে (ডিফল্ট): %s"
+msgstr ""
+
+#. translators: %s: link to the Measurement Fields manager page
+#: classes/class-tmr-categories-panel.php:106
+#, php-format
+msgid "নতুন ফিল্ড তৈরি বা এডিট করতে %s পেজে যান।"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:117
+#: classes/class-tmr-customers-panel.php:75
+#: classes/class-tmr-customers-panel.php:121
+#: classes/class-tmr-design-type-panel.php:110
+#: classes/class-tmr-dress-panel.php:106
+#: classes/class-tmr-dress-part-panel.php:102
+#: classes/class-tmr-measurement-fields-panel.php:102
+#: classes/class-tmr-staff-panel.php:96
+msgid "সক্রিয়"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:119
+#: classes/class-tmr-measurement-fields-panel.php:104
+#: classes/class-tmr-profile-panel.php:88
+#: classes/class-tmr-settings-page.php:38
+#: classes/class-tmr-settings-page.php:53
+#: classes/class-tmr-staff-panel.php:98
+msgid "সেভ করুন"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:174
+msgid "পোশাক এডিট করুন"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:181
+#: classes/class-tmr-design-type-panel.php:85
+#: classes/class-tmr-dress-panel.php:80
+#: classes/class-tmr-orders-panel.php:610
+#: classes/class-tmr-profile-panel.php:121
+#: classes/class-tmr-staff-panel.php:196
+msgid "ছবি নির্বাচন করুন"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:207
+msgid "এই পোশাকটি মুছবেন?"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:248
+#, php-format
+msgid "%1$d টি ড্রেস · %2$d টি পার্ট"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:250
+#: classes/class-tmr-design-type-panel.php:283
+#: classes/class-tmr-dress-panel.php:279
+#: classes/class-tmr-dress-part-panel.php:251
+#: classes/class-tmr-measurement-fields-panel.php:201
+#: classes/class-tmr-staff-panel.php:301
+msgid "সক্রিয়/নিষ্ক্রিয়"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:255
+#: classes/class-tmr-customers-panel.php:82
+#: classes/class-tmr-design-type-panel.php:288
+#: classes/class-tmr-dress-panel.php:284
+#: classes/class-tmr-dress-part-panel.php:256
+#: classes/class-tmr-measurement-fields-panel.php:206
+#: classes/class-tmr-orders-panel.php:187
+#: classes/class-tmr-orders-panel.php:288
+#: classes/class-tmr-orders-panel.php:1938
+#: classes/class-tmr-staff-panel.php:311
+msgid "এডিট"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:256
+#: classes/class-tmr-customers-panel.php:83
+#: classes/class-tmr-design-type-panel.php:289
+#: classes/class-tmr-dress-panel.php:285
+#: classes/class-tmr-dress-part-panel.php:257
+#: classes/class-tmr-measurement-fields-panel.php:207
+#: classes/class-tmr-orders-panel.php:188
+#: classes/class-tmr-orders-panel.php:304
+#: classes/class-tmr-orders-panel.php:1942
+#: classes/class-tmr-staff-panel.php:312
+msgid "ডিলিট"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:267
+#: classes/class-tmr-categories-panel.php:294
+#: classes/class-tmr-categories-panel.php:360
+#: classes/class-tmr-categories-panel.php:380
+#: classes/class-tmr-customers-panel.php:210
+#: classes/class-tmr-customers-panel.php:233
+#: classes/class-tmr-customers-panel.php:276
+#: classes/class-tmr-dashboard-panel.php:254
+#: classes/class-tmr-dashboard-panel.php:270
+#: classes/class-tmr-dashboard-panel.php:294
+#: classes/class-tmr-design-type-panel.php:304
+#: classes/class-tmr-design-type-panel.php:324
+#: classes/class-tmr-design-type-panel.php:350
+#: classes/class-tmr-design-type-panel.php:397
+#: classes/class-tmr-dress-panel.php:300
+#: classes/class-tmr-dress-panel.php:320
+#: classes/class-tmr-dress-panel.php:347
+#: classes/class-tmr-dress-panel.php:394
+#: classes/class-tmr-dress-part-panel.php:272
+#: classes/class-tmr-dress-part-panel.php:292
+#: classes/class-tmr-dress-part-panel.php:318
+#: classes/class-tmr-dress-part-panel.php:362
+#: classes/class-tmr-measurement-fields-panel.php:218
+#: classes/class-tmr-measurement-fields-panel.php:245
+#: classes/class-tmr-measurement-fields-panel.php:293
+#: classes/class-tmr-measurement-fields-panel.php:313
+#: classes/class-tmr-my-orders-panel.php:363
+#: classes/class-tmr-orders-panel.php:2298
+#: classes/class-tmr-orders-panel.php:2318
+#: classes/class-tmr-orders-panel.php:2346
+#: classes/class-tmr-orders-panel.php:2378
+#: classes/class-tmr-orders-panel.php:2419
+#: classes/class-tmr-orders-panel.php:2450
+#: classes/class-tmr-orders-panel.php:2597
+#: classes/class-tmr-profile-panel.php:161
+#: classes/class-tmr-settings-page.php:110
+#: classes/class-tmr-settings-page.php:124
+#: classes/class-tmr-staff-panel.php:323
+#: classes/class-tmr-staff-panel.php:343
+#: classes/class-tmr-staff-panel.php:368
+#: classes/class-tmr-staff-panel.php:419
+#: classes/class-tmr-staff-panel.php:470
+#: classes/class-tmr-staff-panel.php:491
+msgid "অনুমতি নেই।"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:274
+#: classes/class-tmr-categories-panel.php:367
+#: classes/class-tmr-categories-panel.php:387
+msgid "ক্যাটাগরি পাওয়া যায়নি।"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:303
+#: classes/class-tmr-measurement-fields-panel.php:252
+#: classes/class-tmr-profile-panel.php:171
+#: classes/class-tmr-staff-panel.php:377
+msgid "নাম আবশ্যক।"
+msgstr ""
+
+#: classes/class-tmr-categories-panel.php:394
+msgid "এই ক্যাটাগরিতে ড্রেস বা পার্ট যুক্ত আছে, তাই মোছা যাবে না।"
+msgstr ""
+
+#: classes/class-tmr-category-taxonomy.php:24
+msgid "ক্যাটাগরি"
+msgstr ""
+
+#: classes/class-tmr-customer-post-type.php:19
+#: classes/class-tmr-customers-panel.php:49
+#: classes/class-tmr-dashboard-panel.php:50
+#: classes/class-tmr-orders-panel.php:158
+#: classes/class-tmr-orders-panel.php:179
+#: classes/class-tmr-orders-panel.php:575
+#: classes/class-tmr-orders-panel.php:1987
+#: classes/class-tmr-panel-shell.php:56
+msgid "কাস্টমার"
+msgstr ""
+
+#: classes/class-tmr-customers-panel.php:44
+msgid "নাম বা ফোন খুঁজুন…"
+msgstr ""
+
+#: classes/class-tmr-customers-panel.php:47
+msgid "+ কাস্টমার যোগ করুন"
+msgstr ""
+
+#: classes/class-tmr-customers-panel.php:49
+msgid "আপনার কাস্টমার তালিকা পরিচালনা করুন।"
+msgstr ""
+
+#: classes/class-tmr-customers-panel.php:55
+#: classes/class-tmr-customers-panel.php:105
+#: classes/class-tmr-orders-panel.php:671
+#: classes/class-tmr-profile-panel.php:85
+#: classes/class-tmr-staff-panel.php:88
+#: classes/class-tmr-staff-panel.php:114
+#: templates/print-full.php:48
+#: templates/print-receipt.php:43
+msgid "নাম"
+msgstr ""
+
+#: classes/class-tmr-customers-panel.php:56
+#: classes/class-tmr-customers-panel.php:109
+#: classes/class-tmr-orders-panel.php:672
+#: classes/class-tmr-profile-panel.php:87
+#: classes/class-tmr-settings-page.php:36
+msgid "ফোন"
+msgstr ""
+
+#: classes/class-tmr-customers-panel.php:57
+#: classes/class-tmr-customers-panel.php:113
+#: classes/class-tmr-orders-panel.php:673
+#: classes/class-tmr-settings-page.php:35
+msgid "ঠিকানা"
+msgstr ""
+
+#: classes/class-tmr-customers-panel.php:58
+msgid "নিবন্ধনের তারিখ"
+msgstr ""
+
+#: classes/class-tmr-customers-panel.php:59
+#: classes/class-tmr-customers-panel.php:117
+#: classes/class-tmr-my-orders-panel.php:151
+#: classes/class-tmr-my-orders-panel.php:165
+msgid "স্ট্যাটাস"
+msgstr ""
+
+#: classes/class-tmr-customers-panel.php:65
+msgid "কোনো কাস্টমার পাওয়া যায়নি।"
+msgstr ""
+
+#: classes/class-tmr-customers-panel.php:77
+msgid "নিষ্ক্রিয়"
+msgstr ""
+
+#: classes/class-tmr-customers-panel.php:98
+#: classes/class-tmr-customers-panel.php:142
+msgid "কাস্টমার যোগ করুন"
+msgstr ""
+
+#: classes/class-tmr-customers-panel.php:126
+#: classes/class-tmr-orders-panel.php:676
+msgid "কাস্টমার সেভ করুন"
+msgstr ""
+
+#: classes/class-tmr-customers-panel.php:155
+msgid "কাস্টমার এডিট করুন"
+msgstr ""
+
+#: classes/class-tmr-customers-panel.php:161
+msgid "এই কাস্টমারকে ডিলিট করবেন?"
+msgstr ""
+
+#: classes/class-tmr-customers-panel.php:217
+#: classes/class-tmr-customers-panel.php:283
+msgid "কাস্টমার পাওয়া যায়নি।"
+msgstr ""
+
+#: classes/class-tmr-customers-panel.php:246
+#: classes/class-tmr-orders-panel.php:2427
+msgid "নাম ও ফোন নম্বর আবশ্যক।"
+msgstr ""
+
+#: classes/class-tmr-dashboard-panel.php:34
+msgid "দ্রুত খুঁজুন…"
+msgstr ""
+
+#: classes/class-tmr-dashboard-panel.php:37
+#: classes/class-tmr-orders-panel.php:211
+msgid "+ অর্ডার নিন"
+msgstr ""
+
+#: classes/class-tmr-dashboard-panel.php:39
+msgid "টেইলার ওভারভিউ"
+msgstr ""
+
+#: classes/class-tmr-dashboard-panel.php:39
+msgid "আপনার দৈনন্দিন কার্যক্রম দেখুন।"
+msgstr ""
+
+#: classes/class-tmr-dashboard-panel.php:44
+#: classes/class-tmr-dress-panel.php:47
+#: classes/class-tmr-panel-shell.php:66
+msgid "বিভিন্ন পোশাক"
+msgstr ""
+
+#: classes/class-tmr-dashboard-panel.php:46
+msgid "ক্যাটালগে সক্রিয়"
+msgstr ""
+
+#: classes/class-tmr-dashboard-panel.php:52
+msgid "মোট রেকর্ড"
+msgstr ""
+
+#: classes/class-tmr-dashboard-panel.php:56
+msgid "মোট অর্ডার"
+msgstr ""
+
+#: classes/class-tmr-dashboard-panel.php:62
+msgid "আজকের ডেলিভারি"
+msgstr ""
+
+#: classes/class-tmr-dashboard-panel.php:70
+msgid "কাটিং মাস্টার / সোয়িং অপারেটর সারি"
+msgstr ""
+
+#: classes/class-tmr-dashboard-panel.php:71
+msgid "সব দেখুন"
+msgstr ""
+
+#: classes/class-tmr-dashboard-panel.php:75
+msgid "এই মুহূর্তে কোনো পেন্ডিং কাজ নেই।"
+msgstr ""
+
+#: classes/class-tmr-dashboard-panel.php:82
+#: classes/class-tmr-orders-panel.php:181
+msgid "অনির্ধারিত"
+msgstr ""
+
+#: classes/class-tmr-dashboard-panel.php:90
+#: classes/class-tmr-my-orders-panel.php:56
+#: classes/class-tmr-my-orders-panel.php:158
+#: classes/class-tmr-orders-panel.php:173
+#: classes/class-tmr-orders-panel.php:1988
+#: classes/class-tmr-orders-panel.php:2361
+#: classes/class-tmr-print-slips.php:126
+msgid "ওয়াক-ইন"
+msgstr ""
+
+#: classes/class-tmr-dashboard-panel.php:298
+msgid "অজানা স্ট্যাটাস।"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:53
+#: classes/class-tmr-design-type-panel.php:136
+#: classes/class-tmr-dress-panel.php:45
+#: classes/class-tmr-dress-panel.php:132
+#: classes/class-tmr-dress-part-panel.php:45
+#: classes/class-tmr-dress-part-panel.php:125
+msgid "সব বন্ধ করুন"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:54
+msgid "+ ডিজাইন টাইপ যোগ করুন"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:55
+#: classes/class-tmr-panel-shell.php:68
+msgid "বিভিন্ন অংশের ডিজাইন"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:55
+msgid "পোশাকের প্রতিটি অংশের জন্য নির্বাচনযোগ্য ডিজাইন অপশন।"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:58
+msgid "এখনো কোনো ড্রেস পার্ট তৈরি হয়নি।"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:66
+msgid "পার্ট নির্ধারণ করা হয়নি"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:73
+#: classes/class-tmr-design-type-panel.php:169
+msgid "ডিজাইন টাইপ যোগ করুন"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:81
+msgid "ডিজাইনের ছবি"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:86
+#: classes/class-tmr-dress-panel.php:81
+msgid "মুছুন"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:92
+msgid "ডিজাইনের নাম"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:96
+#: classes/class-tmr-dress-part-panel.php:73
+msgid "পার্টের নাম"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:98
+msgid "ড্রেস পার্ট নির্বাচন করুন"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:112
+msgid "ডিজাইন টাইপ সেভ করুন"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:136
+#: classes/class-tmr-dress-panel.php:132
+#: classes/class-tmr-dress-part-panel.php:125
+msgid "সব খুলুন"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:192
+msgid "ডিজাইন টাইপ এডিট করুন"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:198
+msgid "এই ডিজাইন টাইপটি ডিলিট করবেন?"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:213
+msgid "ডিজাইনের ছবি নির্বাচন করুন"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:250
+#, php-format
+msgid "%d টি ডিজাইন"
+msgid_plural "%d টি ডিজাইন"
+msgstr[0] ""
+msgstr[1] ""
+
+#: classes/class-tmr-design-type-panel.php:311
+#: classes/class-tmr-design-type-panel.php:331
+#: classes/class-tmr-design-type-panel.php:404
+msgid "ডিজাইন টাইপ পাওয়া যায়নি।"
+msgstr ""
+
+#: classes/class-tmr-design-type-panel.php:362
+msgid "ডিজাইনের নাম ও ড্রেস পার্ট আবশ্যক।"
+msgstr ""
+
+#: classes/class-tmr-design-type-post-type.php:20
+msgid "ডিজাইন টাইপ"
+msgstr ""
+
+#: classes/class-tmr-dress-panel.php:46
+msgid "+ ড্রেস যোগ করুন"
+msgstr ""
+
+#: classes/class-tmr-dress-panel.php:47
+msgid "প্রতিটি পোশাকের ধরন আলাদাভাবে যোগ করুন।"
+msgstr ""
+
+#: classes/class-tmr-dress-panel.php:50
+#: classes/class-tmr-dress-part-panel.php:50
+msgid "এখনো কোনো ক্যাটাগরি তৈরি হয়নি।"
+msgstr ""
+
+#: classes/class-tmr-dress-panel.php:58
+#: classes/class-tmr-dress-part-panel.php:58
+msgid "ক্যাটাগরি ছাড়া"
+msgstr ""
+
+#: classes/class-tmr-dress-panel.php:65
+#: classes/class-tmr-dress-panel.php:165
+msgid "ড্রেস যোগ করুন"
+msgstr ""
+
+#: classes/class-tmr-dress-panel.php:73
+msgid "আইকন / ছবি (SVG বা PNG)"
+msgstr ""
+
+#: classes/class-tmr-dress-panel.php:84
+msgid "SVG আপলোড করলে script/event-handler যুক্ত ফাইল স্বয়ংক্রিয়ভাবে প্রত্যাখ্যান হবে।"
+msgstr ""
+
+#: classes/class-tmr-dress-panel.php:88
+#: classes/class-tmr-dress-post-type.php:20
+#: classes/class-tmr-my-orders-panel.php:149
+#: classes/class-tmr-my-orders-panel.php:163
+#: templates/print-full.php:57
+#: templates/print-receipt.php:52
+msgid "ড্রেস"
+msgstr ""
+
+#: classes/class-tmr-dress-panel.php:92
+msgid "ড্রেস ক্যাটাগরি"
+msgstr ""
+
+#: classes/class-tmr-dress-panel.php:94
+msgid "ড্রেস ক্যাটাগরি নির্বাচন করুন"
+msgstr ""
+
+#: classes/class-tmr-dress-panel.php:108
+msgid "ড্রেস সেভ করুন"
+msgstr ""
+
+#: classes/class-tmr-dress-panel.php:188
+msgid "ড্রেস এডিট করুন"
+msgstr ""
+
+#: classes/class-tmr-dress-panel.php:199
+msgid "ড্রেসের আইকন/ছবি নির্বাচন করুন"
+msgstr ""
+
+#: classes/class-tmr-dress-panel.php:215
+msgid "এই ড্রেসটি ডিলিট করবেন?"
+msgstr ""
+
+#: classes/class-tmr-dress-panel.php:246
+#, php-format
+msgid "%d টি ড্রেস"
+msgid_plural "%d টি ড্রেস"
+msgstr[0] ""
+msgstr[1] ""
+
+#: classes/class-tmr-dress-panel.php:307
+#: classes/class-tmr-dress-panel.php:327
+#: classes/class-tmr-dress-panel.php:401
+msgid "ড্রেস পাওয়া যায়নি।"
+msgstr ""
+
+#: classes/class-tmr-dress-panel.php:359
+msgid "ড্রেসের নাম ও ক্যাটাগরি আবশ্যক।"
+msgstr ""
+
+#: classes/class-tmr-dress-part-panel.php:46
+msgid "+ পার্ট যোগ করুন"
+msgstr ""
+
+#: classes/class-tmr-dress-part-panel.php:47
+#: classes/class-tmr-panel-shell.php:67
+msgid "পোশাকের বিভিন্ন অংশ"
+msgstr ""
+
+#: classes/class-tmr-dress-part-panel.php:47
+msgid "প্রতিটি পোশাকের কাস্টমাইজযোগ্য অংশ (কলার, পকেট, প্লেট...)।"
+msgstr ""
+
+#: classes/class-tmr-dress-part-panel.php:65
+#: classes/class-tmr-dress-part-panel.php:153
+msgid "পার্ট যোগ করুন"
+msgstr ""
+
+#: classes/class-tmr-dress-part-panel.php:77
+msgid "ড্রেস পার্ট ক্যাটাগরি"
+msgstr ""
+
+#: classes/class-tmr-dress-part-panel.php:79
+msgid "ক্যাটাগরি নির্বাচন করুন"
+msgstr ""
+
+#: classes/class-tmr-dress-part-panel.php:90
+msgid "পার্ট মাপ — এই পার্টের জন্য অতিরিক্ত মাপ নেওয়া হবে"
+msgstr ""
+
+#: classes/class-tmr-dress-part-panel.php:94
+msgid "এই মাপের নাম"
+msgstr ""
+
+#: classes/class-tmr-dress-part-panel.php:95
+msgid "যেমনঃ লম্বা"
+msgstr ""
+
+#: classes/class-tmr-dress-part-panel.php:104
+msgid "পার্ট সেভ করুন"
+msgstr ""
+
+#: classes/class-tmr-dress-part-panel.php:177
+msgid "পার্ট এডিট করুন"
+msgstr ""
+
+#: classes/class-tmr-dress-part-panel.php:183
+msgid "এই পার্টটি ডিলিট করবেন?"
+msgstr ""
+
+#: classes/class-tmr-dress-part-panel.php:218
+#, php-format
+msgid "%d টি পার্ট"
+msgid_plural "%d টি পার্ট"
+msgstr[0] ""
+msgstr[1] ""
+
+#: classes/class-tmr-dress-part-panel.php:248
+msgid "পার্ট মাপ চালু"
+msgstr ""
+
+#: classes/class-tmr-dress-part-panel.php:279
+#: classes/class-tmr-dress-part-panel.php:299
+#: classes/class-tmr-dress-part-panel.php:369
+msgid "ড্রেস পার্ট পাওয়া যায়নি।"
+msgstr ""
+
+#: classes/class-tmr-dress-part-panel.php:331
+msgid "পার্টের নাম ও ক্যাটাগরি আবশ্যক।"
+msgstr ""
+
+#: classes/class-tmr-dress-part-post-type.php:21
+msgid "ড্রেস পার্ট"
+msgstr ""
+
+#: classes/class-tmr-dress-part-post-type.php:43
+msgid "পরিমাণ"
+msgstr ""
+
+#: classes/class-tmr-manager-role.php:20
+msgid "ম্যানেজার"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields-panel.php:40
+msgid "+ ফিল্ড যোগ করুন"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields-panel.php:41
+#: classes/class-tmr-panel-shell.php:69
+msgid "পোশাকের পরিমাপ"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields-panel.php:41
+msgid "পরিমাপের ফিল্ড তৈরি করুন, তারপর কোন পোশাকে ব্যবহার হবে তা নির্বাচন করুন।"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields-panel.php:46
+msgid "এখনো কোনো মাপের ফিল্ড তৈরি হয়নি।"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields-panel.php:71
+#: classes/class-tmr-measurement-fields-panel.php:120
+msgid "মাপের ফিল্ড যোগ করুন"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields-panel.php:78
+msgid "ফিল্ডের নাম"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields-panel.php:82
+msgid "কোন পোশাকে ব্যবহার হবে"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields-panel.php:95
+msgid "কোনো পোশাক সিলেক্ট না করলে এই ফিল্ডটি স্বয়ংক্রিয়ভাবে সব পোশাকে (ডিফল্ট হিসেবে) যুক্ত থাকবে।"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields-panel.php:139
+msgid "মাপের ফিল্ড এডিট করুন"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields-panel.php:145
+msgid "এই মাপের ফিল্ডটি ডিলিট করবেন? এটি সব পোশাক থেকে সরে যাবে।"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields-panel.php:190
+msgid "ডিফল্ট — সব পোশাকে"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields-panel.php:192
+msgid "কোনো পোশাকে ব্যবহৃত হয়নি"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields-panel.php:230
+#: classes/class-tmr-measurement-fields-panel.php:300
+#: classes/class-tmr-measurement-fields-panel.php:318
+msgid "ফিল্ড পাওয়া যায়নি।"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields.php:367
+#: classes/class-tmr-measurement-fields.php:378
+msgid "লম্বা"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields.php:368
+msgid "বডি"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields.php:369
+msgid "পুট"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields.php:370
+msgid "হাতা"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields.php:371
+msgid "কলার/গলা"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields.php:372
+#: classes/class-tmr-measurement-fields.php:379
+msgid "মুহরী"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields.php:373
+msgid "কফ"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields.php:374
+msgid "প্লেট"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields.php:375
+msgid "ঘের"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields.php:380
+msgid "কোমড়"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields.php:381
+msgid "হাই"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields.php:382
+msgid "লুজ"
+msgstr ""
+
+#: classes/class-tmr-measurement-fields.php:383
+msgid "হিপ"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:76
+#: classes/class-tmr-my-orders-panel.php:165
+#: classes/class-tmr-orders-panel.php:223
+#: classes/class-tmr-orders-panel.php:276
+#: classes/class-tmr-orders-panel.php:886
+#: classes/class-tmr-orders-panel.php:1960
+msgid "পেন্ডিং"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:83
+#: classes/class-tmr-my-orders-panel.php:165
+#: classes/class-tmr-orders-panel.php:223
+#: classes/class-tmr-orders-panel.php:277
+#: classes/class-tmr-orders-panel.php:887
+#: classes/class-tmr-orders-panel.php:1961
+msgid "রেডি"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:90
+msgid "আজ ডেলিভার হয়েছে"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:101
+msgid "অর্ডার আইডি বা নাম"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:111
+#: classes/class-tmr-my-orders-panel.php:113
+msgid "ফিল্টার করুন"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:116
+msgid "মুছে ফেলুন"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:127
+#, php-format
+msgid "স্বাগতম, %s"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:128
+msgid "আপনার নির্ধারিত অর্ডারসমূহ।"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:137
+#: classes/class-tmr-panel-shell.php:55
+msgid "আমার অর্ডার"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:141
+msgid "আপনার নামে কোনো বাকি অর্ডার নেই।"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:141
+msgid "এই ফিল্টারে কোনো অর্ডার পাওয়া যায়নি।"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:150
+#: classes/class-tmr-my-orders-panel.php:164
+#: classes/class-tmr-my-orders-panel.php:199
+#: classes/class-tmr-orders-panel.php:161
+#: classes/class-tmr-orders-panel.php:182
+#: classes/class-tmr-orders-panel.php:586
+#: classes/class-tmr-orders-panel.php:1995
+#: templates/print-full.php:51
+msgid "ডেলিভারি তারিখ"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:168
+msgid "মাপ দেখুন"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:169
+msgid "নট রেডি করুন"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:169
+msgid "রেডি করুন"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:170
+msgid "ডেলিভারড করুন"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:195
+msgid "অর্ডার তারিখ"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:213
+#: classes/class-tmr-orders-panel.php:950
+msgid "জানুয়ারি"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:213
+#: classes/class-tmr-orders-panel.php:950
+msgid "ফেব্রুয়ারি"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:213
+#: classes/class-tmr-orders-panel.php:950
+msgid "মার্চ"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:213
+#: classes/class-tmr-orders-panel.php:950
+msgid "এপ্রিল"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:214
+#: classes/class-tmr-orders-panel.php:951
+msgid "মে"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:214
+#: classes/class-tmr-orders-panel.php:951
+msgid "জুন"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:214
+#: classes/class-tmr-orders-panel.php:951
+msgid "জুলাই"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:214
+#: classes/class-tmr-orders-panel.php:951
+msgid "আগস্ট"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:215
+#: classes/class-tmr-orders-panel.php:952
+msgid "সেপ্টেম্বর"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:215
+#: classes/class-tmr-orders-panel.php:952
+msgid "অক্টোবর"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:215
+#: classes/class-tmr-orders-panel.php:952
+msgid "নভেম্বর"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:215
+#: classes/class-tmr-orders-panel.php:952
+msgid "ডিসেম্বর"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:218
+#: classes/class-tmr-orders-panel.php:955
+msgid "রবি"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:218
+#: classes/class-tmr-orders-panel.php:955
+msgid "সোম"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:218
+#: classes/class-tmr-orders-panel.php:955
+msgid "মঙ্গল"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:219
+#: classes/class-tmr-orders-panel.php:956
+msgid "বুধ"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:219
+#: classes/class-tmr-orders-panel.php:956
+msgid "বৃহ"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:219
+#: classes/class-tmr-orders-panel.php:956
+msgid "শুক্র"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:219
+#: classes/class-tmr-orders-panel.php:956
+msgid "শনি"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:316
+msgid "এই অর্ডারটি ডেলিভার হয়েছে বলে চিহ্নিত করবেন?"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:343
+msgid "মাপ যোগ করা হয়নি।"
+msgstr ""
+
+#: classes/class-tmr-my-orders-panel.php:373
+msgid "এই অর্ডারটি আপনার নয়।"
+msgstr ""
+
+#: classes/class-tmr-order-item-post-type.php:26
+msgid "অর্ডার আইটেম"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:157
+#: classes/class-tmr-orders-panel.php:178
+msgid "অর্ডার আইডি"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:159
+#: classes/class-tmr-orders-panel.php:180
+msgid "ড্রেস ও পরিমাণ"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:160
+#: classes/class-tmr-orders-panel.php:181
+#: classes/class-tmr-orders-panel.php:761
+#: classes/class-tmr-panel-shell.php:70
+#: classes/class-tmr-staff-panel.php:47
+#: classes/class-tmr-staff-post-type.php:23
+msgid "স্টাফ"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:162
+#: classes/class-tmr-orders-panel.php:183
+msgid "ডেলিভারি স্ট্যাটাস"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:168
+msgid "কোনো অর্ডার পাওয়া যায়নি।"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:186
+msgid "দেখুন"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:223
+msgid "সব"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:223
+#: classes/class-tmr-orders-panel.php:278
+#: classes/class-tmr-orders-panel.php:888
+#: classes/class-tmr-orders-panel.php:1962
+msgid "ডেলিভারড"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:223
+msgid "বাতিলকৃত"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:236
+msgid "কাস্টমারের নাম বা ফোন খুঁজুন…"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:243
+msgid "অর্ডার ম্যানেজার"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:243
+msgid "সকল কাস্টমার অর্ডার।"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:253
+#: classes/class-tmr-orders-panel.php:1080
+msgid "অর্ডার নিন"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:257
+#: classes/class-tmr-orders-panel.php:1082
+msgid "লোড হচ্ছে…"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:263
+#: classes/class-tmr-orders-panel.php:1535
+msgid "অর্ডার সম্পন্ন হয়েছে"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:279
+#: classes/class-tmr-orders-panel.php:659
+#: classes/class-tmr-orders-panel.php:889
+#: classes/class-tmr-orders-panel.php:1963
+msgid "বাতিল"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:282
+#: classes/class-tmr-orders-panel.php:1978
+msgid "স্ট্যাটাস পরিবর্তন করুন"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:292
+#: templates/print-receipt.php:9
+msgid "রিসিট"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:296
+msgid "ওয়ার্ক"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:300
+msgid "ফুল"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:307
+msgid "ফুল পেজ স্ক্রিন ক্যাপচার"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:310
+msgid "শুধু পোশাক স্ক্রিন ক্যাপচার"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:322
+#: classes/class-tmr-orders-panel.php:1956
+msgid "জরুরি"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:330
+#: classes/class-tmr-orders-panel.php:1462
+msgid "প্রিন্ট"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:333
+msgid "ছবি ক্যাপচার"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:336
+msgid "মেসেজ"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:357
+#: templates/print-receipt.php:46
+#: templates/print-workslip.php:49
+msgid "ডেলিভারি"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:394
+msgid "সম্পূর্ণ অর্ডার দেখুন"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:395
+msgid "বন্ধ করুন"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:570
+msgid "কাস্টমার ও ডেলিভারি"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:577
+msgid "নাম বা মোবাইল নাম্বার লিখুন…"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:578
+#: classes/class-tmr-orders-panel.php:666
+msgid "নতুন কাস্টমার যোগ করুন"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:587
+msgid "তারিখ নির্বাচন করুন"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:598
+msgid "জরুরি ডেলিভারি"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:604
+msgid "রেফারেন্স ছবি"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:621
+msgid "মূল্য"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:658
+msgid "অর্ডার সেভ করুন"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:724
+msgid "ড্রেস ও পরিমাণ (ক্লিক করে নির্বাচন করুন)"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:738
+#: classes/class-tmr-orders-panel.php:749
+#: classes/class-tmr-orders-panel.php:780
+#: classes/class-tmr-orders-panel.php:819
+msgid "কমান"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:740
+#: classes/class-tmr-orders-panel.php:751
+#: classes/class-tmr-orders-panel.php:782
+#: classes/class-tmr-orders-panel.php:821
+msgid "বাড়ান"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:747
+msgid "এই পোশাকে এখনো আলাদা কোনো প্রোডাক্ট যোগ করা হয়নি — সরাসরি পরিমাণ দিন"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:764
+#: classes/class-tmr-orders-panel.php:1451
+#: classes/class-tmr-orders-panel.php:1628
+#: classes/class-tmr-orders-panel.php:1645
+#: classes/class-tmr-orders-panel.php:2050
+#: templates/print-workslip.php:50
+msgid "কাটিং মাস্টার"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:765
+#: classes/class-tmr-orders-panel.php:1454
+#: classes/class-tmr-orders-panel.php:1629
+#: classes/class-tmr-orders-panel.php:1646
+#: classes/class-tmr-orders-panel.php:2051
+#: templates/print-workslip.php:51
+msgid "সোয়িং অপারেটর"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:773
+#: classes/class-tmr-orders-panel.php:1485
+#: classes/class-tmr-orders-panel.php:2059
+msgid "মাপের বিবরণ"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:847
+msgid "নাম লিখুন বা তালিকা থেকে বেছে নিন…"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1080
+msgid "অর্ডার আপডেট করুন"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1296
+msgid "রেফারেন্স ছবি নির্বাচন করুন"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1311
+msgid "একজন কাস্টমার নির্বাচন করুন।"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1371
+msgid "কমপক্ষে একটি ড্রেস নির্বাচন করুন।"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1466
+msgid "ছবি ডাউনলোড"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1470
+msgid "হোয়াটসঅ্যাপ"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1497
+#: classes/class-tmr-orders-panel.php:1634
+#: classes/class-tmr-orders-panel.php:2076
+msgid "ডিজাইন"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1544
+msgid "অর্ডার সারাংশ"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1589
+#: classes/class-tmr-orders-panel.php:2140
+msgid "এই অর্ডারটির ডেলিভারি স্ট্যাটাস পরিবর্তন করবেন?"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1598
+#: classes/class-tmr-orders-panel.php:1607
+#: classes/class-tmr-orders-panel.php:2149
+msgid "এই অর্ডারটি ডিলিট করবেন?"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1631
+msgid "মাপ"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1838
+#: classes/class-tmr-orders-panel.php:1871
+#: classes/class-tmr-orders-panel.php:1879
+msgid "স্ক্রিনশট নেওয়া যায়নি।"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1848
+msgid "আপনার অর্ডার"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1933
+#: classes/class-tmr-orders-panel.php:2326
+#: classes/class-tmr-orders-panel.php:2353
+#: classes/class-tmr-orders-panel.php:2604
+#: classes/class-tmr-print-slips.php:28
+msgid "অর্ডার পাওয়া যায়নি।"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1939
+msgid "রিসিট প্রিন্ট"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1940
+msgid "ওয়ার্ক স্লিপ প্রিন্ট"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1941
+msgid "ফুল স্লিপ প্রিন্ট"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1952
+msgid "অর্ডার তথ্য"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1984
+msgid "কাস্টমার তথ্য"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:1991
+#: templates/print-full.php:50
+#: templates/print-receipt.php:45
+msgid "অর্ডারের তারিখ"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:2002
+msgid "পেমেন্ট সামারি"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:2030
+msgid "টি আইটেম"
+msgstr ""
+
+#: classes/class-tmr-orders-panel.php:2468
+msgid "কাস্টমার, তারিখ এবং কমপক্ষে একটি ড্রেস আবশ্যক।"
+msgstr ""
+
+#: classes/class-tmr-panel-shell.php:53
+msgid "ড্যাশবোর্ড"
+msgstr ""
+
+#: classes/class-tmr-panel-shell.php:71
+msgid "হিসাব"
+msgstr ""
+
+#: classes/class-tmr-panel-shell.php:72
+#: classes/class-tmr-settings-page.php:28
+msgid "সেটিংস"
+msgstr ""
+
+#: classes/class-tmr-panel-shell.php:73
+#: classes/class-tmr-profile-panel.php:69
+msgid "প্রোফাইল"
+msgstr ""
+
+#: classes/class-tmr-panel-shell.php:74
+#: classes/class-tmr-profile-panel.php:203
+msgid "পাসওয়ার্ড পরিবর্তন"
+msgstr ""
+
+#: classes/class-tmr-panel-shell.php:219
+#: classes/class-tmr-panel-shell.php:220
+msgid "টেইলার প্যানেল"
+msgstr ""
+
+#: classes/class-tmr-panel-shell.php:232
+msgid "প্রোডাক্ট ইনপুট: বিভিন্ন পোশাক"
+msgstr ""
+
+#: classes/class-tmr-panel-shell.php:233
+msgid "প্রোডাক্ট ইনপুট: পোশাকের বিভিন্ন অংশ"
+msgstr ""
+
+#: classes/class-tmr-panel-shell.php:234
+msgid "প্রোডাক্ট ইনপুট: বিভিন্ন অংশের ডিজাইন"
+msgstr ""
+
+#: classes/class-tmr-panel-shell.php:235
+msgid "প্রোডাক্ট ইনপুট: পোশাকের পরিমাপ"
+msgstr ""
+
+#: classes/class-tmr-panel-shell.php:492
+msgid "মেনু"
+msgstr ""
+
+#: classes/class-tmr-panel-shell.php:549
+msgid "অ্যাডমিন"
+msgstr ""
+
+#: classes/class-tmr-panel-shell.php:549
+#: classes/class-tmr-staff-role.php:19
+msgid "টেইলার স্টাফ"
+msgstr ""
+
+#: classes/class-tmr-panel-shell.php:554
+msgid "লগআউট"
+msgstr ""
+
+#: classes/class-tmr-print-slips.php:19
+msgid "এটি দেখার অনুমতি আপনার নেই।"
+msgstr ""
+
+#: classes/class-tmr-print-slips.php:43
+msgid "প্রিন্ট টেমপ্লেট পাওয়া যায়নি।"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:69
+msgid "আপনার অ্যাকাউন্টের তথ্য পরিচালনা করুন।"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:86
+#: classes/class-tmr-staff-panel.php:122
+msgid "ইমেইল"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:94
+msgid "প্যানেলের ভাষা"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:147
+#: classes/class-tmr-settings-page.php:39
+#: classes/class-tmr-settings-page.php:54
+msgid "সেভ হয়েছে।"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:174
+msgid "সঠিক ইমেইল দিন।"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:178
+msgid "এই ইমেইল আরেকটি অ্যাকাউন্টে ব্যবহৃত হচ্ছে।"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:203
+msgid "আপনার লগইন পাসওয়ার্ড পরিবর্তন করুন।"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:206
+msgid "পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে।"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:209
+#: classes/class-tmr-staff-panel.php:445
+msgid "পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:210
+msgid "দুটি পাসওয়ার্ড মিলছে না।"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:213
+msgid "একটি সমস্যা হয়েছে।"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:222
+msgid "নতুন পাসওয়ার্ড"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:225
+#: classes/class-tmr-profile-panel.php:242
+#: classes/class-tmr-staff-panel.php:129
+msgid "দেখান/লুকান"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:239
+msgid "পাসওয়ার্ড নিশ্চিত করুন"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:249
+msgid "পাসওয়ার্ড পরিবর্তন করুন"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:261
+msgid "খুবই দুর্বল"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:262
+msgid "দুর্বল"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:263
+msgid "মোটামুটি"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:264
+msgid "ভালো"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:265
+msgid "চমৎকার"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:273
+msgid "কমপক্ষে ৮ অক্ষর প্রয়োজন।"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:287
+msgid "যাচাই করা হচ্ছে…"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:300
+msgid "পাসওয়ার্ড মিলেছে"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:302
+msgid "পাসওয়ার্ড মিলছে না"
+msgstr ""
+
+#: classes/class-tmr-profile-panel.php:318
+msgid "আপনি লগইন করেননি।"
+msgstr ""
+
+#: classes/class-tmr-settings-page.php:28
+msgid "দোকানের তথ্য পরিচালনা করুন।"
+msgstr ""
+
+#: classes/class-tmr-settings-page.php:32
+msgid "দোকানের তথ্য"
+msgstr ""
+
+#: classes/class-tmr-settings-page.php:34
+msgid "দোকানের নাম"
+msgstr ""
+
+#: classes/class-tmr-settings-page.php:45
+msgid "ডেলিভারি সেটিংস"
+msgstr ""
+
+#: classes/class-tmr-settings-page.php:48
+msgid "ডিফল্ট ডেলিভারি সময় (দিনে)"
+msgstr ""
+
+#: classes/class-tmr-settings-page.php:50
+msgid "নতুন অর্ডার নেওয়ার সময় ডেলিভারি তারিখ আজ থেকে এত দিন পরে স্বয়ংক্রিয়ভাবে নির্বাচিত থাকবে।"
+msgstr ""
+
+#. translators: 1: link to the "পোশাক" (category) management page, 2: link to the "পোশাকের পরিমাপ" (measurement fields) management page
+#: classes/class-tmr-settings-page.php:64
+#, php-format
+msgid "পোশাক এখন %1$s পেজ থেকে এবং পরিমাপের ফিল্ড %2$s পেজ থেকে পরিচালনা করুন।"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:46
+msgid "+ স্টাফ যোগ করুন"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:47
+msgid "কাটিং মাস্টার ও সোয়িং অপারেটরদের তালিকা — অর্ডার নেওয়ার সময় এখান থেকেই বেছে নেওয়া যাবে।"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:52
+msgid "এখনো কোনো স্টাফ যোগ করা হয়নি।"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:68
+#: classes/class-tmr-staff-panel.php:171
+msgid "স্টাফ যোগ করুন"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:107
+#: classes/class-tmr-staff-panel.php:309
+msgid "লগইন অ্যাক্সেস দিন"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:115
+msgid "এই নামেই লগইন অ্যাকাউন্টের ডিসপ্লে নাম সেট হবে, যাতে \"আমার অর্ডার\" পেজে সঠিক অর্ডার দেখায়।"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:118
+msgid "ইউজারনেম"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:126
+msgid "পাসওয়ার্ড"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:133
+msgid "কমপক্ষে ৮ অক্ষর।"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:137
+msgid "অ্যাকাউন্ট তৈরি করুন"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:189
+msgid "স্টাফ এডিট করুন"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:222
+msgid "এই স্টাফকে ডিলিট করবেন?"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:267
+msgid "এই স্টাফের লগইন অ্যাক্সেস সরাবেন? অ্যাকাউন্টটি ডিলিট হয়ে যাবে।"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:296
+msgid "লগইন সক্রিয়"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:298
+msgid "লগইন নেই"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:307
+msgid "লগইন সরান"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:330
+#: classes/class-tmr-staff-panel.php:350
+#: classes/class-tmr-staff-panel.php:425
+#: classes/class-tmr-staff-panel.php:498
+msgid "স্টাফ পাওয়া যায়নি।"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:428
+msgid "এই স্টাফের ইতিমধ্যে একটি লগইন অ্যাকাউন্ট আছে।"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:436
+msgid "সঠিক ইউজারনেম দিন (শুধু অক্ষর, সংখ্যা, ., -, _)।"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:439
+msgid "এই ইউজারনেম আগে থেকেই আছে।"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:442
+msgid "সঠিক ও নতুন ইমেইল দিন — এই ইমেইল হয়তো আগে থেকেই ব্যবহৃত।"
+msgstr ""
+
+#: classes/class-tmr-staff-panel.php:477
+msgid "এই স্টাফের কোনো লগইন অ্যাকাউন্ট নেই।"
+msgstr ""
+
+#: classes/class-tmr-svg-upload-support.php:83
+msgid "এই SVG ফাইলে সন্দেহজনক কনটেন্ট (script/event handler) পাওয়া গেছে, তাই আপলোড প্রত্যাখ্যান করা হলো।"
+msgstr ""
+
+#: templates/print-full.php:9
+msgid "ফুল ডিজাইন স্লিপ"
+msgstr ""
+
+#: templates/print-full.php:47
+#: templates/print-receipt.php:42
+#: templates/print-workslip.php:48
+msgid "অর্ডার নং"
+msgstr ""
+
+#: templates/print-full.php:49
+#: templates/print-receipt.php:44
+msgid "মোবাইল"
+msgstr ""
+
+#: templates/print-full.php:58
+msgid "মাপ ও ডিজাইনের বিবরণ"
+msgstr ""
+
+#: templates/print-workslip.php:9
+msgid "ওয়ার্ক স্লিপ"
+msgstr ""

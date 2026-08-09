@@ -460,7 +460,11 @@ class TMR_Orders_Panel
         if (!$ymd) {
             return '';
         }
-        $months = array(
+        $months = 'en' === TMR_Panel_Shell::current_ui_lang() ? array(
+            1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
+            5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
+            9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December',
+        ) : array(
             1 => 'জানুয়ারি', 2 => 'ফেব্রুয়ারি', 3 => 'মার্চ', 4 => 'এপ্রিল',
             5 => 'মে', 6 => 'জুন', 7 => 'জুলাই', 8 => 'আগস্ট',
             9 => 'সেপ্টেম্বর', 10 => 'অক্টোবর', 11 => 'নভেম্বর', 12 => 'ডিসেম্বর',
@@ -942,8 +946,15 @@ class TMR_Orders_Panel
             // as the cozythai booking calendar) — state re-initialized every time the
             // form markup is (re)injected, since #tmr-delivery-cal is destroyed and
             // recreated along with the rest of the modal body each open. =====
-            var bnMonths = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
-            var bnDayHeaders = ['রবি', 'সোম', 'মঙ্গল', 'বুধ', 'বৃহ', 'শুক্র', 'শনি'];
+            var bnMonths = <?php echo wp_json_encode(array(
+                __('জানুয়ারি', 'tailor-manager'), __('ফেব্রুয়ারি', 'tailor-manager'), __('মার্চ', 'tailor-manager'), __('এপ্রিল', 'tailor-manager'),
+                __('মে', 'tailor-manager'), __('জুন', 'tailor-manager'), __('জুলাই', 'tailor-manager'), __('আগস্ট', 'tailor-manager'),
+                __('সেপ্টেম্বর', 'tailor-manager'), __('অক্টোবর', 'tailor-manager'), __('নভেম্বর', 'tailor-manager'), __('ডিসেম্বর', 'tailor-manager'),
+            )); ?>;
+            var bnDayHeaders = <?php echo wp_json_encode(array(
+                __('রবি', 'tailor-manager'), __('সোম', 'tailor-manager'), __('মঙ্গল', 'tailor-manager'),
+                __('বুধ', 'tailor-manager'), __('বৃহ', 'tailor-manager'), __('শুক্র', 'tailor-manager'), __('শনি', 'tailor-manager'),
+            )); ?>;
             var calYear, calMonth, calSelected;
 
             function pad2(n) { return n < 10 ? '0' + n : '' + n; }
