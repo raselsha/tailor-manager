@@ -829,6 +829,9 @@ body.tmr-staff-chrome .tmr-admin-wrapper { height: calc(100vh - 40px); }
 .tmr-filters-search:focus { border-color: #0061d5; outline: none; box-shadow: 0 0 0 2px rgba(0, 97, 213, .2); }
 .tmr-filters-spacer { flex: 1 1 auto; }
 .tmr-filter-count { flex-shrink: 0; font-size: 13px; font-weight: 600; color: #475569; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 999px; padding: 6px 14px; white-space: nowrap; }
+.tmr-per-page-wrap { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.tmr-per-page-label { font-size: 12px; font-weight: 600; color: #64748b; white-space: nowrap; }
+.tmr-filters-bar .tmr-per-page-select { min-width: 66px; height: 38px; padding: 0 26px 0 12px; }
 
 /* My Orders' own filter row — icon-prefixed pill inputs + an icon-only submit
    button, single row on any width (the two inputs flex to share whatever room
@@ -869,6 +872,7 @@ body.tmr-staff-chrome .tmr-admin-wrapper { height: calc(100vh - 40px); }
 .tmr-tabs-scroll .tmr-tabs { flex-wrap: nowrap; }
 .tmr-orders-search-form { flex-shrink: 0; width: 260px; }
 .tmr-orders-search-form .tmr-filter-input-wrap { width: 100%; }
+.tmr-customers-search-form { flex: 1 1 240px; min-width: 200px; }
 .tmr-empty-inline { color: #cbd5e1; font-style: italic; }
 @media (max-width: 900px) {
     .tmr-orders-filters-bar { flex-wrap: wrap; }

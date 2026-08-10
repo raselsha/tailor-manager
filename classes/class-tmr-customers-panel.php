@@ -11,7 +11,9 @@ defined('ABSPATH') || exit;
 class TMR_Customers_Panel
 {
     const POST_TYPE = TMR_Customer_Post_Type::POST_TYPE;
-    const PER_PAGE = 20;
+    const PER_PAGE_OPTIONS = array(10, 20, 50, 100, 200);
+    const PER_PAGE_DEFAULT = 20;
+    const PER_PAGE_META_KEY = 'tmr_customers_per_page';
 
     public function __construct()
     {
@@ -19,6 +21,26 @@ class TMR_Customers_Panel
         add_action('wp_ajax_tmr_delete_customer', array($this, 'ajax_delete'));
         add_action('wp_ajax_tmr_get_customer', array($this, 'ajax_get'));
         add_action('wp_ajax_tmr_search_customers_list', array($this, 'ajax_search'));
+    }
+
+    /**
+     * $requested (from $_GET/$_POST['per_page'], read by the caller — render()
+     * and ajax_search() are the only places touching superglobals, same as
+     * $search/$paged already do) wins and is remembered on the user's account
+     * when it's one of the allowed options; otherwise falls back to whatever
+     * was last remembered, then the hard default. Stored in user meta (not a
+     * cookie/localStorage) so the choice follows the user across devices, same
+     * as WP core's own per-screen "items per page" screen option.
+     */
+    private static function resolve_per_page($requested)
+    {
+        if ($requested && in_array($requested, self::PER_PAGE_OPTIONS, true)) {
+            update_user_meta(get_current_user_id(), self::PER_PAGE_META_KEY, $requested);
+            return $requested;
+        }
+
+        $saved = (int) get_user_meta(get_current_user_id(), self::PER_PAGE_META_KEY, true);
+        return in_array($saved, self::PER_PAGE_OPTIONS, true) ? $saved : self::PER_PAGE_DEFAULT;
     }
 
     /**
@@ -31,12 +53,12 @@ class TMR_Customers_Panel
      * scoped to only this query via the tmr_customer_search_term query var,
      * so it can never leak into some other WP_Query running the same request.
      */
-    private static function build_query($search, $paged)
+    private static function build_query($search, $paged, $per_page)
     {
         $args = array(
             'post_type'      => self::POST_TYPE,
             'post_status'    => array('publish', 'draft'),
-            'posts_per_page' => self::PER_PAGE,
+            'posts_per_page' => $per_page,
             'paged'          => $paged,
             'orderby'        => 'title',
             'order'          => 'ASC',
@@ -104,10 +126,11 @@ class TMR_Customers_Panel
             wp_die(esc_html__('এই পেজ দেখার অনুমতি আপনার নেই।', 'tailor-manager'));
         }
 
-        $search = isset($_GET['s']) ? sanitize_text_field(wp_unslash($_GET['s'])) : '';
-        $paged  = isset($_GET['paged']) ? max(1, (int) $_GET['paged']) : 1;
+        $search   = isset($_GET['s']) ? sanitize_text_field(wp_unslash($_GET['s'])) : '';
+        $paged    = isset($_GET['paged']) ? max(1, (int) $_GET['paged']) : 1;
+        $per_page = self::resolve_per_page(isset($_GET['per_page']) ? (int) $_GET['per_page'] : 0);
 
-        $query = self::build_query($search, $paged);
+        $query = self::build_query($search, $paged, $per_page);
 
         $header_right = '<a href="#" class="tmr-btn-add" id="tmr-add-customer">' . esc_html__('+ কাস্টমার যোগ করুন', 'tailor-manager') . '</a>';
 
@@ -124,6 +147,14 @@ class TMR_Customers_Panel
                     <input type="text" name="s" class="tmr-filter-input" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_attr_e('নাম বা ফোন খুঁজুন…', 'tailor-manager'); ?>" />
                 </div>
             </form>
+            <div class="tmr-per-page-wrap">
+                <label for="tmr-customers-per-page" class="tmr-per-page-label"><?php esc_html_e('প্রতি পেজে', 'tailor-manager'); ?></label>
+                <select id="tmr-customers-per-page" class="tmr-per-page-select">
+                    <?php foreach (self::PER_PAGE_OPTIONS as $option) : ?>
+                        <option value="<?php echo esc_attr($option); ?>" <?php selected($per_page, $option); ?>><?php echo esc_html($option); ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
             <span class="tmr-filter-count" id="tmr-customers-count"><?php echo esc_html(self::format_count($query->found_posts)); ?></span>
         </div>
         <?php
@@ -133,7 +164,7 @@ class TMR_Customers_Panel
         ?>
 
         <div id="tmr-customers-list-wrap">
-            <?php self::render_table($query, $paged, $search); ?>
+            <?php self::render_table($query, $paged, $search, $per_page); ?>
         </div>
 
         <div class="tmr-modal" id="tmr-customer-modal">
@@ -178,32 +209,44 @@ class TMR_Customers_Panel
             var $modal = $('#tmr-customer-modal');
             var $form = $('#tmr-customer-form');
 
+            // Shared by both the debounced search input and the per-page select
+            // below — re-fetches and swaps only #tmr-customers-list-wrap (+ the
+            // count badge), so 2000+ customers means a fast AJAX re-render
+            // instead of a full page reload per keystroke/change.
+            function fetchCustomersList(paged) {
+                var search = $('.tmr-customers-search-form input[name="s"]').val();
+                var perPage = $('#tmr-customers-per-page').val();
+
+                TMRPanel.call('tmr_search_customers_list', { s: search, paged: paged, per_page: perPage }, function (data) {
+                    $('#tmr-customers-list-wrap').html(data.html);
+                    $('#tmr-customers-count').text(data.count);
+
+                    var url = new URL(window.location.href);
+                    if (search) {
+                        url.searchParams.set('s', search);
+                    } else {
+                        url.searchParams.delete('s');
+                    }
+                    url.searchParams.set('paged', paged);
+                    url.searchParams.set('per_page', perPage);
+                    window.history.replaceState(null, '', url.toString());
+                });
+            }
+
             // Debounced live search — mirrors the Orders panel's own pattern
-            // (TMR_Orders_Panel's .tmr-orders-search-form): re-fetches and swaps
-            // only #tmr-customers-list-wrap, so 2000+ customers means a fast
-            // AJAX re-render per pause in typing instead of a full page reload
-            // per keystroke (or needing Enter, the old plain-GET form's only way
-            // to search at all).
+            // (TMR_Orders_Panel's .tmr-orders-search-form).
             var customersSearchTimer = null;
             $(document).on('input', '.tmr-customers-search-form input[name="s"]', function () {
-                var search = $(this).val();
-
                 clearTimeout(customersSearchTimer);
                 customersSearchTimer = setTimeout(function () {
-                    TMRPanel.call('tmr_search_customers_list', { s: search, paged: 1 }, function (data) {
-                        $('#tmr-customers-list-wrap').html(data.html);
-                        $('#tmr-customers-count').text(data.count);
-
-                        var url = new URL(window.location.href);
-                        if (search) {
-                            url.searchParams.set('s', search);
-                        } else {
-                            url.searchParams.delete('s');
-                        }
-                        url.searchParams.set('paged', '1');
-                        window.history.replaceState(null, '', url.toString());
-                    });
+                    fetchCustomersList(1);
                 }, 350);
+            });
+
+            // Per-page change is a deliberate discrete action (not a keystroke
+            // stream), so it fetches immediately — no debounce needed.
+            $(document).on('change', '#tmr-customers-per-page', function () {
+                fetchCustomersList(1);
             });
 
             $('#tmr-add-customer').on('click', function (e) {
@@ -255,7 +298,7 @@ class TMR_Customers_Panel
         TMR_Panel_Shell::footer();
     }
 
-    private static function render_table($query, $paged, $search)
+    private static function render_table($query, $paged, $search, $per_page)
     {
         ?>
         <div class="tmr-card">
@@ -300,7 +343,7 @@ class TMR_Customers_Panel
             </table>
         </div>
 
-        <?php self::render_pagination($query->max_num_pages, $paged, array('page' => 'tmr-customers', 's' => $search)); ?>
+        <?php self::render_pagination($query->max_num_pages, $paged, array('page' => 'tmr-customers', 's' => $search, 'per_page' => $per_page)); ?>
         <?php
     }
 
@@ -311,13 +354,14 @@ class TMR_Customers_Panel
             wp_send_json_error(array('message' => __('অনুমতি নেই।', 'tailor-manager')));
         }
 
-        $search = isset($_POST['s']) ? sanitize_text_field(wp_unslash($_POST['s'])) : '';
-        $paged  = isset($_POST['paged']) ? max(1, (int) $_POST['paged']) : 1;
+        $search   = isset($_POST['s']) ? sanitize_text_field(wp_unslash($_POST['s'])) : '';
+        $paged    = isset($_POST['paged']) ? max(1, (int) $_POST['paged']) : 1;
+        $per_page = self::resolve_per_page(isset($_POST['per_page']) ? (int) $_POST['per_page'] : 0);
 
-        $query = self::build_query($search, $paged);
+        $query = self::build_query($search, $paged, $per_page);
 
         ob_start();
-        self::render_table($query, $paged, $search);
+        self::render_table($query, $paged, $search, $per_page);
         $html = ob_get_clean();
 
         wp_send_json_success(array('html' => $html, 'count' => self::format_count($query->found_posts)));
