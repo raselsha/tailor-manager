@@ -21,17 +21,81 @@ class TMR_Customers_Panel
         add_action('wp_ajax_tmr_search_customers_list', array($this, 'ajax_search'));
     }
 
+    /**
+     * Deliberately NOT WP_Query's own 's' param — that only ever matches
+     * post_title/excerpt/content, so a customer looked up by their PHONE
+     * NUMBER (a postmeta field, "নাম বা ফোন খুঁজুন" promises both) silently
+     * matched nothing at all, even though the placeholder says otherwise.
+     * posts_join/posts_where below build "title LIKE X OR phone LIKE X" as
+     * one properly self-contained, AND'd-onto-the-rest clause instead —
+     * scoped to only this query via the tmr_customer_search_term query var,
+     * so it can never leak into some other WP_Query running the same request.
+     */
     private static function build_query($search, $paged)
     {
-        return new WP_Query(array(
+        $args = array(
             'post_type'      => self::POST_TYPE,
             'post_status'    => array('publish', 'draft'),
-            's'              => $search,
             'posts_per_page' => self::PER_PAGE,
             'paged'          => $paged,
             'orderby'        => 'title',
             'order'          => 'ASC',
-        ));
+        );
+
+        if ('' === $search) {
+            return new WP_Query($args);
+        }
+
+        $args['tmr_customer_search_term'] = $search;
+
+        add_filter('posts_join', array(__CLASS__, 'filter_search_join'), 10, 2);
+        add_filter('posts_where', array(__CLASS__, 'filter_search_where'), 10, 2);
+        add_filter('posts_distinct', array(__CLASS__, 'filter_search_distinct'), 10, 2);
+
+        $query = new WP_Query($args);
+
+        remove_filter('posts_join', array(__CLASS__, 'filter_search_join'), 10);
+        remove_filter('posts_where', array(__CLASS__, 'filter_search_where'), 10);
+        remove_filter('posts_distinct', array(__CLASS__, 'filter_search_distinct'), 10);
+
+        return $query;
+    }
+
+    public static function filter_search_join($join, $query)
+    {
+        if (!$query->get('tmr_customer_search_term')) {
+            return $join;
+        }
+        global $wpdb;
+        $join .= " LEFT JOIN {$wpdb->postmeta} AS tmr_search_phone ON ({$wpdb->posts}.ID = tmr_search_phone.post_id AND tmr_search_phone.meta_key = '_tmr_phone')";
+        return $join;
+    }
+
+    public static function filter_search_where($where, $query)
+    {
+        $term = $query->get('tmr_customer_search_term');
+        if (!$term) {
+            return $where;
+        }
+        global $wpdb;
+        $like = '%' . $wpdb->esc_like($term) . '%';
+        $where .= $wpdb->prepare(
+            " AND ({$wpdb->posts}.post_title LIKE %s OR tmr_search_phone.meta_value LIKE %s)",
+            $like,
+            $like
+        );
+        return $where;
+    }
+
+    public static function filter_search_distinct($distinct, $query)
+    {
+        return $query->get('tmr_customer_search_term') ? 'DISTINCT' : $distinct;
+    }
+
+    private static function format_count($total)
+    {
+        /* translators: %d: total matching customer count */
+        return sprintf(__('মোট %d জন কাস্টমার পাওয়া গেছে', 'tailor-manager'), $total);
     }
 
     public static function render()
@@ -60,6 +124,7 @@ class TMR_Customers_Panel
                     <input type="text" name="s" class="tmr-filter-input" value="<?php echo esc_attr($search); ?>" placeholder="<?php esc_attr_e('নাম বা ফোন খুঁজুন…', 'tailor-manager'); ?>" />
                 </div>
             </form>
+            <span class="tmr-filter-count" id="tmr-customers-count"><?php echo esc_html(self::format_count($query->found_posts)); ?></span>
         </div>
         <?php
         $filter_bar_html = ob_get_clean();
@@ -127,6 +192,7 @@ class TMR_Customers_Panel
                 customersSearchTimer = setTimeout(function () {
                     TMRPanel.call('tmr_search_customers_list', { s: search, paged: 1 }, function (data) {
                         $('#tmr-customers-list-wrap').html(data.html);
+                        $('#tmr-customers-count').text(data.count);
 
                         var url = new URL(window.location.href);
                         if (search) {
@@ -254,7 +320,7 @@ class TMR_Customers_Panel
         self::render_table($query, $paged, $search);
         $html = ob_get_clean();
 
-        wp_send_json_success(array('html' => $html));
+        wp_send_json_success(array('html' => $html, 'count' => self::format_count($query->found_posts)));
     }
 
     /**
