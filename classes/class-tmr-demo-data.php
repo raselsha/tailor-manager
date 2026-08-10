@@ -79,6 +79,14 @@ class TMR_Demo_Data
             'এমব্রয়ডারি'       => array($cat_slugs['coat'], 0),
             'এমব্রয়ডারি বোর্ড' => array($cat_slugs['coat'], 1),
             'কারচুপি'          => array($cat_slugs['coat'], 0),
+            // Shape-swatch parts — options carry a featured image on the real
+            // shop's install (order form auto-renders it via has_post_thumbnail());
+            // seeded here as text-only choices since a generic install has no
+            // matching image asset to ship, same as any other design type's
+            // image being optional.
+            'প্লেট নমুনা'       => array($cat_slugs['coat'], 0),
+            'পকেট নমুনা'       => array($cat_slugs['coat'], 0),
+            'কফ নমুনা'         => array($cat_slugs['coat'], 0),
             'পকেট'             => array($cat_slugs['trouser'], 0),
             'সেলাই|trouser'    => array($cat_slugs['trouser'], 0, 'সেলাই'),
             'চেইন'             => array($cat_slugs['trouser'], 0),
@@ -160,6 +168,17 @@ class TMR_Demo_Data
 
             // কারচুপি (জামা)
             'কলার প্লেট' => 'কারচুপি', 'কারচুপি - সামনা কালর হাতা' => 'কারচুপি',
+
+            // প্লেট নমুনা (জামা)
+            'সোজা প্লেট' => 'প্লেট নমুনা', 'গোল মাথা প্লেট' => 'প্লেট নমুনা',
+            'কোনা কাটা প্লেট' => 'প্লেট নমুনা', 'কোনাকুনি প্লেট' => 'প্লেট নমুনা',
+
+            // পকেট নমুনা (জামা)
+            'চারকোনা পকেট' => 'পকেট নমুনা', 'গোল কোণা পকেট' => 'পকেট নমুনা', 'কোনা কাটা পকেট' => 'পকেট নমুনা',
+            'কোনাকুনি দাগ পকেট' => 'পকেট নমুনা', 'সোজা দাগ পকেট' => 'পকেট নমুনা', 'একদাগ পকেট' => 'পকেট নমুনা',
+
+            // কফ নমুনা (জামা)
+            'সোজা কফ' => 'কফ নমুনা', 'গোল কফ' => 'কফ নমুনা', 'চারকোনা কফ' => 'কফ নমুনা', 'কোনাকুনি কফ' => 'কফ নমুনা',
 
             // পকেট (পায়জামা)
             'দুই পকেট_2' => 'পকেট', 'এক পকেট ডানে' => 'পকেট', 'এক পকেট বামে' => 'পকেট',
