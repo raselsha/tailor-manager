@@ -37,8 +37,7 @@ class TMR_Dress_Post_Type
         $args = array(
             'post_type'      => self::POST_TYPE,
             'posts_per_page' => -1,
-            'orderby'        => 'title',
-            'order'          => 'ASC',
+            'orderby'        => array('menu_order' => 'ASC', 'title' => 'ASC'),
             'post_status'    => $active_only ? array('publish') : array('publish', 'draft'),
             'tax_query'      => array(
                 array(

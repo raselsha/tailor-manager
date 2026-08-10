@@ -68,6 +68,52 @@
          */
         syncStatusToggle: function ($checkbox) {
             $checkbox.siblings('.tmr-status-toggle-label').text($checkbox.is(':checked') ? 'সক্রিয়' : 'নিষ্ক্রিয়');
+        },
+
+        /**
+         * Wires drag-and-drop card reordering via SortableJS (window.Sortable,
+         * vendored — see the enqueue comment in TMR_Panel_Shell::enqueue_assets()
+         * for why it replaced jQuery UI Sortable), one independent instance per
+         * matched container (e.g. every category's own .tmr-dress-grid, so
+         * dragging never crosses from one category's group into another's — this
+         * is display-order only, not a way to reassign category/parent). Each
+         * container saves its own order the moment a drag finishes, sending every
+         * card's data-id in its new top-to-bottom/left-to-right order.
+         * @param {string} gridSelector e.g. '.tmr-dress-grid'
+         * @param {string} action       tmr_ AJAX action that persists the order
+         */
+        initSortableGrids: function (gridSelector, action) {
+            $(gridSelector).each(function () {
+                window.Sortable.create(this, {
+                    animation: 150,
+                    handle: '.tmr-drag-handle',
+                    draggable: '.tmr-dress-card:not(.tmr-dress-card-add)',
+                    ghostClass: 'tmr-drag-ghost',
+                    chosenClass: 'tmr-drag-chosen',
+                    // Touch only (mouse stays instant): a short press-and-hold
+                    // before the drag actually engages, so a finger that's really
+                    // trying to scroll the page (and moves a few px during that
+                    // hold) cancels the drag instead of yanking a card sideways —
+                    // without this, a touch grab and an attempted scroll compete
+                    // for the same gesture and the drag "doesn't take."
+                    delay: 150,
+                    delayOnTouchOnly: true,
+                    touchStartThreshold: 5,
+                    onEnd: function (evt) {
+                        // evt.to (not evt.target, which SortableJS doesn't document/
+                        // guarantee) is the container the drag actually ended in —
+                        // always this same grid here since cross-grid dragging isn't
+                        // enabled (no `group` option set), but reading the documented
+                        // property is one less thing to get wrong.
+                        var ids = $(evt.to).find('.tmr-dress-card:not(.tmr-dress-card-add)').map(function () {
+                            return $(this).data('id');
+                        }).get();
+                        if (ids.length) {
+                            TMRPanel.call(action, { order: ids });
+                        }
+                    }
+                });
+            });
         }
     };
 

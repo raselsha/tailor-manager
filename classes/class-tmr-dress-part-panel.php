@@ -11,6 +11,7 @@ class TMR_Dress_Part_Panel
         add_action('wp_ajax_tmr_delete_dress_part', array($this, 'ajax_delete'));
         add_action('wp_ajax_tmr_get_dress_part', array($this, 'ajax_get'));
         add_action('wp_ajax_tmr_toggle_part_status', array($this, 'ajax_toggle_status'));
+        add_action('wp_ajax_tmr_reorder_dress_part', array($this, 'ajax_reorder'));
     }
 
     public static function render()
@@ -23,8 +24,7 @@ class TMR_Dress_Part_Panel
             'post_type'      => self::POST_TYPE,
             'post_status'    => array('publish', 'draft'),
             'posts_per_page' => -1,
-            'orderby'        => 'title',
-            'order'          => 'ASC',
+            'orderby'        => array('menu_order' => 'ASC', 'title' => 'ASC'),
         ));
 
         $categories = TMR_Category_Taxonomy::get_terms();
@@ -111,6 +111,8 @@ class TMR_Dress_Part_Panel
         jQuery(function ($) {
             var $modal = $('#tmr-part-modal');
             var $form = $('#tmr-part-form');
+
+            TMRPanel.initSortableGrids('.tmr-dress-grid', 'tmr_reorder_dress_part');
 
             $('.tmr-cat-collapse-header').on('click', function () {
                 $(this).next('.tmr-cat-collapse-body').slideToggle(150);
@@ -239,7 +241,7 @@ class TMR_Dress_Part_Panel
     {
         $measurement_enabled = TMR_Dress_Part_Post_Type::measurement_enabled($part->ID);
         ?>
-        <div class="tmr-dress-card">
+        <div class="tmr-dress-card" data-id="<?php echo esc_attr($part->ID); ?>">
             <div class="tmr-dress-card-icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0z"></path><path d="M14.5 6.5l3 3"></path><path d="M11.5 9.5l1.5 1.5"></path><path d="M8.5 12.5l1.5 1.5"></path></svg>
             </div>
@@ -253,6 +255,7 @@ class TMR_Dress_Part_Panel
                     <span class="tmr-toggle-slider"></span>
                 </label>
                 <div class="tmr-dress-card-actions">
+                    <span class="tmr-drag-handle" title="<?php esc_attr_e('টেনে সাজান', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="6" r="1.5"></circle><circle cx="15" cy="6" r="1.5"></circle><circle cx="9" cy="12" r="1.5"></circle><circle cx="15" cy="12" r="1.5"></circle><circle cx="9" cy="18" r="1.5"></circle><circle cx="15" cy="18" r="1.5"></circle></svg></span>
                     <span class="tmr-action-btn tmr-edit-part" data-id="<?php echo esc_attr($part->ID); ?>" title="<?php esc_attr_e('এডিট', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></span>
                     <span class="tmr-action-btn tmr-action-btn-red tmr-delete-part" data-id="<?php echo esc_attr($part->ID); ?>" title="<?php esc_attr_e('ডিলিট', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></span>
                 </div>
@@ -283,6 +286,19 @@ class TMR_Dress_Part_Panel
         wp_update_post(array('ID' => $id, 'post_status' => $new_status));
 
         wp_send_json_success(array('status' => $new_status));
+    }
+
+    public function ajax_reorder()
+    {
+        check_ajax_referer('tmr_panel_nonce', 'nonce');
+        if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
+            wp_send_json_error(array('message' => __('অনুমতি নেই।', 'tailor-manager')));
+        }
+
+        $order = isset($_POST['order']) && is_array($_POST['order']) ? array_map('intval', $_POST['order']) : array();
+        TMR_Panel_Shell::save_menu_order($order);
+
+        wp_send_json_success();
     }
 
     public function ajax_get()

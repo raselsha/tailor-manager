@@ -462,6 +462,57 @@ body.tmr-staff-chrome .tmr-admin-wrapper { height: calc(100vh - 40px); }
 .tmr-dress-card-add .tmr-dress-card-icon { background: rgba(0, 97, 213, .1); color: #0061d5; }
 .tmr-dress-card-add .tmr-dress-card-name { color: #0061d5; }
 
+/* Drag-and-drop reorder handle (TMRPanel.initSortableGrids(), SortableJS) —
+   pinned to the card's own top-right corner instead of sitting inline with
+   edit/delete, so it reads as "grab the card" rather than a third row action.
+   Dim-until-hover on a real mouse; see the (hover: none) block below for why
+   touch gets a different, always-visible/bigger treatment instead. */
+.tmr-drag-handle {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 7px;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, .12);
+    cursor: grab;
+    touch-action: none;
+    opacity: 0;
+    transition: opacity .15s ease;
+}
+.tmr-dress-card:hover .tmr-drag-handle { opacity: .7; }
+.tmr-drag-handle:hover { opacity: 1 !important; }
+.tmr-drag-handle:active { cursor: grabbing; }
+
+/* Touch: a handle that only appears on :hover is effectively undiscoverable —
+   touchscreens don't have a reliable hover state — and 26px is still a small
+   target for a fingertip (Apple/Google both recommend ~40-44px minimum). Any
+   device without real hover (phones, tablets) gets the handle shown outright,
+   at a bigger touch-friendly size; touch-action: none above already stops the
+   page from trying to scroll once a drag starts on it. */
+@media (hover: none), (pointer: coarse) {
+    .tmr-drag-handle {
+        opacity: .85;
+        width: 38px;
+        height: 38px;
+        top: 4px;
+        right: 4px;
+    }
+    .tmr-drag-handle svg { width: 18px; height: 18px; }
+}
+
+/* SortableJS's own state classes — chosenClass on the card actually being
+   dragged (lifted, follows the pointer), ghostClass on the placeholder left
+   behind at its drop position (dashed outline, matches the old jQuery UI
+   placeholder look). */
+.tmr-drag-chosen { box-shadow: 0 10px 26px rgba(15, 23, 42, .16); cursor: grabbing; z-index: 2; }
+.tmr-drag-ghost { border: 2px dashed #0061d5 !important; border-radius: 14px; background: rgba(0, 97, 213, .05); opacity: 1; }
+.tmr-drag-ghost * { visibility: hidden; }
+
 /* Expand/collapse-all header button. */
 .tmr-toggle-all-btn { display: inline-flex; align-items: center; gap: 6px; }
 

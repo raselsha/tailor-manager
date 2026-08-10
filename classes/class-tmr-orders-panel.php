@@ -882,6 +882,144 @@ class TMR_Orders_Panel
             var $orderConfirmationBody = $('#tmr-order-confirmation-body');
             var currentOrderConfirmation = null;
 
+            /**
+             * Draft protection for a NEW order (never an order being edited —
+             * that one's real data is already safely on the server) — leaving
+             * this page for another (e.g. to go add a measurement field mid-order)
+             * used to silently throw away everything typed so far, since the
+             * order form only ever lived in this page's own JS/DOM state. Every
+             * meaningful change is snapshotted to localStorage; the next time a
+             * NEW order is opened, a leftover draft is silently put straight
+             * back into the form (no "restore your draft?" prompt) instead of
+             * the blank form that would otherwise just sit there.
+             */
+            var TMR_ORDER_DRAFT_KEY = 'tmr_order_draft';
+            var TMR_ORDER_DRAFT_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+            /**
+             * Most fields here have neither a `name` nor a stable `id` (the form
+             * repeats the same field shape once per category/part/dress, so IDs
+             * would collide) — this mirrors the exact same data-* attributes the
+             * submit handler above already reads to tell one dress/part/category's
+             * fields apart from another's.
+             */
+            function tmrOrderFieldKey($el) {
+                var id = $el.attr('id');
+                if (id) { return 'id:' + id; }
+                var name = $el.attr('name');
+                if (name) { return 'name:' + name; }
+                if ($el.hasClass('tmr-dress-check')) { return 'dresscheck:' + $el.data('dress-id'); }
+                if ($el.hasClass('tmr-dress-qty')) { return 'dressqty:' + $el.data('dress-id'); }
+                if ($el.hasClass('tmr-design-check')) { return 'designcheck:' + $el.val(); }
+                if ($el.hasClass('tmr-category-qty')) {
+                    return 'catqty:' + $el.closest('.tmr-category-block').data('category-id');
+                }
+                if ($el.hasClass('tmr-measure-field')) {
+                    return 'measure:' + $el.closest('.tmr-category-block').data('category-id') + ':' + $el.data('slug');
+                }
+                if ($el.hasClass('tmr-part-measurement')) {
+                    return 'partmeasure:' + $el.closest('.tmr-part-block').data('part-id');
+                }
+                return null;
+            }
+
+            // A form that's just sitting open with nothing chosen yet (every
+            // field at its own default) isn't worth protecting — only save once
+            // the shop owner has actually started an order, so an untouched
+            // "+ অর্ডার নিন" click never immediately manufactures a draft.
+            function tmrOrderFormHasMeaningfulData() {
+                if (parseInt($('#tmr-customer-id').val(), 10) > 0) { return true; }
+                if ($('#tmr-customer-search').val()) { return true; }
+                if ($('#tmr-order-form .tmr-dress-check:checked').length) { return true; }
+                if ($('#tmr-order-form .tmr-price-input').filter(function () { return $(this).val(); }).length) { return true; }
+                var imageId = parseInt($('#tmr-order-image-id').val(), 10);
+                return imageId > 0;
+            }
+
+            function tmrSnapshotOrderDraft() {
+                if (!TMR.orderDraftEnabled) {
+                    return;
+                }
+                if (parseInt($('#tmr-order-form input[name="order_id"]').val(), 10) > 0) {
+                    return;
+                }
+                if (!tmrOrderFormHasMeaningfulData()) {
+                    try { localStorage.removeItem(TMR_ORDER_DRAFT_KEY); } catch (e) { /* best-effort */ }
+                    return;
+                }
+                var fields = {};
+                $('#tmr-order-form').find('input, select, textarea').each(function () {
+                    var $el = $(this);
+                    var key = tmrOrderFieldKey($el);
+                    if (!key) { return; }
+                    fields[key] = ($el.is(':checkbox') || $el.is(':radio')) ? $el.is(':checked') : $el.val();
+                });
+                try {
+                    localStorage.setItem(TMR_ORDER_DRAFT_KEY, JSON.stringify({ savedAt: Date.now(), fields: fields }));
+                } catch (e) { /* storage full/disabled — draft protection is best-effort */ }
+            }
+
+            var orderDraftSaveTimer = null;
+            $(document).on('input change', '#tmr-order-form', function () {
+                clearTimeout(orderDraftSaveTimer);
+                orderDraftSaveTimer = setTimeout(tmrSnapshotOrderDraft, 600);
+            });
+
+            function tmrRestoreOrderDraft(fields) {
+                $('#tmr-order-form').find('input, select, textarea').each(function () {
+                    var $el = $(this);
+                    var key = tmrOrderFieldKey($el);
+                    if (!key || !(key in fields)) { return; }
+                    if ($el.is(':checkbox') || $el.is(':radio')) {
+                        $el.prop('checked', fields[key]);
+                    } else {
+                        $el.val(fields[key]);
+                    }
+                });
+                // Re-run the exact same post-load setup loadOrderForm() itself
+                // calls below, so every dependent bit of UI (category sections
+                // expanding open, part-measurement rows showing, price totals)
+                // reflects what was just restored, not only the raw inputs.
+                $('#tmr-order-form .tmr-dress-check, #tmr-order-form .tmr-design-check').trigger('change');
+                initCategoryCollapse();
+                initMeasureFieldStates();
+                initPartMeasureVisibility();
+                recalcPricing();
+                if (fields['id:tmr-delivery-date']) {
+                    $('#tmr-delivery-date-display').val(formatDeliveryDisplay(fields['id:tmr-delivery-date']));
+                }
+            }
+
+            // Silent — no "restore your draft?" prompt. A leftover draft just
+            // reappears in the form as-is; nothing to confirm, edit whatever's
+            // wrong or clear the form the normal way if it's not wanted.
+            function tmrMaybeRestoreOrderDraft() {
+                if (!TMR.orderDraftEnabled) {
+                    return;
+                }
+                var raw;
+                try {
+                    raw = localStorage.getItem(TMR_ORDER_DRAFT_KEY);
+                } catch (e) {
+                    return;
+                }
+                if (!raw) {
+                    return;
+                }
+                var draft;
+                try {
+                    draft = JSON.parse(raw);
+                } catch (e) {
+                    localStorage.removeItem(TMR_ORDER_DRAFT_KEY);
+                    return;
+                }
+                if (!draft || !draft.savedAt || (Date.now() - draft.savedAt) > TMR_ORDER_DRAFT_MAX_AGE_MS) {
+                    localStorage.removeItem(TMR_ORDER_DRAFT_KEY);
+                    return;
+                }
+                tmrRestoreOrderDraft(draft.fields);
+            }
+
             var tmrStatusLabels = {
                 pending: '<?php echo esc_js(__('পেন্ডিং', 'tailor-manager')); ?>',
                 ready: '<?php echo esc_js(__('রেডি', 'tailor-manager')); ?>',
@@ -1088,6 +1226,9 @@ class TMR_Orders_Panel
                     initMeasureFieldStates();
                     initPartMeasureVisibility();
                     recalcPricing();
+                    if (!id) {
+                        tmrMaybeRestoreOrderDraft();
+                    }
                 });
             }
 
@@ -1376,6 +1517,7 @@ class TMR_Orders_Panel
                 payload.push({ name: 'items', value: JSON.stringify(categories) });
 
                 TMRPanel.call('tmr_save_order', $.param(payload), function (data) {
+                    try { localStorage.removeItem(TMR_ORDER_DRAFT_KEY); } catch (e) { /* best-effort */ }
                     showOrderConfirmation(data);
                 });
             });

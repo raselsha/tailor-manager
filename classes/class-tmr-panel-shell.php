@@ -292,6 +292,22 @@ class TMR_Panel_Shell
     }
 
     /**
+     * Shared by every drag-and-drop-sortable CPT grid (Dress, Dress Part, Design
+     * Type) — persists a new display order as each post's own native menu_order
+     * field rather than a bespoke option, so no extra storage/migration is
+     * needed and every existing WP_Query('orderby' => 'menu_order') convention
+     * just works. $ids is scoped to ONE grid/group at a time (e.g. one category's
+     * dress cards), so menu_order values intentionally restart at 0 per group —
+     * they're never compared across groups, only used to sort within one.
+     */
+    public static function save_menu_order(array $ids)
+    {
+        foreach ($ids as $index => $id) {
+            wp_update_post(array('ID' => (int) $id, 'menu_order' => $index));
+        }
+    }
+
+    /**
      * date_i18n('l, M j') still renders English day/month names unless the whole site's
      * locale is switched to bn_BD (a bigger, site-wide change beyond this plugin) — so
      * dates shown in the panel are formatted through this small fixed map instead.
@@ -347,12 +363,25 @@ class TMR_Panel_Shell
         // Kazuhiko Arase's public-domain QR generator (same vendor copy doctor-appointment
         // uses for its booking-confirmation QR) — powers the order confirmation's QR code.
         wp_enqueue_script('tmr-qrcode', TMR_PLUGIN_URL . 'assets/js/vendor/qrcode.js', array(), TMR_VERSION, true);
-        wp_enqueue_script('tmr-panel', TMR_PLUGIN_URL . 'assets/js/panel.js', array('jquery', 'tmr-qrcode'), file_exists($js_path) ? filemtime($js_path) : TMR_VERSION, true);
+        // SortableJS (MIT, vendored — RubaXa/SortableJS), not jQuery UI Sortable:
+        // jQuery UI's own sortable was built for normal block/list flow and drags
+        // items via absolute-positioning math that doesn't account for CSS Grid
+        // track layout (.tmr-dress-grid is `display: grid`) — it would
+        // intermittently miscalculate the drop target and silently fail to
+        // reorder. SortableJS moves the real DOM node during drag instead, which
+        // the grid just reflows around, and needs no jQuery UI dependency at all.
+        wp_enqueue_script('tmr-sortable', TMR_PLUGIN_URL . 'assets/js/vendor/sortable.min.js', array(), TMR_VERSION, true);
+        wp_enqueue_script('tmr-panel', TMR_PLUGIN_URL . 'assets/js/panel.js', array('jquery', 'tmr-qrcode', 'tmr-sortable'), file_exists($js_path) ? filemtime($js_path) : TMR_VERSION, true);
         wp_enqueue_media();
 
         wp_localize_script('tmr-panel', 'TMR', array(
-            'ajaxUrl' => admin_url('admin-ajax.php'),
-            'nonce'   => wp_create_nonce('tmr_panel_nonce'),
+            'ajaxUrl'           => admin_url('admin-ajax.php'),
+            'nonce'             => wp_create_nonce('tmr_panel_nonce'),
+            // Settings > ডেলিভারি সেটিংস toggle — the Orders panel's own JS
+            // (TMR_Orders_Panel) checks this before ever touching localStorage,
+            // so a shop owner who doesn't want in-progress orders remembered
+            // across page loads can turn the whole thing off from one place.
+            'orderDraftEnabled' => (bool) get_option('tmr_order_draft_enabled', '1'),
         ));
     }
 

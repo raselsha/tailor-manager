@@ -15,6 +15,7 @@ class TMR_Measurement_Fields_Panel
         add_action('wp_ajax_tmr_mf_save_field', array($this, 'ajax_save_field'));
         add_action('wp_ajax_tmr_mf_delete_field', array($this, 'ajax_delete_field'));
         add_action('wp_ajax_tmr_mf_toggle_status', array($this, 'ajax_toggle_status'));
+        add_action('wp_ajax_tmr_reorder_measurement_fields', array($this, 'ajax_reorder'));
     }
 
     public static function render()
@@ -112,6 +113,8 @@ class TMR_Measurement_Fields_Panel
             var $modal = $('#tmr-field-modal');
             var $form = $('#tmr-field-form');
 
+            TMRPanel.initSortableGrids('.tmr-dress-grid', 'tmr_reorder_measurement_fields');
+
             function openAddModal() {
                 $form[0].reset();
                 $form.find('[name="slug"]').val('');
@@ -181,7 +184,7 @@ class TMR_Measurement_Fields_Panel
     private static function render_field_card($slug, $label, array $assigned_tags, $active, $is_default)
     {
         ?>
-        <div class="tmr-dress-card">
+        <div class="tmr-dress-card" data-id="<?php echo esc_attr($slug); ?>">
             <div class="tmr-dress-card-icon">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0z"></path><path d="M14.5 6.5l3 3"></path><path d="M11.5 9.5l1.5 1.5"></path><path d="M8.5 12.5l1.5 1.5"></path></svg>
             </div>
@@ -203,12 +206,26 @@ class TMR_Measurement_Fields_Panel
                     <span class="tmr-toggle-slider"></span>
                 </label>
                 <div class="tmr-dress-card-actions">
+                    <span class="tmr-drag-handle" title="<?php esc_attr_e('টেনে সাজান', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="6" r="1.5"></circle><circle cx="15" cy="6" r="1.5"></circle><circle cx="9" cy="12" r="1.5"></circle><circle cx="15" cy="12" r="1.5"></circle><circle cx="9" cy="18" r="1.5"></circle><circle cx="15" cy="18" r="1.5"></circle></svg></span>
                     <span class="tmr-action-btn tmr-edit-field" data-slug="<?php echo esc_attr($slug); ?>" title="<?php esc_attr_e('এডিট', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></span>
                     <span class="tmr-action-btn tmr-action-btn-red tmr-delete-field" data-slug="<?php echo esc_attr($slug); ?>" title="<?php esc_attr_e('ডিলিট', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></span>
                 </div>
             </div>
         </div>
         <?php
+    }
+
+    public function ajax_reorder()
+    {
+        check_ajax_referer('tmr_panel_nonce', 'nonce');
+        if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
+            wp_send_json_error(array('message' => __('অনুমতি নেই।', 'tailor-manager')));
+        }
+
+        $order = isset($_POST['order']) && is_array($_POST['order']) ? array_map('sanitize_key', wp_unslash($_POST['order'])) : array();
+        TMR_Measurement_Fields::reorder_library($order);
+
+        wp_send_json_success();
     }
 
     public function ajax_get_field()

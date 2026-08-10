@@ -125,8 +125,7 @@ if (!class_exists('TMR_Tailor_Manager')) {
             $order->register();
             $order_item->register();
 
-            $taxonomy->maybe_seed_default_terms();
-            TMR_Measurement_Fields::maybe_seed_defaults();
+            TMR_Demo_Data::maybe_seed();
 
             flush_rewrite_rules();
         }

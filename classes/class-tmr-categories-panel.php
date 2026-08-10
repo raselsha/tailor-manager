@@ -16,6 +16,7 @@ class TMR_Categories_Panel
         add_action('wp_ajax_tmr_get_category', array($this, 'ajax_get_category'));
         add_action('wp_ajax_tmr_delete_category', array($this, 'ajax_delete_category'));
         add_action('wp_ajax_tmr_toggle_category_status', array($this, 'ajax_toggle_status'));
+        add_action('wp_ajax_tmr_reorder_categories', array($this, 'ajax_reorder'));
     }
 
     public static function render()
@@ -127,6 +128,8 @@ class TMR_Categories_Panel
             var $modal = $('#tmr-category-modal');
             var $form = $('#tmr-category-form');
 
+            TMRPanel.initSortableGrids('.tmr-dress-grid', 'tmr_reorder_categories');
+
             function setImage(imageId, url) {
                 $form.find('.tmr-cat-image-id').val(imageId);
                 if (url) {
@@ -236,7 +239,7 @@ class TMR_Categories_Panel
     private static function render_category_card(WP_Term $term, $image_url, $dress_count, $part_count, $active)
     {
         ?>
-        <div class="tmr-dress-card">
+        <div class="tmr-dress-card" data-id="<?php echo esc_attr($term->term_id); ?>">
             <div class="tmr-dress-card-icon">
                 <?php if ($image_url) : ?>
                     <img src="<?php echo esc_url($image_url); ?>" alt="" />
@@ -252,6 +255,7 @@ class TMR_Categories_Panel
                     <span class="tmr-toggle-slider"></span>
                 </label>
                 <div class="tmr-dress-card-actions">
+                    <span class="tmr-drag-handle" title="<?php esc_attr_e('টেনে সাজান', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="6" r="1.5"></circle><circle cx="15" cy="6" r="1.5"></circle><circle cx="9" cy="12" r="1.5"></circle><circle cx="15" cy="12" r="1.5"></circle><circle cx="9" cy="18" r="1.5"></circle><circle cx="15" cy="18" r="1.5"></circle></svg></span>
                     <span class="tmr-action-btn tmr-edit-category" data-id="<?php echo esc_attr($term->term_id); ?>" title="<?php esc_attr_e('এডিট', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></span>
                     <span class="tmr-action-btn tmr-action-btn-red tmr-delete-category" data-id="<?php echo esc_attr($term->term_id); ?>" title="<?php esc_attr_e('ডিলিট', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></span>
                 </div>
@@ -371,6 +375,19 @@ class TMR_Categories_Panel
         TMR_Category_Taxonomy::set_active($id, $new_active);
 
         wp_send_json_success(array('active' => $new_active));
+    }
+
+    public function ajax_reorder()
+    {
+        check_ajax_referer('tmr_panel_nonce', 'nonce');
+        if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
+            wp_send_json_error(array('message' => __('অনুমতি নেই।', 'tailor-manager')));
+        }
+
+        $order = isset($_POST['order']) && is_array($_POST['order']) ? array_map('intval', $_POST['order']) : array();
+        TMR_Category_Taxonomy::reorder($order);
+
+        wp_send_json_success();
     }
 
     public function ajax_delete_category()

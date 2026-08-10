@@ -9,6 +9,7 @@ class TMR_Category_Taxonomy
 {
     const TAXONOMY     = 'tmr_category';
     const ACTIVE_META  = '_tmr_category_active';
+    const ORDER_META   = '_tmr_category_order';
 
     public function __construct()
     {
@@ -31,23 +32,10 @@ class TMR_Category_Taxonomy
         );
     }
 
-    public function maybe_seed_default_terms()
-    {
-        if (get_option('tmr_categories_seeded')) {
-            return;
-        }
-
-        foreach (array('ক্যাটাগরি ১', 'ক্যাটাগরি ২') as $name) {
-            if (!term_exists($name, self::TAXONOMY)) {
-                wp_insert_term($name, self::TAXONOMY);
-            }
-        }
-
-        update_option('tmr_categories_seeded', 1);
-    }
-
     /**
-     * @return WP_Term[]
+     * @return WP_Term[] in drag-and-drop display order (reorder()'s own saved
+     *         order, falling back to term_id — i.e. creation order — for any
+     *         term that predates the sort feature and was never dragged)
      */
     public static function get_terms()
     {
@@ -58,7 +46,31 @@ class TMR_Category_Taxonomy
             'order'      => 'ASC',
         ));
 
-        return is_wp_error($terms) ? array() : $terms;
+        if (is_wp_error($terms)) {
+            return array();
+        }
+
+        usort($terms, function ($a, $b) {
+            $order_a = get_term_meta($a->term_id, self::ORDER_META, true);
+            $order_b = get_term_meta($b->term_id, self::ORDER_META, true);
+            // '' (never explicitly ordered) sorts after any real position, by
+            // term_id — new/legacy categories land at the end, not scattered in.
+            $order_a = '' === $order_a ? PHP_INT_MAX : (int) $order_a;
+            $order_b = '' === $order_b ? PHP_INT_MAX : (int) $order_b;
+            return $order_a === $order_b ? ($a->term_id - $b->term_id) : ($order_a - $order_b);
+        });
+
+        return $terms;
+    }
+
+    /**
+     * @param int[] $term_ids in the new desired display order
+     */
+    public static function reorder(array $term_ids)
+    {
+        foreach ($term_ids as $index => $term_id) {
+            update_term_meta((int) $term_id, self::ORDER_META, $index);
+        }
     }
 
     /**

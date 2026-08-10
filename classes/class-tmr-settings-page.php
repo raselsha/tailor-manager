@@ -24,6 +24,7 @@ class TMR_Settings_Page
         $shop_address = get_option('tmr_shop_address', '');
         $shop_phone   = get_option('tmr_shop_phone', '');
         $default_delivery_days = (int) get_option('tmr_default_delivery_days', 7);
+        $order_draft_enabled   = (bool) get_option('tmr_order_draft_enabled', '1');
 
         TMR_Panel_Shell::header('settings', __('সেটিংস', 'tailor-manager'), __('দোকানের তথ্য পরিচালনা করুন।', 'tailor-manager'));
         ?>
@@ -48,6 +49,14 @@ class TMR_Settings_Page
                         <label class="tmr-form-label"><?php esc_html_e('ডিফল্ট ডেলিভারি সময় (দিনে)', 'tailor-manager'); ?></label>
                         <input type="number" min="0" step="1" name="default_delivery_days" value="<?php echo esc_attr($default_delivery_days); ?>" style="max-width:140px;" />
                         <p class="tmr-form-hint"><?php esc_html_e('নতুন অর্ডার নেওয়ার সময় ডেলিভারি তারিখ আজ থেকে এত দিন পরে স্বয়ংক্রিয়ভাবে নির্বাচিত থাকবে।', 'tailor-manager'); ?></p>
+                    </div>
+                    <div class="tmr-form-row">
+                        <label class="tmr-toggle">
+                            <input type="checkbox" name="order_draft_enabled" value="1" <?php checked($order_draft_enabled); ?> />
+                            <span class="tmr-toggle-slider"></span>
+                            <span class="tmr-form-label" style="margin:0;"><?php esc_html_e('অর্ডার খসড়া সংরক্ষণ', 'tailor-manager'); ?></span>
+                        </label>
+                        <p class="tmr-form-hint"><?php esc_html_e('চালু থাকলে, নতুন অর্ডার ফর্মে যা লেখা হচ্ছে তা এই ডিভাইসেই সাথে সাথে সংরক্ষিত হয় — অন্য পেজে গিয়ে ফিরে এলেও ফর্মের ডেটা থেকে যায়। বন্ধ থাকলে প্রতিবার ফাঁকা ফর্ম দেখাবে।', 'tailor-manager'); ?></p>
                     </div>
                     <div class="tmr-form-save-row">
                         <button type="submit" class="tmr-btn-add"><?php esc_html_e('সেভ করুন', 'tailor-manager'); ?></button>
@@ -126,6 +135,7 @@ class TMR_Settings_Page
 
         $days = isset($_POST['default_delivery_days']) ? max(0, (int) $_POST['default_delivery_days']) : 7;
         update_option('tmr_default_delivery_days', $days);
+        update_option('tmr_order_draft_enabled', !empty($_POST['order_draft_enabled']) ? '1' : '0');
 
         wp_send_json_success();
     }

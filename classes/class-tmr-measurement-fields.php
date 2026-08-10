@@ -36,6 +36,55 @@ class TMR_Measurement_Fields
     }
 
     /**
+     * Reorders the library itself — PHP associative arrays preserve insertion/key
+     * order, and get_library()/get_active_library() both just iterate that order,
+     * so rebuilding LIBRARY_OPTION in the requested slug order is the entire
+     * change; nothing downstream needs to know sorting happened.
+     * @param string[] $slugs field slugs in the new desired display order
+     */
+    public static function reorder_library(array $slugs)
+    {
+        $library  = self::get_library();
+        $reordered = array();
+        foreach ($slugs as $slug) {
+            if (isset($library[$slug])) {
+                $reordered[$slug] = $library[$slug];
+            }
+        }
+        // Any field not present in $slugs (shouldn't happen from the UI, but a
+        // stale/partial request must not silently delete fields) keeps its
+        // relative position, appended after the newly ordered ones.
+        foreach ($library as $slug => $label) {
+            if (!isset($reordered[$slug])) {
+                $reordered[$slug] = $label;
+            }
+        }
+        update_option(self::LIBRARY_OPTION, $reordered);
+
+        // get_for_category() (the order-taking form's own field list) reads each
+        // category's OWN assignment array, not the library, for its order — so a
+        // library-only reorder would resort the Measurement Fields manager's grid
+        // but leave every order form showing the old order. Re-sorting each
+        // category's existing assignment list to match keeps the library as the
+        // one place that actually controls display order everywhere, instead of
+        // two independently-ordered lists that can drift apart.
+        $new_order   = array_flip(array_keys($reordered));
+        $assignments = get_option(self::ASSIGNMENTS_OPTION, array());
+        foreach ($assignments as $category_slug => $slugs) {
+            if (!is_array($slugs)) {
+                continue;
+            }
+            usort($slugs, function ($a, $b) use ($new_order) {
+                $pos_a = isset($new_order[$a]) ? $new_order[$a] : PHP_INT_MAX;
+                $pos_b = isset($new_order[$b]) ? $new_order[$b] : PHP_INT_MAX;
+                return $pos_a - $pos_b;
+            });
+            $assignments[$category_slug] = $slugs;
+        }
+        update_option(self::ASSIGNMENTS_OPTION, $assignments);
+    }
+
+    /**
      * Absent state means active — fields created before this flag existed shouldn't
      * silently turn inactive.
      */
@@ -348,53 +397,4 @@ class TMR_Measurement_Fields
         update_option(self::ASSIGNMENTS_OPTION, $assignments);
     }
 
-    public static function maybe_seed_defaults()
-    {
-        if (get_option('tmr_measurement_fields_seeded')) {
-            return;
-        }
-
-        self::maybe_migrate();
-
-        $terms = TMR_Category_Taxonomy::get_terms();
-        $by_name = array();
-        foreach ($terms as $term) {
-            $by_name[$term->name] = $term->slug;
-        }
-
-        $defaults = array(
-            'ক্যাটাগরি ১' => array(
-                __('লম্বা', 'tailor-manager'),
-                __('বডি', 'tailor-manager'),
-                __('পুট', 'tailor-manager'),
-                __('হাতা', 'tailor-manager'),
-                __('কলার/গলা', 'tailor-manager'),
-                __('মুহরী', 'tailor-manager'),
-                __('কফ', 'tailor-manager'),
-                __('প্লেট', 'tailor-manager'),
-                __('ঘের', 'tailor-manager'),
-            ),
-            'ক্যাটাগরি ২' => array(
-                __('লম্বা', 'tailor-manager'),
-                __('মুহরী', 'tailor-manager'),
-                __('কোমড়', 'tailor-manager'),
-                __('হাই', 'tailor-manager'),
-                __('লুজ', 'tailor-manager'),
-                __('হিপ', 'tailor-manager'),
-            ),
-        );
-
-        foreach ($defaults as $name => $labels) {
-            if (!isset($by_name[$name])) {
-                continue;
-            }
-            $slugs = array();
-            foreach ($labels as $label) {
-                $slugs[] = self::create_or_get_field($label);
-            }
-            self::save_assignments_for_category($by_name[$name], $slugs);
-        }
-
-        update_option('tmr_measurement_fields_seeded', 1);
-    }
 }
