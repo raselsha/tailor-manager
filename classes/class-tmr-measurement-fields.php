@@ -202,8 +202,21 @@ class TMR_Measurement_Fields
         $label   = trim($label);
         $library = get_option(self::LIBRARY_OPTION, array());
 
+        // A Bangla label typed via a different keyboard/IME can produce a different
+        // (but visually identical) Unicode byte sequence for the same conjunct —
+        // e.g. ড়/য় as one precomposed codepoint vs. base letter + combining nukta.
+        // A plain === on the raw bytes treats those as different strings and
+        // silently creates a duplicate field instead of reusing the existing one
+        // (this is exactly how three catalog entries got accidentally duplicated
+        // during the Al-Modina data import), so both sides are normalized to NFC
+        // first when the intl extension is available — falls back to the old
+        // exact-byte comparison on hosts without it, same as before this fix.
+        $can_normalize = class_exists('Normalizer');
+        $label_key     = $can_normalize ? Normalizer::normalize($label, Normalizer::FORM_C) : $label;
+
         foreach ($library as $slug => $existing_label) {
-            if ($existing_label === $label) {
+            $existing_key = $can_normalize ? Normalizer::normalize($existing_label, Normalizer::FORM_C) : $existing_label;
+            if ($existing_key === $label_key) {
                 return $slug;
             }
         }
