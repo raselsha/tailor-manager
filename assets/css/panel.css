@@ -584,6 +584,11 @@ body.tmr-staff-chrome .tmr-admin-wrapper { height: calc(100vh - 40px); }
 .tmr-table tr:last-child td { border-bottom: none; }
 .tmr-table tr:hover td { background: #fafbfc; }
 
+/* Customers list — tighter rows than the base .tmr-table so more of a
+   2000+-row list fits on screen at once without scrolling. */
+.tmr-customers-table th { padding: 10px 20px; }
+.tmr-customers-table td { padding: 9px 20px; font-size: 13px; }
+
 .tmr-empty {
     text-align: center;
     padding: 40px;
