@@ -2694,7 +2694,13 @@ class TMR_Orders_Panel
             $measurements = array();
             if (isset($item['measurements']) && is_array($item['measurements'])) {
                 foreach ($item['measurements'] as $slug => $val) {
-                    $measurements[sanitize_key($slug)] = sanitize_text_field($val);
+                    // sanitize_key() strips '%' — a field whose label can't transliterate
+                    // to ASCII (e.g. a Bangla-only label) gets a percent-encoded slug from
+                    // sanitize_title() at creation time, and sanitize_key() mangles that
+                    // back into a string matching no real field, silently saving the
+                    // measurement under a key the order-view/edit screens never look up
+                    // (the value looks "lost" even though it's sitting in postmeta).
+                    $measurements[sanitize_title($slug)] = sanitize_text_field($val);
                 }
             }
             update_post_meta($item_id, '_tmr_measurements', $measurements);
