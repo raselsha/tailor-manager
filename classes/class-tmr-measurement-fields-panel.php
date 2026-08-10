@@ -39,7 +39,7 @@ class TMR_Measurement_Fields_Panel
         }
 
         $header_right = '<a href="#" class="tmr-btn-add" id="tmr-add-field">' . esc_html__('+ ফিল্ড যোগ করুন', 'tailor-manager') . '</a>';
-        TMR_Panel_Shell::header('measurement-fields', __('পোশাকের পরিমাপ', 'tailor-manager'), __('পরিমাপের ফিল্ড তৈরি করুন, তারপর কোন পোশাকে ব্যবহার হবে তা নির্বাচন করুন।', 'tailor-manager'), $header_right, true);
+        TMR_Panel_Shell::header('measurement-fields', __('পরিমাপ', 'tailor-manager'), __('পরিমাপের ফিল্ড তৈরি করুন, তারপর কোন পোশাকে ব্যবহার হবে তা নির্বাচন করুন।', 'tailor-manager'), $header_right, true);
         ?>
         <div class="tmr-card">
             <div class="tmr-dress-grid">

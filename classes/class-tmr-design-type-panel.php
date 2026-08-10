@@ -53,7 +53,7 @@ class TMR_Design_Type_Panel
 
         $header_right = '<button type="button" class="tmr-btn-outline tmr-toggle-all-btn" id="tmr-toggle-all">' . esc_html__('সব বন্ধ করুন', 'tailor-manager') . '</button>'
             . '<a href="#" class="tmr-btn-add" id="tmr-add-design">' . esc_html__('+ ডিজাইন টাইপ যোগ করুন', 'tailor-manager') . '</a>';
-        TMR_Panel_Shell::header('design-type', __('বিভিন্ন অংশের ডিজাইন', 'tailor-manager'), __('পোশাকের প্রতিটি অংশের জন্য নির্বাচনযোগ্য ডিজাইন অপশন।', 'tailor-manager'), $header_right, true);
+        TMR_Panel_Shell::header('design-type', __('ডিজাইন', 'tailor-manager'), __('পোশাকের প্রতিটি অংশের জন্য নির্বাচনযোগ্য ডিজাইন অপশন।', 'tailor-manager'), $header_right, true);
         ?>
         <?php if (empty($parts)) : ?>
             <div class="tmr-card"><p class="tmr-empty"><?php esc_html_e('এখনো কোনো ড্রেস পার্ট তৈরি হয়নি।', 'tailor-manager'); ?></p></div>

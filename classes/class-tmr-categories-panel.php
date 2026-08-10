@@ -34,7 +34,7 @@ class TMR_Categories_Panel
         $default_labels    = array_intersect_key(TMR_Measurement_Fields::get_library(), array_flip($default_slugs));
 
         $header_right = '<a href="#" class="tmr-btn-add" id="tmr-add-category">' . esc_html__('+ পোশাক যোগ করুন', 'tailor-manager') . '</a>';
-        TMR_Panel_Shell::header('categories', __('পোশাক', 'tailor-manager'), __('আপনার সব পোশাক ক্যাটাগরি এখানে পরিচালনা করুন।', 'tailor-manager'), $header_right, true);
+        TMR_Panel_Shell::header('categories', __('পোশাক টাইপ', 'tailor-manager'), __('আপনার সব পোশাক ক্যাটাগরি এখানে পরিচালনা করুন।', 'tailor-manager'), $header_right, true);
         ?>
         <div class="tmr-card">
             <div class="tmr-dress-grid">

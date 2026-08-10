@@ -156,11 +156,17 @@ msgstr "No orders in this period."
 msgid "+ পোশাক যোগ করুন"
 msgstr "+ Add Category"
 
-#: classes/class-tmr-categories-panel.php:36
-#: classes/class-tmr-orders-panel.php:2029
-#: classes/class-tmr-panel-shell.php:65
+#: classes/class-tmr-dashboard-panel.php:44
+#: classes/class-tmr-dress-panel.php:47
+#: classes/class-tmr-orders-panel.php:2171
+#: classes/class-tmr-panel-shell.php:66
 msgid "পোশাক"
-msgstr "Categories"
+msgstr "Garments"
+
+#: classes/class-tmr-categories-panel.php:36
+#: classes/class-tmr-panel-shell.php:65
+msgid "পোশাক টাইপ"
+msgstr "Garment Type"
 
 #: classes/class-tmr-categories-panel.php:36
 msgid "আপনার সব পোশাক ক্যাটাগরি এখানে পরিচালনা করুন।"
@@ -477,12 +483,6 @@ msgstr "Tailor Overview"
 msgid "আপনার দৈনন্দিন কার্যক্রম দেখুন।"
 msgstr "See your day-to-day activity."
 
-#: classes/class-tmr-dashboard-panel.php:44
-#: classes/class-tmr-dress-panel.php:47
-#: classes/class-tmr-panel-shell.php:66
-msgid "বিভিন্ন পোশাক"
-msgstr "Garments"
-
 #: classes/class-tmr-dashboard-panel.php:46
 msgid "ক্যাটালগে সক্রিয়"
 msgstr "Active in catalog"
@@ -542,11 +542,6 @@ msgstr "Collapse all"
 #: classes/class-tmr-design-type-panel.php:54
 msgid "+ ডিজাইন টাইপ যোগ করুন"
 msgstr "+ Add Design Type"
-
-#: classes/class-tmr-design-type-panel.php:55
-#: classes/class-tmr-panel-shell.php:68
-msgid "বিভিন্ন অংশের ডিজাইন"
-msgstr "Part Designs"
 
 #: classes/class-tmr-design-type-panel.php:55
 msgid "পোশাকের প্রতিটি অংশের জন্য নির্বাচনযোগ্য ডিজাইন অপশন।"
@@ -717,7 +712,7 @@ msgstr "+ Add Part"
 
 #: classes/class-tmr-dress-part-panel.php:47
 #: classes/class-tmr-panel-shell.php:67
-msgid "পোশাকের বিভিন্ন অংশ"
+msgid "পোশাকের অংশ"
 msgstr "Garment Parts"
 
 #: classes/class-tmr-dress-part-panel.php:47
@@ -800,7 +795,7 @@ msgstr "+ Add Field"
 
 #: classes/class-tmr-measurement-fields-panel.php:41
 #: classes/class-tmr-panel-shell.php:69
-msgid "পোশাকের পরিমাপ"
+msgid "পরিমাপ"
 msgstr "Measurements"
 
 #: classes/class-tmr-measurement-fields-panel.php:41
@@ -1459,19 +1454,19 @@ msgid "টেইলার প্যানেল"
 msgstr "Tailor Panel"
 
 #: classes/class-tmr-panel-shell.php:232
-msgid "প্রোডাক্ট ইনপুট: বিভিন্ন পোশাক"
+msgid "প্রোডাক্ট ইনপুট: পোশাক"
 msgstr "Product Input: Garments"
 
 #: classes/class-tmr-panel-shell.php:233
-msgid "প্রোডাক্ট ইনপুট: পোশাকের বিভিন্ন অংশ"
+msgid "প্রোডাক্ট ইনপুট: পোশাকের অংশ"
 msgstr "Product Input: Garment Parts"
 
 #: classes/class-tmr-panel-shell.php:234
-msgid "প্রোডাক্ট ইনপুট: বিভিন্ন অংশের ডিজাইন"
-msgstr "Product Input: Part Designs"
+msgid "প্রোডাক্ট ইনপুট: ডিজাইন"
+msgstr "Product Input: Design"
 
 #: classes/class-tmr-panel-shell.php:235
-msgid "প্রোডাক্ট ইনপুট: পোশাকের পরিমাপ"
+msgid "প্রোডাক্ট ইনপুট: পরিমাপ"
 msgstr "Product Input: Measurements"
 
 #: classes/class-tmr-panel-shell.php:492

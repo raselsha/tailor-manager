@@ -41,7 +41,7 @@ class TMR_Dashboard_Panel
         <div class="tmr-stats-grid">
             <div class="tmr-stat-card tmr-stat-card-blue">
                 <div class="tmr-stat-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41L13.42 20.58a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg></div>
-                <h4><?php esc_html_e('বিভিন্ন পোশাক', 'tailor-manager'); ?></h4>
+                <h4><?php esc_html_e('পোশাক', 'tailor-manager'); ?></h4>
                 <div class="value"><?php echo esc_html($stats['dresses']); ?></div>
                 <div class="trend"><?php esc_html_e('ক্যাটালগে সক্রিয়', 'tailor-manager'); ?></div>
             </div>

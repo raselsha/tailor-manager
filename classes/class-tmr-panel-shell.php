@@ -55,18 +55,18 @@ class TMR_Panel_Shell
             'my-orders'   => array('slug' => 'tmr-my-orders', 'title' => __('আমার অর্ডার', 'tailor-manager'), 'icon' => self::icon('calendar')),
             'customers'   => array('slug' => 'tmr-customers', 'title' => __('কাস্টমার', 'tailor-manager'), 'icon' => self::icon('users')),
             // URL slugs deliberately swapped from what their array keys/classes suggest —
-            // ?page=tmr-dress is the "পোশাক" (broad category, TMR_Categories_Panel) screen
-            // and ?page=tmr-categories is the "বিভিন্ন পোশাক" (individual garment,
+            // ?page=tmr-dress is the "পোশাক টাইপ" (broad category, TMR_Categories_Panel)
+            // screen and ?page=tmr-categories is the "পোশাক" (individual garment,
             // TMR_Dress_Panel) screen. The array KEYS still match each screen's underlying
             // class/purpose (TMR_Dress_Panel = 'dress', TMR_Categories_Panel = 'categories')
             // so render() calls below didn't need to change — only the slug/title values did.
-            // Menu order: "পোশাক" (categories key) right after কাস্টমার, then "বিভিন্ন পোশাক"
+            // Menu order: "পোশাক টাইপ" (categories key) right after কাস্টমার, then "পোশাক"
             // (dress key) beneath it — array order drives sidebar order (visible_nav()).
-            'categories'  => array('slug' => 'tmr-dress', 'title' => __('পোশাক', 'tailor-manager'), 'icon' => self::icon('shirt')),
-            'dress'       => array('slug' => 'tmr-categories', 'title' => __('বিভিন্ন পোশাক', 'tailor-manager'), 'icon' => self::icon('layers')),
-            'dress-part'  => array('slug' => 'tmr-dress-part', 'title' => __('পোশাকের বিভিন্ন অংশ', 'tailor-manager'), 'icon' => self::icon('scissors')),
-            'design-type' => array('slug' => 'tmr-design-type', 'title' => __('বিভিন্ন অংশের ডিজাইন', 'tailor-manager'), 'icon' => self::icon('tag')),
-            'measurement-fields' => array('slug' => 'tmr-measurement-fields', 'title' => __('পোশাকের পরিমাপ', 'tailor-manager'), 'icon' => self::icon('ruler')),
+            'categories'  => array('slug' => 'tmr-dress', 'title' => __('পোশাক টাইপ', 'tailor-manager'), 'icon' => self::icon('shirt')),
+            'dress'       => array('slug' => 'tmr-categories', 'title' => __('পোশাক', 'tailor-manager'), 'icon' => self::icon('layers')),
+            'dress-part'  => array('slug' => 'tmr-dress-part', 'title' => __('পোশাকের অংশ', 'tailor-manager'), 'icon' => self::icon('scissors')),
+            'design-type' => array('slug' => 'tmr-design-type', 'title' => __('ডিজাইন', 'tailor-manager'), 'icon' => self::icon('tag')),
+            'measurement-fields' => array('slug' => 'tmr-measurement-fields', 'title' => __('পরিমাপ', 'tailor-manager'), 'icon' => self::icon('ruler')),
             'staff'       => array('slug' => 'tmr-staff', 'title' => __('স্টাফ', 'tailor-manager'), 'icon' => self::icon('user')),
             'accounts'    => array('slug' => 'tmr-accounts', 'title' => __('হিসাব', 'tailor-manager'), 'icon' => self::icon('dollar')),
             'settings'    => array('slug' => 'tmr-settings', 'title' => __('সেটিংস', 'tailor-manager'), 'icon' => self::icon('settings')),
@@ -229,10 +229,10 @@ class TMR_Panel_Shell
         add_submenu_page($n['dashboard']['slug'], $n['my-orders']['title'], $n['my-orders']['title'], TMR_Staff_Role::CAPABILITY, $n['my-orders']['slug'], array('TMR_My_Orders_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['orders']['title'], $n['orders']['title'], self::CAPABILITY, $n['orders']['slug'], array('TMR_Orders_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['customers']['title'], $n['customers']['title'], self::CAPABILITY, $n['customers']['slug'], array('TMR_Customers_Panel', 'render'));
-        add_submenu_page($n['dashboard']['slug'], $n['dress']['title'], __('প্রোডাক্ট ইনপুট: বিভিন্ন পোশাক', 'tailor-manager'), self::CAPABILITY, $n['dress']['slug'], array('TMR_Dress_Panel', 'render'));
-        add_submenu_page($n['dashboard']['slug'], $n['dress-part']['title'], __('প্রোডাক্ট ইনপুট: পোশাকের বিভিন্ন অংশ', 'tailor-manager'), self::CAPABILITY, $n['dress-part']['slug'], array('TMR_Dress_Part_Panel', 'render'));
-        add_submenu_page($n['dashboard']['slug'], $n['design-type']['title'], __('প্রোডাক্ট ইনপুট: বিভিন্ন অংশের ডিজাইন', 'tailor-manager'), self::CAPABILITY, $n['design-type']['slug'], array('TMR_Design_Type_Panel', 'render'));
-        add_submenu_page($n['dashboard']['slug'], $n['measurement-fields']['title'], __('প্রোডাক্ট ইনপুট: পোশাকের পরিমাপ', 'tailor-manager'), self::CAPABILITY, $n['measurement-fields']['slug'], array('TMR_Measurement_Fields_Panel', 'render'));
+        add_submenu_page($n['dashboard']['slug'], $n['dress']['title'], __('প্রোডাক্ট ইনপুট: পোশাক', 'tailor-manager'), self::CAPABILITY, $n['dress']['slug'], array('TMR_Dress_Panel', 'render'));
+        add_submenu_page($n['dashboard']['slug'], $n['dress-part']['title'], __('প্রোডাক্ট ইনপুট: পোশাকের অংশ', 'tailor-manager'), self::CAPABILITY, $n['dress-part']['slug'], array('TMR_Dress_Part_Panel', 'render'));
+        add_submenu_page($n['dashboard']['slug'], $n['design-type']['title'], __('প্রোডাক্ট ইনপুট: ডিজাইন', 'tailor-manager'), self::CAPABILITY, $n['design-type']['slug'], array('TMR_Design_Type_Panel', 'render'));
+        add_submenu_page($n['dashboard']['slug'], $n['measurement-fields']['title'], __('প্রোডাক্ট ইনপুট: পরিমাপ', 'tailor-manager'), self::CAPABILITY, $n['measurement-fields']['slug'], array('TMR_Measurement_Fields_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['categories']['title'], $n['categories']['title'], self::CAPABILITY, $n['categories']['slug'], array('TMR_Categories_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['staff']['title'], $n['staff']['title'], self::CAPABILITY, $n['staff']['slug'], array('TMR_Staff_Panel', 'render'));
         add_submenu_page($n['dashboard']['slug'], $n['accounts']['title'], $n['accounts']['title'], self::CAPABILITY, $n['accounts']['slug'], array('TMR_Accounts_Report', 'render'));
