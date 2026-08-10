@@ -222,7 +222,14 @@ class TMR_Measurement_Fields_Panel
             wp_send_json_error(array('message' => __('অনুমতি নেই।', 'tailor-manager')));
         }
 
-        $order = isset($_POST['order']) && is_array($_POST['order']) ? array_map('sanitize_key', wp_unslash($_POST['order'])) : array();
+        // sanitize_key() (not used here) strips '%' — a field whose label can't
+        // transliterate to ASCII (e.g. a Bangla-only label like "লুজ") gets a
+        // percent-encoded slug from sanitize_title() at creation time, and
+        // sanitize_key() would mangle that back into a string matching nothing
+        // in the library, silently dropping the field from the reorder (it just
+        // falls through to reorder_library()'s own "append unmatched fields at
+        // the end" fallback — every drag attempt on it looks like it does nothing).
+        $order = isset($_POST['order']) && is_array($_POST['order']) ? array_map('sanitize_title', wp_unslash($_POST['order'])) : array();
         TMR_Measurement_Fields::reorder_library($order);
 
         wp_send_json_success();
