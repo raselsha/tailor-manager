@@ -54,16 +54,16 @@ class TMR_Panel_Shell
             'orders'      => array('slug' => 'tmr-orders', 'title' => __('অর্ডার', 'tailor-manager'), 'icon' => self::icon('calendar')),
             'my-orders'   => array('slug' => 'tmr-my-orders', 'title' => __('আমার অর্ডার', 'tailor-manager'), 'icon' => self::icon('calendar')),
             'customers'   => array('slug' => 'tmr-customers', 'title' => __('কাস্টমার', 'tailor-manager'), 'icon' => self::icon('users')),
-            // URL slugs deliberately swapped from what their array keys/classes suggest —
-            // ?page=tmr-dress is the "পোশাক টাইপ" (broad category, TMR_Categories_Panel)
-            // screen and ?page=tmr-categories is the "পোশাক" (individual garment,
-            // TMR_Dress_Panel) screen. The array KEYS still match each screen's underlying
-            // class/purpose (TMR_Dress_Panel = 'dress', TMR_Categories_Panel = 'categories')
-            // so render() calls below didn't need to change — only the slug/title values did.
+            // URL slugs now match each array key/underlying class — ?page=tmr-categories
+            // is the "পোশাক টাইপ" (broad category, TMR_Categories_Panel) screen and
+            // ?page=tmr-dress is the "পোশাক" (individual garment, TMR_Dress_Panel)
+            // screen. (Previously swapped from this; nothing else in the codebase
+            // hardcodes either literal slug — every link builds off this array — so
+            // swapping the two 'slug' values here was the entire change.)
             // Menu order: "পোশাক টাইপ" (categories key) right after কাস্টমার, then "পোশাক"
             // (dress key) beneath it — array order drives sidebar order (visible_nav()).
-            'categories'  => array('slug' => 'tmr-dress', 'title' => __('পোশাক টাইপ', 'tailor-manager'), 'icon' => self::icon('shirt')),
-            'dress'       => array('slug' => 'tmr-categories', 'title' => __('পোশাক', 'tailor-manager'), 'icon' => self::icon('layers')),
+            'categories'  => array('slug' => 'tmr-categories', 'title' => __('পোশাক টাইপ', 'tailor-manager'), 'icon' => self::icon('shirt')),
+            'dress'       => array('slug' => 'tmr-dress', 'title' => __('পোশাক', 'tailor-manager'), 'icon' => self::icon('layers')),
             'dress-part'  => array('slug' => 'tmr-dress-part', 'title' => __('পোশাকের অংশ', 'tailor-manager'), 'icon' => self::icon('scissors')),
             'design-type' => array('slug' => 'tmr-design-type', 'title' => __('ডিজাইন', 'tailor-manager'), 'icon' => self::icon('tag')),
             'measurement-fields' => array('slug' => 'tmr-measurement-fields', 'title' => __('পরিমাপ', 'tailor-manager'), 'icon' => self::icon('ruler')),
