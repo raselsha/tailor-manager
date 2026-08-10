@@ -875,10 +875,23 @@ body.tmr-staff-chrome .tmr-admin-wrapper { height: calc(100vh - 40px); }
     .tmr-orders-search-form { width: 100%; }
 }
 
-/* Pagination */
-.tmr-pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 24px; }
-.tmr-page-btn { display: flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 10px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; color: #374151; font-size: 13px; font-weight: 500; text-decoration: none; }
+/* Pagination — windowed (first/last + current ± 2, "…" for the gaps) instead
+   of one button per page, so a long list (2000+ rows = 100+ pages at 20/page)
+   never renders a button per page in a single overflowing row. */
+.tmr-pagination { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.tmr-page-btn { display: flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 10px; border-radius: 12px; border: 1px solid #e2e8f0; background: #fff; color: #374151; font-size: 13px; font-weight: 500; text-decoration: none; box-sizing: border-box; }
 .tmr-page-btn.is-active { background: #0061d5; border-color: #0061d5; color: #fff; }
+.tmr-page-btn.tmr-page-edge { color: #64748b; font-size: 16px; }
+.tmr-page-ellipsis { display: flex; align-items: center; justify-content: center; min-width: 20px; height: 36px; color: #94a3b8; font-size: 13px; }
+.tmr-page-jump { display: inline-flex; align-items: center; gap: 6px; margin-left: 8px; padding-left: 12px; border-left: 1px solid #e2e8f0; }
+.tmr-page-jump-input { width: 64px; height: 36px; padding: 0 10px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 13px; text-align: center; box-sizing: border-box; }
+.tmr-page-jump-input:focus { outline: none; border-color: #0061d5; box-shadow: 0 0 0 3px rgba(0, 97, 213, .12); }
+.tmr-page-jump-btn { height: 36px; padding: 0 14px; border: 1px solid #e2e8f0; border-radius: 10px; background: #fff; color: #374151; font-size: 13px; font-weight: 600; cursor: pointer; }
+.tmr-page-jump-btn:hover { border-color: #0061d5; color: #0061d5; }
+
+@media (max-width: 600px) {
+    .tmr-page-jump { flex-basis: 100%; justify-content: center; margin-left: 0; padding-left: 0; border-left: none; padding-top: 8px; }
+}
 
 /* Toolbar (kept for backward-compat with existing screens still using it) */
 .tmr-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; gap: 10px; flex-wrap: wrap; }

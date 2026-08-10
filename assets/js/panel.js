@@ -117,6 +117,42 @@
         }
     };
 
+    // "পেজে যান" jump box (TMR_Customers_Panel::render_pagination(), shared with
+    // the Orders panel) — shows up once a list has more than 10 pages, where
+    // scanning the windowed page numbers for a specific one by eye stops being
+    // realistic (2000+ customers is 100+ pages here). data-base carries the
+    // same $base_args the page links themselves were built from (jQuery parses
+    // it back into a plain object automatically since it's valid JSON).
+    function tmrGoToPage($jump) {
+        var page = parseInt($jump.find('.tmr-page-jump-input').val(), 10);
+        var max = parseInt($jump.data('max'), 10);
+        if (!page || page < 1 || page > max) {
+            return;
+        }
+        var base = $jump.data('base');
+        var url;
+        if (base && typeof base === 'object' && Object.keys(base).length) {
+            url = new URL(window.location.origin + window.location.pathname);
+            Object.keys(base).forEach(function (key) {
+                url.searchParams.set(key, base[key]);
+            });
+        } else {
+            url = new URL(window.location.href);
+        }
+        url.searchParams.set('paged', page);
+        window.location.href = url.toString();
+    }
+
+    $(document).on('click', '.tmr-page-jump-btn', function () {
+        tmrGoToPage($(this).closest('.tmr-page-jump'));
+    });
+    $(document).on('keydown', '.tmr-page-jump-input', function (e) {
+        if ('Enter' === e.key) {
+            e.preventDefault();
+            tmrGoToPage($(this).closest('.tmr-page-jump'));
+        }
+    });
+
     $(document).on('change', '.tmr-status-toggle', function () {
         TMRPanel.syncStatusToggle($(this));
     });
