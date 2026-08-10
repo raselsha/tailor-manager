@@ -59,23 +59,35 @@ class TMR_Demo_Data
     }
 
     /**
-     * @return array<string,int> part title => new post ID, keyed by title so
-     *         seed_design_types() can look parents up by name
+     * @return array<string,int> "cat_key|part title" => new post ID, keyed this
+     *         way (not just by title) because the same part title — সেলাই —
+     *         legitimately exists once per category with a totally different
+     *         option set, so title alone would collide.
      */
     private static function seed_dress_parts($cat_slugs)
     {
         $parts = array(
-            'কলার ডিজাইন' => array($cat_slugs['coat'], 1),
-            'পকেট ডিজাইন' => array($cat_slugs['coat'], 0),
-            'প্লেট ডিজাইন' => array($cat_slugs['coat'], 1),
-            'হাতা ডিজাইন' => array($cat_slugs['coat'], 0),
-            'পকেট'        => array($cat_slugs['trouser'], 0),
-            'সেলাই'       => array($cat_slugs['trouser'], 0),
-            'চেইন'        => array($cat_slugs['trouser'], 0),
+            'কলার ডিজাইন'      => array($cat_slugs['coat'], 1),
+            'পকেট ডিজাইন'      => array($cat_slugs['coat'], 1),
+            'প্লেট ডিজাইন'     => array($cat_slugs['coat'], 1),
+            'হাতা ডিজাইন'      => array($cat_slugs['coat'], 0),
+            'তিরা'             => array($cat_slugs['coat'], 0),
+            'সেলাই|coat'       => array($cat_slugs['coat'], 0, 'সেলাই'),
+            'ফাড়া'            => array($cat_slugs['coat'], 1),
+            'পাইপি'            => array($cat_slugs['coat'], 0),
+            'কফ ডিজাইন'        => array($cat_slugs['coat'], 0),
+            'এমব্রয়ডারি'       => array($cat_slugs['coat'], 0),
+            'এমব্রয়ডারি বোর্ড' => array($cat_slugs['coat'], 1),
+            'কারচুপি'          => array($cat_slugs['coat'], 0),
+            'পকেট'             => array($cat_slugs['trouser'], 0),
+            'সেলাই|trouser'    => array($cat_slugs['trouser'], 0, 'সেলাই'),
+            'চেইন'             => array($cat_slugs['trouser'], 0),
         );
         $ids = array();
-        foreach ($parts as $title => $info) {
-            list($cat_slug, $enabled) = $info;
+        foreach ($parts as $key => $info) {
+            $cat_slug = $info[0];
+            $enabled  = $info[1];
+            $title    = isset($info[2]) ? $info[2] : $key;
             $post_id = wp_insert_post(array(
                 'post_type'   => TMR_Dress_Part_Post_Type::POST_TYPE,
                 'post_title'  => $title,
@@ -86,45 +98,90 @@ class TMR_Demo_Data
             }
             wp_set_object_terms($post_id, $cat_slug, TMR_Category_Taxonomy::TAXONOMY);
             update_post_meta($post_id, '_tmr_measurement_enabled', $enabled);
-            $ids[$title] = $post_id;
+            $ids[$key] = $post_id;
         }
         return $ids;
     }
 
     private static function seed_design_types($part_ids)
     {
-        // "_1"/"_2" suffixes only disambiguate two design types that share
-        // the exact title ("দুই পকেট") under two different parts — stripped
-        // before the post is created, never stored.
         $designs = array(
-            'রাউন্ড কলার'    => 'কলার ডিজাইন',
-            'সেরওয়ানী কলার' => 'কলার ডিজাইন',
-            'শার্ট কলার'     => 'কলার ডিজাইন',
-            'ব্যান্ড কলার'   => 'কলার ডিজাইন',
-            'এক পকেট'        => 'পকেট ডিজাইন',
-            'দুই পকেট_1'      => 'পকেট ডিজাইন',
-            'বুক পকেট'       => 'পকেট ডিজাইন',
-            'সাইড পকেট'      => 'পকেট ডিজাইন',
-            'সিঙ্গেল প্লেট'  => 'প্লেট ডিজাইন',
-            'ডাবল প্লেট'     => 'প্লেট ডিজাইন',
-            'ভি প্লেট'       => 'প্লেট ডিজাইন',
-            'ফুল হাতা'       => 'হাতা ডিজাইন',
-            'হাফ হাতা'       => 'হাতা ডিজাইন',
-            'কফ হাতা'        => 'হাতা ডিজাইন',
-            'দুই পকেট_2'      => 'পকেট',
-            'এক পকেট ডানে'   => 'পকেট',
-            'এক পকেট বামে'   => 'পকেট',
-            'চাপ সেলাই'      => 'সেলাই',
-            'মোটা রাবার'     => 'সেলাই',
-            'চিকন রাবার'     => 'সেলাই',
-            'সামনা চেইন'     => 'চেইন',
-            'দুই পাশ চেইন'   => 'চেইন',
-            'চেইন ছাড়া'      => 'চেইন',
+            // কলার ডিজাইন (জামা)
+            'রাউন্ড কলার' => 'কলার ডিজাইন', 'ব্যান্ড কলার' => 'কলার ডিজাইন', 'মদিনা কলার' => 'কলার ডিজাইন',
+            'সেরওয়ানী কলার' => 'কলার ডিজাইন', 'রাউন্ড সেরওয়ানী কলার' => 'কলার ডিজাইন', 'ব্যান্ড সেরওয়ানী কলার' => 'কলার ডিজাইন',
+            'কলার বেশী রাউন্ড' => 'কলার ডিজাইন', 'কলার আড়া' => 'কলার ডিজাইন', 'কলার ওরফ' => 'কলার ডিজাইন',
+            'কলার রিং বোতাম' => 'কলার ডিজাইন', 'কলার টিপ বোতাম' => 'কলার ডিজাইন', 'কলারের ঘাট' => 'কলার ডিজাইন',
+            'কলারের ডাবল ঘাট' => 'কলার ডিজাইন', 'শার্ট কলার' => 'কলার ডিজাইন', 'শাট কলার' => 'কলার ডিজাইন',
+            'এরো শাট কলার' => 'কলার ডিজাইন', 'সেলাই ছাড়া কলার' => 'কলার ডিজাইন', 'সাইড বর্ডার' => 'কলার ডিজাইন',
+
+            // পকেট ডিজাইন (জামা)
+            'বুক পকেট ডাবল' => 'পকেট ডিজাইন', 'বুক পকেট' => 'পকেট ডিজাইন', 'মোবাইল পকেট' => 'পকেট ডিজাইন',
+            'মেসওয়াক পকেট' => 'পকেট ডিজাইন', 'বোগাল পকেট' => 'পকেট ডিজাইন', 'বাক পকেট' => 'পকেট ডিজাইন',
+            'কলির সাথে পকেট' => 'পকেট ডিজাইন', 'বন পকেট' => 'পকেট ডিজাইন', 'সেলাই ছাড়া পকেট' => 'পকেট ডিজাইন',
+            'সাইড পকেটে মেসয়াবা' => 'পকেট ডিজাইন', 'এক পকেট' => 'পকেট ডিজাইন', 'দুই পকেট_1' => 'পকেট ডিজাইন', 'সাইড পকেট' => 'পকেট ডিজাইন',
+
+            // প্লেট ডিজাইন (জামা)
+            'কাপড় প্লেট' => 'প্লেট ডিজাইন', 'ডানে প্লেট' => 'প্লেট ডিজাইন', 'ডাবল প্লেট' => 'প্লেট ডিজাইন',
+            'সিঙ্গেল প্লেট' => 'প্লেট ডিজাইন', 'বামে খোলা' => 'প্লেট ডিজাইন', 'প্লেট আড়া' => 'প্লেট ডিজাইন',
+            'বামে প্লেট' => 'প্লেট ডিজাইন', 'প্লেট ওরফ' => 'প্লেট ডিজাইন', 'প্লেটে চেইন বোতাম' => 'প্লেট ডিজাইন',
+            'প্লেটে ৪ বোতাম' => 'প্লেট ডিজাইন', 'প্লেটে ৩ বোতাম' => 'প্লেট ডিজাইন', 'প্লেটে টিপ বোতাম' => 'প্লেট ডিজাইন',
+            'V প্লেট' => 'প্লেট ডিজাইন', 'বন প্লেট' => 'প্লেট ডিজাইন', 'প্লেটে চেইন' => 'প্লেট ডিজাইন', 'প্লেট ডিজাইন Description' => 'প্লেট ডিজাইন',
+
+            // হাতা ডিজাইন (জামা)
+            'ফুল হাতা' => 'হাতা ডিজাইন', 'হাফ হাতা' => 'হাতা ডিজাইন', 'কফ হাতা' => 'হাতা ডিজাইন',
+
+            // তিরা (জামা)
+            'স্ট্রেইট তিরা' => 'তিরা', 'V তিরা' => 'তিরা', 'রাউন্ড তিরা' => 'তিরা', 'গোল তিরা (ছোট)' => 'তিরা',
+
+            // সেলাই (জামা)
+            'কান্দি মোড়া চাপ সেলাই' => 'সেলাই|coat', 'কান্দি মোড়া ডাবল সেলাই' => 'সেলাই|coat',
+            'সাইড নিচ চিকন সেলাই' => 'সেলাই|coat', 'কলার প্লেট কান্দি মোড়া তিরা (ডাবল সেলাই)' => 'সেলাই|coat',
+            'সাইড নিচ/হাতা/ডাবল সেলাই' => 'সেলাই|coat', 'মুহরী দ ডাবল সেলাই' => 'সেলাই|coat',
+            'নিচ হাতা ১ ই:' => 'সেলাই|coat', 'নিচ হাতা ১/ ই:' => 'সেলাই|coat', 'নিচ হাতা ১// ই:' => 'সেলাই|coat',
+            'নিচ হাতা ২/ ই:' => 'সেলাই|coat', 'নিচ হাতা ২// ই:' => 'সেলাই|coat', 'নিচ হাতা ৩ ই:' => 'সেলাই|coat',
+            'সাইড নিচ ১// সুতা' => 'সেলাই|coat', 'সাইড নিচ + নিচ হাতা ৩ সুতা' => 'সেলাই|coat',
+
+            // ফাড়া (জামা)
+            'পকেট ঢাকা' => 'ফাড়া', 'মাদানী' => 'ফাড়া', 'সাইড ফাড়া' => 'ফাড়া',
+
+            // পাইপি (জামা)
+            'প্লেটের ১ পাশ' => 'পাইপি', 'প্লেটের ২ পাশ' => 'পাইপি',
+
+            // কফ ডিজাইন (জামা)
+            'কফিং ৩ই:' => 'কফ ডিজাইন', 'ডাবল কফিং ৩ই:' => 'কফ ডিজাইন',
+
+            // এমব্রয়ডারি (জামা)
+            'সামনা+কলার+মুহরী' => 'এমব্রয়ডারি', 'সামনা+কলার+মুহরী+মোড়া' => 'এমব্রয়ডারি',
+            'শুধু সামনা+কলার' => 'এমব্রয়ডারি', 'শুধু সামনা' => 'এমব্রয়ডারি',
+
+            // এমব্রয়ডারি বোর্ড (জামা)
+            'M বোর্ড' => 'এমব্রয়ডারি বোর্ড', 'B বোর্ড (কালো)' => 'এমব্রয়ডারি বোর্ড', 'B বোর্ড (সাদা)' => 'এমব্রয়ডারি বোর্ড',
+            'Rবোর্ড' => 'এমব্রয়ডারি বোর্ড', 'চিকন বোর্ড' => 'এমব্রয়ডারি বোর্ড',
+
+            // কারচুপি (জামা)
+            'কলার প্লেট' => 'কারচুপি', 'কারচুপি - সামনা কালর হাতা' => 'কারচুপি',
+
+            // পকেট (পায়জামা)
+            'দুই পকেট_2' => 'পকেট', 'এক পকেট ডানে' => 'পকেট', 'এক পকেট বামে' => 'পকেট',
+            'মোবাইল পকেট ডানে' => 'পকেট', 'মোবাইল পকেট ডানে (দুই পাশ)' => 'পকেট', 'মোবাইল পকেট বামে' => 'পকেট',
+            'হিপ পকেট দুই পাশ' => 'পকেট', 'হিপ পকেট এক পাশ' => 'পকেট', 'পাঞ্জাবী পকেট' => 'পকেট',
+
+            // সেলাই (পায়জামা)
+            'পাটিশ ২-২ সেলাই' => 'সেলাই|trouser', 'পাটিশ ২-১ সেলাই' => 'সেলাই|trouser', 'পাটিশ ঘন সেলাই' => 'সেলাই|trouser',
+            'চাপ সেলাই' => 'সেলাই|trouser', 'চাপ সেলাই ডাবল' => 'সেলাই|trouser', 'মোটা সুতা' => 'সেলাই|trouser',
+            'মোটা রাবার/ফিতা' => 'সেলাই|trouser', 'চিকন রাবার/ফিতা' => 'সেলাই|trouser', 'ফিতা' => 'সেলাই|trouser', 'নেরো শেপ' => 'সেলাই|trouser',
+
+            // চেইন (পায়জামা)
+            'সামনা চেইন' => 'চেইন', 'দুই পাশ চেইন' => 'চেইন', '১ পাশ চেইন (ডান)' => 'চেইন',
+            '১ পাশ চেইন (বাম)' => 'চেইন', '৩ চেইন' => 'চেইন', 'চেইন ছাড়া' => 'চেইন',
         );
-        foreach ($designs as $title => $part_title) {
-            if (!isset($part_ids[$part_title])) {
+        foreach ($designs as $title => $part_key) {
+            if (!isset($part_ids[$part_key])) {
                 continue;
             }
+            // "_1"/"_2" suffixes only disambiguate two design types that share the
+            // exact title ("দুই পকেট") under two different parts — stripped before
+            // the post is created, never stored.
             $real_title = preg_replace('/_[12]$/', '', $title);
             $post_id = wp_insert_post(array(
                 'post_type'   => TMR_Design_Type_Post_Type::POST_TYPE,
@@ -134,22 +191,30 @@ class TMR_Demo_Data
             if (is_wp_error($post_id) || !$post_id) {
                 continue;
             }
-            update_post_meta($post_id, '_tmr_dress_part_id', $part_ids[$part_title]);
+            update_post_meta($post_id, '_tmr_dress_part_id', $part_ids[$part_key]);
         }
     }
 
     private static function seed_dress($cat_slugs)
     {
         $dresses = array(
-            'পাঞ্জাবী'  => $cat_slugs['coat'],
-            'শার্ট'     => $cat_slugs['coat'],
-            'কাবলী'     => $cat_slugs['coat'],
-            'ফতুয়া'    => $cat_slugs['coat'],
-            'সেরোয়ানী' => $cat_slugs['coat'],
-            'সেলোয়ার'  => $cat_slugs['trouser'],
-            'পায়জামা'  => $cat_slugs['trouser'],
-            'প্যান্ট'   => $cat_slugs['trouser'],
-            'চুড়িদার'  => $cat_slugs['trouser'],
+            'এক ছাটা'        => $cat_slugs['coat'],
+            'একছাটা জুব্বা'   => $cat_slugs['coat'],
+            'এরাবিয়ান জুব্বা' => $cat_slugs['coat'],
+            'কাবলী'          => $cat_slugs['coat'],
+            'গোল জামা'        => $cat_slugs['coat'],
+            'পাঞ্জাবী'        => $cat_slugs['coat'],
+            'পুলিশ কাবলি'     => $cat_slugs['coat'],
+            'ফতুয়া'          => $cat_slugs['coat'],
+            'বোরখা'          => $cat_slugs['coat'],
+            'শার্ট'           => $cat_slugs['coat'],
+            'সেরোয়ানী'        => $cat_slugs['coat'],
+            'আলিগড়'          => $cat_slugs['trouser'],
+            'চুড়িদার'        => $cat_slugs['trouser'],
+            'চোজ পায়জামা'     => $cat_slugs['trouser'],
+            'পায়জামা'        => $cat_slugs['trouser'],
+            'প্যান্ট'         => $cat_slugs['trouser'],
+            'সেলোয়ার'        => $cat_slugs['trouser'],
         );
         foreach ($dresses as $title => $cat_slug) {
             $post_id = wp_insert_post(array(
@@ -167,13 +232,13 @@ class TMR_Demo_Data
     /**
      * Overrides (not adds to) TMR_Measurement_Fields' own generic defaults —
      * this is the real field set actually used on the shop this demo data
-     * came from, which diverges from that generic fallback (4 fields for the
-     * trouser category here, not 6).
+     * came from, which diverges from that generic fallback (a trouser category
+     * needs its own waist/hip/etc. fields, not a shirt's body/sleeve set).
      */
     private static function seed_measurement_fields($cat_slugs)
     {
-        $coat_fields = array('লম্বা', 'বডি', 'পুট', 'হাতা', 'কলার/গলা', 'মুহরী', 'কফ', 'প্লেট', 'ঘের');
-        $trouser_fields = array('লম্বা', 'বডি', 'পুট', 'হাতা');
+        $coat_fields = array('লম্বা', 'বডি', 'লুজ', 'পুট', 'হাতা', 'কলার/গলা', 'মুহরী', 'কফ', 'প্লেট', 'ঘের');
+        $trouser_fields = array('লম্বা', 'মুহরী', 'কোমড়', 'হাই', 'লুজ', 'হিপ');
 
         $coat_slugs = array();
         foreach ($coat_fields as $label) {
