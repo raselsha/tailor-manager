@@ -26,7 +26,7 @@ class TMR_Dashboard_Panel
         );
         $today_delivery = self::get_orders_by_delivery_date($today, $today, false);
 
-        $groups = self::get_pending_grouped_by_cutter();
+        $upcoming_orders = self::get_upcoming_orders();
 
         $header_right = '<div class="tmr-filter-input-wrap" style="flex:0 0 260px;">'
             . '<svg class="tmr-filter-input-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>'
@@ -67,73 +67,79 @@ class TMR_Dashboard_Panel
 
         <div class="tmr-dashboard-grid-container tmr-card-plain">
             <div class="tmr-section-header">
-                <h3><?php esc_html_e('কাটিং মাস্টার / সোয়িং অপারেটর সারি', 'tailor-manager'); ?></h3>
+                <h3><?php esc_html_e('আসন্ন ডেলিভারি', 'tailor-manager'); ?></h3>
                 <a href="<?php echo esc_url(admin_url('admin.php?page=tmr-orders&status=pending')); ?>" class="tmr-view-all-link"><?php esc_html_e('সব দেখুন', 'tailor-manager'); ?> &rarr;</a>
             </div>
 
-            <?php if (empty($groups)) : ?>
-                <div class="tmr-card"><table class="tmr-table"><tbody><tr><td class="tmr-empty"><?php esc_html_e('এই মুহূর্তে কোনো পেন্ডিং কাজ নেই।', 'tailor-manager'); ?></td></tr></tbody></table></div>
-            <?php else : ?>
-                <div class="tmr-dashboard-doctor-groups" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;">
-                    <?php foreach ($groups as $cutter => $order_ids) : ?>
-                        <div class="tmr-card">
-                            <div class="tmr-card-header">
-                                <div>
-                                    <h3><?php echo esc_html($cutter ?: __('অনির্ধারিত', 'tailor-manager')); ?></h3>
-                                    <span style="display:block;font-size:10px;color:#94a3b8;"><?php echo esc_html(TMR_Panel_Shell::bangla_date(strtotime($today))); ?></span>
-                                </div>
-                                <span class="tmr-badge tmr-badge-green"><?php echo esc_html(count($order_ids)); ?></span>
-                            </div>
-                            <ul style="list-style:none;margin:0;padding:4px 0;min-height:100px;max-height:120px;overflow-y:auto;">
-                                <?php foreach (array_slice($order_ids, 0, 6) as $order_id) :
-                                    $customer_id = (int) get_post_meta($order_id, '_tmr_customer_id', true);
-                                    $name        = $customer_id ? get_the_title($customer_id) : __('ওয়াক-ইন', 'tailor-manager');
-                                ?>
-                                    <li style="display:flex;align-items:center;gap:6px;padding:5px 14px;border-top:1px dotted #cbd5e1;font-size:12px;">
-                                        <a href="<?php echo esc_url(admin_url('admin.php?page=tmr-orders&action=view&id=' . $order_id)); ?>" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1e293b;text-decoration:none;">#<?php echo esc_html($order_id); ?> <?php echo esc_html($name); ?></a>
-                                    </li>
-                                <?php endforeach; ?>
-                            </ul>
-                        </div>
-                    <?php endforeach; ?>
+            <div class="tmr-card">
+                <div class="tmr-table-cards">
+                <table class="tmr-table tmr-orders-table">
+                    <thead>
+                        <tr>
+                            <th><?php esc_html_e('অর্ডার আইডি', 'tailor-manager'); ?></th>
+                            <th><?php esc_html_e('কাস্টমার', 'tailor-manager'); ?></th>
+                            <th><?php esc_html_e('ডেলিভারি তারিখ', 'tailor-manager'); ?></th>
+                            <th><?php esc_html_e('ডেলিভারি স্ট্যাটাস', 'tailor-manager'); ?></th>
+                            <th><?php esc_html_e('মোট', 'tailor-manager'); ?></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($upcoming_orders)) : ?>
+                            <tr><td colspan="6" class="tmr-empty"><?php esc_html_e('আসন্ন কোনো ডেলিভারি নেই।', 'tailor-manager'); ?></td></tr>
+                        <?php else : ?>
+                            <?php foreach ($upcoming_orders as $order) :
+                                $customer_id = (int) get_post_meta($order->ID, '_tmr_customer_id', true);
+                                $name        = $customer_id ? get_the_title($customer_id) : __('ওয়াক-ইন', 'tailor-manager');
+                                $status_key  = TMR_Order_Post_Type::status_label($order->ID);
+                            ?>
+                                <tr>
+                                    <td data-label="<?php esc_attr_e('অর্ডার আইডি', 'tailor-manager'); ?>">#<?php echo esc_html($order->ID); ?></td>
+                                    <td data-label="<?php esc_attr_e('কাস্টমার', 'tailor-manager'); ?>" class="tmr-orders-customer-cell" title="<?php echo esc_attr($name); ?>"><?php echo esc_html($name); ?></td>
+                                    <td data-label="<?php esc_attr_e('ডেলিভারি তারিখ', 'tailor-manager'); ?>"><?php echo esc_html(get_post_meta($order->ID, '_tmr_delivery_date', true)); ?></td>
+                                    <td data-label="<?php esc_attr_e('ডেলিভারি স্ট্যাটাস', 'tailor-manager'); ?>"><span class="tmr-badge tmr-badge-<?php echo esc_attr($status_key); ?>"><?php echo esc_html(ucfirst($status_key)); ?></span></td>
+                                    <td data-label="<?php esc_attr_e('মোট', 'tailor-manager'); ?>"><?php echo esc_html('৳ ' . number_format((float) get_post_meta($order->ID, '_tmr_total', true))); ?></td>
+                                    <td class="tmr-orders-actions-cell">
+                                        <div class="tmr-actions">
+                                            <a class="tmr-icon-btn" href="<?php echo esc_url(admin_url('admin.php?page=tmr-orders&action=view&id=' . $order->ID)); ?>" title="<?php esc_attr_e('দেখুন', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></a>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
                 </div>
-            <?php endif; ?>
+            </div>
         </div>
         <?php
         TMR_Panel_Shell::footer();
     }
 
     /**
-     * @return array<string,int[]> cutter name (may be '' for unassigned) => order IDs,
-     *         for orders that are neither delivered nor cancelled
+     * @return WP_Post[] orders with a delivery date today or later, that aren't
+     *         already delivered or cancelled — ordered soonest-first, same "what's
+     *         actually coming up" list the standalone Orders page's own status
+     *         filters are built from, just date-bounded for the dashboard glance.
      */
-    public static function get_pending_grouped_by_cutter()
+    public static function get_upcoming_orders($limit = 20)
     {
-        $items = get_posts(array(
-            'post_type'      => TMR_Order_Item_Post_Type::POST_TYPE,
-            'post_status'    => 'any',
-            'posts_per_page' => -1,
-        ));
+        $today = current_time('Y-m-d');
+        $meta  = array(
+            array('key' => '_tmr_delivery_date', 'value' => $today, 'compare' => '>=', 'type' => 'DATE'),
+            array(
+                'relation' => 'OR',
+                array('key' => '_tmr_delivered', 'compare' => 'NOT EXISTS'),
+                array('key' => '_tmr_delivered', 'value' => '1', 'compare' => '!='),
+            ),
+            array(
+                'relation' => 'OR',
+                array('key' => '_tmr_cancelled', 'compare' => 'NOT EXISTS'),
+                array('key' => '_tmr_cancelled', 'value' => '1', 'compare' => '!='),
+            ),
+        );
 
-        $groups = array();
-        foreach ($items as $item) {
-            if (!$item->post_parent) {
-                continue;
-            }
-            if (TMR_Order_Post_Type::is_delivered($item->post_parent) || TMR_Order_Post_Type::is_cancelled($item->post_parent)) {
-                continue;
-            }
-
-            $cutter = get_post_meta($item->ID, '_tmr_cutter_name', true);
-            if (!isset($groups[$cutter])) {
-                $groups[$cutter] = array();
-            }
-            if (!in_array($item->post_parent, $groups[$cutter], true)) {
-                $groups[$cutter][] = $item->post_parent;
-            }
-        }
-
-        return $groups;
+        return self::base_order_query($meta, $limit)->posts;
     }
 
     private static function base_order_query($extra_meta = array(), $limit = -1)

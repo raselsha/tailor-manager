@@ -621,6 +621,27 @@ body.tmr-staff-chrome .tmr-admin-wrapper { height: calc(100vh - 40px); }
 .tmr-customers-table .tmr-customer-address-cell { max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tmr-customers-table .tmr-customer-date-cell { color: #64748b; }
 
+/* Customer view page — order-history accordion. The trigger row toggles the
+   sibling .tmr-order-acc-row open/closed instead of navigating anywhere; the
+   accordion body reuses the order-confirmation modal's own CSS classes
+   (.tmr-confirmation-*, .tmr-vp-*) so its content looks identical to the
+   modal without any of this file's rules being duplicated. */
+.tmr-order-acc-trigger { cursor: pointer; }
+.tmr-order-acc-chevron { transition: transform 0.15s ease; }
+.tmr-order-acc-chevron.is-open { transform: rotate(180deg); }
+.tmr-order-acc-row td { background: #f8fafc; padding: 20px; }
+.tmr-order-acc-body .tmr-confirmation-toolbar { margin-bottom: 14px; }
+.tmr-order-acc-body .tmr-confirmation-details { margin-bottom: 0; }
+/* The accordion row after the last order is always the table's true last DOM
+   child (hidden or not), so .tmr-table's own :last-child corner-rounding
+   (panel.css:395-396) misses the trigger row that's actually visible at the
+   bottom when every accordion is collapsed — the default state. Re-apply the
+   same corners to whichever of the two is really last-visible. */
+tr.tmr-order-acc-trigger:last-of-type td:first-child { border-bottom-left-radius: 20px; }
+tr.tmr-order-acc-trigger:last-of-type td:last-child { border-bottom-right-radius: 20px; }
+tr.tmr-order-acc-row:last-child td:first-child { border-bottom-left-radius: 20px; }
+tr.tmr-order-acc-row:last-child td:last-child { border-bottom-right-radius: 20px; }
+
 /* Orders list — same compact-but-not-cramped treatment as the customers
    list, and the same single-line-with-ellipsis cap on its own long columns
    (customer name+phone, dress/quantity summary, staff names) so wrapping
