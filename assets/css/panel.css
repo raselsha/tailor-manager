@@ -637,7 +637,6 @@ body.tmr-staff-chrome .tmr-admin-wrapper { height: calc(100vh - 40px); }
    .tmr-order-acc-body) without touching the shared rule the modal still
    relies on. */
 .tmr-order-acc-body .tmr-confirmation-details { margin-bottom: 0; max-width: 100%; }
-.tmr-order-acc-body .tmr-confirmation-summary-pay-row { grid-template-columns: repeat(2, 1fr); }
 .tmr-order-acc-body .tmr-vp-design-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
 /* The accordion row after the last order is always the table's true last DOM
    child (hidden or not), so .tmr-table's own :last-child corner-rounding

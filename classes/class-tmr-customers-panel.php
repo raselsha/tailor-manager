@@ -448,11 +448,6 @@ class TMR_Customers_Panel
             var tmrAccMeasureIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle></svg>';
             var tmrAccDesignIcon = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>';
 
-            function tmrAccFormatMoney(n) {
-                n = Math.round((parseFloat(n) || 0) * 100) / 100;
-                return '৳ ' + n.toLocaleString('en-US');
-            }
-
             // Just the urgent flag — status itself is already visible as a badge on
             // the default row this accordion expands from, so it isn't repeated here.
             function tmrAccUrgentBadgeHtml(urgent) {
@@ -530,18 +525,13 @@ class TMR_Customers_Panel
                 html += '<button type="button" class="tmr-btn-outline tmr-btn-outline-danger tmr-btn-sm tmr-order-acc-delete">' + tmrAccDeleteIcon + ' <?php echo esc_js(__('ডিলিট', 'tailor-manager')); ?></button>';
                 html += '</div></div>';
 
-                html += '<div class="tmr-confirmation-details">';
                 <?php
-                // Order id, order/delivery date, status and total are already visible on
-                // the row this accordion opens from — repeating them here just duplicates
-                // it. Only advance/due are genuinely new info, so that's all this card
-                // shows now (pay-date/pay-total cards intentionally dropped).
+                // Order id, order/delivery date, status, total, advance and due are all
+                // already visible as columns/badges on the row this accordion opens
+                // from — nothing left here worth a summary card, so the accordion goes
+                // straight to the dress/measurement items.
                 ?>
-                html += '<div class="tmr-confirmation-summary-card"><div class="tmr-confirmation-summary-pay-row">';
-                html += '<div class="tmr-confirmation-pay-card tmr-confirmation-pay-paid"><span class="tmr-confirmation-pay-text"><span class="tmr-confirmation-chip-label"><?php echo esc_js(__('অগ্রিম', 'tailor-manager')); ?></span> <strong>' + tmrAccFormatMoney(data.advance) + '</strong></span></div>';
-                html += '<div class="tmr-confirmation-pay-card tmr-confirmation-pay-due"><span class="tmr-confirmation-pay-text"><span class="tmr-confirmation-chip-label"><?php echo esc_js(__('বাকি', 'tailor-manager')); ?></span> <strong>' + tmrAccFormatMoney(data.due) + '</strong></span></div>';
-                html += '</div></div>';
-
+                html += '<div class="tmr-confirmation-details">';
                 html += '<div class="tmr-confirmation-items">' + tmrAccBuildItemsHtml(data.items) + '</div>';
                 html += '</div>';
 
