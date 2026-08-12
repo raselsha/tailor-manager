@@ -387,12 +387,14 @@ class TMR_Customers_Panel
                         <th><?php esc_html_e('ডেলিভারি তারিখ', 'tailor-manager'); ?></th>
                         <th><?php esc_html_e('স্ট্যাটাস', 'tailor-manager'); ?></th>
                         <th><?php esc_html_e('মোট', 'tailor-manager'); ?></th>
+                        <th><?php esc_html_e('অগ্রিম', 'tailor-manager'); ?></th>
+                        <th><?php esc_html_e('বাকি', 'tailor-manager'); ?></th>
                         <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php if (!$orders->have_posts()) : ?>
-                        <tr><td colspan="6" class="tmr-empty"><?php esc_html_e('এই কাস্টমারের কোনো অর্ডার নেই।', 'tailor-manager'); ?></td></tr>
+                        <tr><td colspan="8" class="tmr-empty"><?php esc_html_e('এই কাস্টমারের কোনো অর্ডার নেই।', 'tailor-manager'); ?></td></tr>
                     <?php else : ?>
                         <?php foreach ($orders->posts as $order) :
                             $status_key = TMR_Order_Post_Type::status_label($order->ID);
@@ -403,6 +405,8 @@ class TMR_Customers_Panel
                                 <td><?php echo esc_html(get_post_meta($order->ID, '_tmr_delivery_date', true)); ?></td>
                                 <td><span class="tmr-badge tmr-badge-<?php echo esc_attr($status_key); ?>"><?php echo esc_html(ucfirst($status_key)); ?></span></td>
                                 <td><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order->ID, '_tmr_total', true))); ?></td>
+                                <td><span class="tmr-badge tmr-badge-green"><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order->ID, '_tmr_advance', true))); ?></span></td>
+                                <td><span class="tmr-badge tmr-badge-red"><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order->ID, '_tmr_due', true))); ?></span></td>
                                 <td>
                                     <?php
                                     // Expands into the same order-summary content the Orders list's
@@ -415,7 +419,7 @@ class TMR_Customers_Panel
                                 </td>
                             </tr>
                             <tr class="tmr-order-acc-row" id="tmr-order-acc-row-<?php echo esc_attr($order->ID); ?>" style="display:none;">
-                                <td colspan="6">
+                                <td colspan="8">
                                     <div class="tmr-order-acc-body"></div>
                                 </td>
                             </tr>
@@ -441,12 +445,6 @@ class TMR_Customers_Panel
         ?>
         <script>
         jQuery(function ($) {
-            var tmrAccStatusLabels = {
-                pending: '<?php echo esc_js(__('পেন্ডিং', 'tailor-manager')); ?>',
-                ready: '<?php echo esc_js(__('রেডি', 'tailor-manager')); ?>',
-                delivered: '<?php echo esc_js(__('ডেলিভারড', 'tailor-manager')); ?>',
-                cancelled: '<?php echo esc_js(__('বাতিল', 'tailor-manager')); ?>'
-            };
             var tmrAccMeasureIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"></circle></svg>';
             var tmrAccDesignIcon = '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>';
 
@@ -455,14 +453,10 @@ class TMR_Customers_Panel
                 return '৳ ' + n.toLocaleString('en-US');
             }
 
-            function tmrAccStatusPillHtml(statusKey, urgent) {
-                var html = '<span class="tmr-confirmation-status-pill tmr-confirmation-status-' + statusKey + '">'
-                    + '<span class="tmr-confirmation-status-dot"></span>'
-                    + '<span>' + (tmrAccStatusLabels[statusKey] || statusKey) + '</span></span>';
-                if (urgent) {
-                    html += ' <span class="tmr-badge tmr-badge-red"><?php echo esc_js(__('জরুরি', 'tailor-manager')); ?></span>';
-                }
-                return html;
+            // Just the urgent flag — status itself is already visible as a badge on
+            // the default row this accordion expands from, so it isn't repeated here.
+            function tmrAccUrgentBadgeHtml(urgent) {
+                return urgent ? '<span class="tmr-badge tmr-badge-red"><?php echo esc_js(__('জরুরি', 'tailor-manager')); ?></span>' : '';
             }
 
             function tmrAccBuildItemsHtml(items) {
@@ -527,7 +521,7 @@ class TMR_Customers_Panel
             function tmrAccRender($body, data) {
                 var html = '';
                 html += '<div class="tmr-confirmation-toolbar">';
-                html += '<div class="tmr-confirmation-toolbar-status">' + tmrAccStatusPillHtml(data.status_key, data.urgent) + '</div>';
+                html += '<div class="tmr-confirmation-toolbar-status">' + tmrAccUrgentBadgeHtml(data.urgent) + '</div>';
                 html += '<div class="tmr-confirmation-toolbar-actions">';
                 html += '<a class="tmr-btn-outline tmr-btn-sm" href="' + data.edit_url + '">' + tmrAccEditIcon + ' <?php echo esc_js(__('এডিট', 'tailor-manager')); ?></a>';
                 html += '<a class="tmr-btn-outline tmr-btn-sm" href="' + data.print_receipt_url + '" target="_blank">' + tmrAccPrintIcon + ' <?php echo esc_js(__('রিসিট', 'tailor-manager')); ?></a>';
