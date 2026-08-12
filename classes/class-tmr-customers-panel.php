@@ -477,7 +477,7 @@ class TMR_Customers_Panel
                     var totalQty = dresses.reduce(function (sum, d) { return sum + (parseInt(d.quantity, 10) || 0); }, 0);
 
                     html += '<div class="tmr-confirmation-summary-card tmr-conf-item">';
-                    html += '<div class="tmr-confirmation-summary-header tmr-confirmation-item-header">';
+                    html += '<div class="tmr-confirmation-summary-header tmr-confirmation-item-header tmr-conf-item-collapse-header">';
                     html += '<div class="tmr-confirmation-item-header-left"><div class="tmr-confirmation-summary-customer"><strong>' + $('<div>').text(heading).html() + '</strong></div>';
                     if (totalQty > 0) {
                         html += '<span class="tmr-confirmation-summary-order-id tmr-conf-item-badge">×' + totalQty + '</span>';
@@ -490,7 +490,7 @@ class TMR_Customers_Panel
                     if (item.tailor) {
                         html += '<span class="tmr-vp-staff-inline"><?php echo esc_js(__('সোয়িং অপারেটর', 'tailor-manager')); ?>: <strong>' + $('<div>').text(item.tailor).html() + '</strong></span>';
                     }
-                    html += '</div><div class="tmr-confirmation-item-header-right"></div>';
+                    html += '</div><div class="tmr-confirmation-item-header-right"><svg class="tmr-conf-item-chevron is-open" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg></div>';
                     html += '</div>';
 
                     html += '<div class="tmr-conf-item-body">';
@@ -537,12 +537,13 @@ class TMR_Customers_Panel
                 html += '</div></div>';
 
                 html += '<div class="tmr-confirmation-details">';
+                <?php
+                // Order id, order/delivery date, status and total are already visible on
+                // the row this accordion opens from — repeating them here just duplicates
+                // it. Only advance/due are genuinely new info, so that's all this card
+                // shows now (pay-date/pay-total cards intentionally dropped).
+                ?>
                 html += '<div class="tmr-confirmation-summary-card"><div class="tmr-confirmation-summary-pay-row">';
-                html += '<div class="tmr-confirmation-pay-card tmr-confirmation-pay-date tmr-confirmation-pay-date-combined"><div class="tmr-confirmation-pay-text">'
-                    + '<span class="tmr-confirmation-date-line"><span class="tmr-confirmation-chip-label"><?php echo esc_js(__('অর্ডার', 'tailor-manager')); ?></span> <strong>' + data.order_date + '</strong></span>'
-                    + '<span class="tmr-confirmation-date-line"><span class="tmr-confirmation-chip-label"><?php echo esc_js(__('ডেলিভারি', 'tailor-manager')); ?></span> <strong>' + data.delivery_date + '</strong></span>'
-                    + '</div></div>';
-                html += '<div class="tmr-confirmation-pay-card tmr-confirmation-pay-total"><span class="tmr-confirmation-pay-text"><span class="tmr-confirmation-chip-label"><?php echo esc_js(__('মোট', 'tailor-manager')); ?></span> <strong>' + tmrAccFormatMoney(data.total) + '</strong></span></div>';
                 html += '<div class="tmr-confirmation-pay-card tmr-confirmation-pay-paid"><span class="tmr-confirmation-pay-text"><span class="tmr-confirmation-chip-label"><?php echo esc_js(__('অগ্রিম', 'tailor-manager')); ?></span> <strong>' + tmrAccFormatMoney(data.advance) + '</strong></span></div>';
                 html += '<div class="tmr-confirmation-pay-card tmr-confirmation-pay-due"><span class="tmr-confirmation-pay-text"><span class="tmr-confirmation-chip-label"><?php echo esc_js(__('বাকি', 'tailor-manager')); ?></span> <strong>' + tmrAccFormatMoney(data.due) + '</strong></span></div>';
                 html += '</div></div>';
@@ -586,6 +587,13 @@ class TMR_Customers_Panel
                 TMRPanel.call('tmr_delete_order', { id: data.id }, function () {
                     window.location.reload();
                 });
+            });
+
+            // Same collapsible dress/measurement cards as the Orders list's own
+            // confirmation modal — header click slides the body + flips the chevron.
+            $(document).on('click', '.tmr-order-acc-body .tmr-conf-item-collapse-header', function () {
+                $(this).next('.tmr-conf-item-body').slideToggle(150);
+                $(this).find('.tmr-conf-item-chevron').toggleClass('is-open');
             });
         });
         </script>

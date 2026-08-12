@@ -101,7 +101,12 @@ class TMR_Dashboard_Panel
                                     <td data-label="<?php esc_attr_e('মোট', 'tailor-manager'); ?>"><?php echo esc_html('৳ ' . number_format((float) get_post_meta($order->ID, '_tmr_total', true))); ?></td>
                                     <td class="tmr-orders-actions-cell">
                                         <div class="tmr-actions">
-                                            <a class="tmr-icon-btn" href="<?php echo esc_url(admin_url('admin.php?page=tmr-orders&action=view&id=' . $order->ID)); ?>" title="<?php esc_attr_e('দেখুন', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></a>
+                                            <?php
+                                            // Same view_order= mechanism the Orders list's own eye-icon
+                                            // uses — lands on the Orders page with its real confirmation
+                                            // modal already open, not the standalone view page.
+                                            ?>
+                                            <a class="tmr-icon-btn" href="<?php echo esc_url(admin_url('admin.php?page=tmr-orders&view_order=' . $order->ID)); ?>" title="<?php esc_attr_e('দেখুন', 'tailor-manager'); ?>"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></a>
                                         </div>
                                     </td>
                                 </tr>
