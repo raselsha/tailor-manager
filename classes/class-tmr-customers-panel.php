@@ -240,6 +240,14 @@ class TMR_Customers_Panel
                 });
             });
 
+            // Order-history cards inside the view modal — collapsed by default
+            // (see the CSS), full dress/measurement/design/pricing detail
+            // expands in place instead of linking out to a separate page.
+            $(document).on('click', '.tmr-order-hist-header', function () {
+                $(this).next('.tmr-order-hist-body').slideToggle(150);
+                $(this).find('.tmr-order-hist-chevron').toggleClass('is-open');
+            });
+
             // Shared by both the debounced search input and the per-page select
             // below — re-fetches and swaps only #tmr-customers-list-wrap (+ the
             // count badge), so 2000+ customers means a fast AJAX re-render
@@ -409,39 +417,116 @@ class TMR_Customers_Panel
             <span class="tmr-vp-section-count"><?php echo esc_html($orders->found_posts); ?> <?php esc_html_e('টি অর্ডার', 'tailor-manager'); ?></span>
         </div>
 
-        <div class="tmr-card">
-            <table class="tmr-table tmr-customers-table">
-                <thead>
-                    <tr>
-                        <th><?php esc_html_e('অর্ডার আইডি', 'tailor-manager'); ?></th>
-                        <th><?php esc_html_e('অর্ডারের তারিখ', 'tailor-manager'); ?></th>
-                        <th><?php esc_html_e('ডেলিভারি তারিখ', 'tailor-manager'); ?></th>
-                        <th><?php esc_html_e('স্ট্যাটাস', 'tailor-manager'); ?></th>
-                        <th><?php esc_html_e('মোট', 'tailor-manager'); ?></th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (!$orders->have_posts()) : ?>
-                        <tr><td colspan="6" class="tmr-empty"><?php esc_html_e('এই কাস্টমারের কোনো অর্ডার নেই।', 'tailor-manager'); ?></td></tr>
-                    <?php else : ?>
-                        <?php foreach ($orders->posts as $order) :
-                            $status_key = TMR_Order_Post_Type::status_label($order->ID);
-                        ?>
-                            <tr>
-                                <td>#<?php echo esc_html($order->ID); ?></td>
-                                <td><?php echo esc_html(get_post_meta($order->ID, '_tmr_order_date', true)); ?></td>
-                                <td><?php echo esc_html(get_post_meta($order->ID, '_tmr_delivery_date', true)); ?></td>
-                                <td><span class="tmr-badge tmr-badge-<?php echo esc_attr($status_key); ?>"><?php echo esc_html(ucfirst($status_key)); ?></span></td>
-                                <td><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order->ID, '_tmr_total', true))); ?></td>
-                                <td>
-                                    <a class="tmr-action-btn" target="_blank" href="<?php echo esc_url(admin_url('admin.php?page=tmr-orders&action=view&id=' . $order->ID)); ?>" title="<?php esc_attr_e('দেখুন', 'tailor-manager'); ?>"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></a>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+        <?php if (!$orders->have_posts()) : ?>
+            <div class="tmr-card"><div class="tmr-empty"><?php esc_html_e('এই কাস্টমারের কোনো অর্ডার নেই।', 'tailor-manager'); ?></div></div>
+        <?php else : ?>
+            <?php foreach ($orders->posts as $order) : self::render_order_history_item($order->ID); endforeach; ?>
+        <?php endif; ?>
+        <?php
+    }
+
+    /**
+     * One collapsible order card for the order-history list above — full
+     * dress/measurement/design/pricing detail expands in place instead of
+     * linking out to the standalone order-view page, so browsing a
+     * customer's past orders never needs to leave this modal.
+     */
+    private static function render_order_history_item($order_id)
+    {
+        $status_key   = TMR_Order_Post_Type::status_label($order_id);
+        $field_labels = TMR_Measurement_Fields::get_library();
+        $items        = TMR_Order_Post_Type::get_items($order_id);
+        ?>
+        <div class="tmr-card tmr-order-hist-card">
+            <div class="tmr-order-hist-header">
+                <div class="tmr-order-hist-header-main">
+                    <strong>#<?php echo esc_html($order_id); ?></strong>
+                    <span class="tmr-badge tmr-badge-<?php echo esc_attr($status_key); ?>"><?php echo esc_html(ucfirst($status_key)); ?></span>
+                </div>
+                <div class="tmr-order-hist-header-dates">
+                    <span><?php echo esc_html(get_post_meta($order_id, '_tmr_order_date', true)); ?></span>
+                    <span aria-hidden="true">&rarr;</span>
+                    <span><?php echo esc_html(get_post_meta($order_id, '_tmr_delivery_date', true)); ?></span>
+                </div>
+                <strong class="tmr-order-hist-header-total"><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_total', true))); ?></strong>
+                <svg class="tmr-cat-collapse-chevron tmr-order-hist-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"></path></svg>
+            </div>
+            <div class="tmr-order-hist-body">
+                <div class="tmr-vp-pay-strip">
+                    <div class="tmr-vp-pay-cell">
+                        <span class="tmr-vp-info-label"><?php esc_html_e('মজুরি', 'tailor-manager'); ?></span>
+                        <strong><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_wage', true))); ?></strong>
+                    </div>
+                    <div class="tmr-vp-pay-cell">
+                        <span class="tmr-vp-info-label"><?php esc_html_e('কাপড়ের দাম', 'tailor-manager'); ?></span>
+                        <strong><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_cloth_price', true))); ?></strong>
+                    </div>
+                    <div class="tmr-vp-pay-cell">
+                        <span class="tmr-vp-info-label"><?php esc_html_e('অগ্রিম', 'tailor-manager'); ?></span>
+                        <strong><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_advance', true))); ?></strong>
+                    </div>
+                    <div class="tmr-vp-pay-cell">
+                        <span class="tmr-vp-info-label"><?php esc_html_e('বাকি', 'tailor-manager'); ?></span>
+                        <strong><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order_id, '_tmr_due', true))); ?></strong>
+                    </div>
+                </div>
+
+                <?php foreach ($items as $item) :
+                    $cat_id  = TMR_Order_Item_Post_Type::get_category_id($item->ID);
+                    $term    = get_term($cat_id, TMR_Category_Taxonomy::TAXONOMY);
+                    $dresses = TMR_Order_Item_Post_Type::get_dresses($item->ID);
+                ?>
+                    <div class="tmr-order-hist-item">
+                        <p class="tmr-order-hist-item-title">
+                            <?php echo $term && !is_wp_error($term) ? esc_html($term->name) : ''; ?>
+                            <span class="tmr-vp-section-count">
+                                <?php
+                                $dress_names = array_map(function ($d) {
+                                    $post = get_post($d['dress_id']);
+                                    return ($post ? $post->post_title : '') . ' x' . $d['quantity'];
+                                }, $dresses);
+                                echo esc_html(implode(', ', $dress_names));
+                                ?>
+                            </span>
+                        </p>
+
+                        <?php $measurements = TMR_Order_Item_Post_Type::get_measurements($item->ID); ?>
+                        <?php if ($measurements) : ?>
+                            <div class="tmr-vm-grid">
+                                <?php foreach ($measurements as $slug => $val) : ?>
+                                    <?php if ('' === $val) continue; ?>
+                                    <div class="tmr-vm-card">
+                                        <span class="tmr-vm-card-label"><?php echo esc_html(isset($field_labels[$slug]) ? $field_labels[$slug] : $slug); ?></span>
+                                        <strong class="tmr-vm-card-value"><?php echo esc_html($val); ?></strong>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php $part_selections = TMR_Order_Item_Post_Type::get_part_selections($item->ID); ?>
+                        <?php if ($part_selections) : ?>
+                            <div class="tmr-vp-part-list">
+                                <?php foreach ($part_selections as $sel) :
+                                    $part = get_post($sel['part_id']);
+                                    if (!$part) continue;
+                                    $design_names = array_map(function ($id) {
+                                        $d = get_post($id);
+                                        return $d ? $d->post_title : '';
+                                    }, $sel['design_type_ids']);
+                                ?>
+                                    <div class="tmr-vp-part-row">
+                                        <span class="tmr-vp-part-label"><?php echo esc_html($part->post_title); ?></span>
+                                        <span><?php echo esc_html(implode(', ', array_filter($design_names))); ?></span>
+                                        <?php if (!empty($sel['part_measurement'])) : ?>
+                                            <span class="tmr-vp-part-extra"><?php echo esc_html($sel['part_measurement']); ?></span>
+                                        <?php endif; ?>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         </div>
         <?php
     }
