@@ -548,17 +548,29 @@ body.tmr-staff-chrome .tmr-admin-wrapper { height: calc(100vh - 40px); }
     width: 100%;
     border-collapse: collapse;
 }
-/* display:block + overflow-x:auto only below the sidebar's own mobile breakpoint
-   — applied unconditionally this broke desktop: a display:block <table> no
-   longer shares ONE table-layout column-width calculation between <thead> and
+/* display:block only below the sidebar's own mobile breakpoint — applied
+   unconditionally this broke desktop: a display:block <table> no longer
+   shares ONE table-layout column-width calculation between <thead> and
    <tbody> (each becomes its own independent anonymous table), so header cells
    stopped lining up with the body's wider action-button row at all. Desktop
    has the width for a normal table to just fit without needing to scroll, so
    it keeps the default display:table there and only switches for narrow
-   viewports where clipping was the real problem. */
+   viewports where clipping was the real problem.
+   The horizontal scrolling itself deliberately does NOT live here (as
+   overflow-x on .tmr-table) — giving .tmr-table its own overflow-x also
+   computes its overflow-y to auto per the CSS overflow-pairing rule, which
+   makes .tmr-table (not .tmr-scroll-wrap) the nearest scrolling ancestor —
+   and position:sticky resolves against whichever ancestor that is. Since
+   .tmr-table itself never grows a real vertical scrollbar (it's never
+   height-constrained), its thead just sits static instead of sticking to
+   .tmr-scroll-wrap's own scroll like it does on desktop. Scrolling
+   horizontally on .tmr-scroll-wrap itself instead (below) keeps it the one
+   real scroll container on every breakpoint, so sticky keeps working. */
 @media (max-width: 900px) {
     .tmr-table {
         display: block;
+    }
+    .tmr-scroll-wrap {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
     }
@@ -585,9 +597,16 @@ body.tmr-staff-chrome .tmr-admin-wrapper { height: calc(100vh - 40px); }
 .tmr-table tr:hover td { background: #fafbfc; }
 
 /* Customers list — tighter rows than the base .tmr-table so more of a
-   2000+-row list fits on screen at once without scrolling. */
-.tmr-customers-table th { padding: 10px 20px; }
-.tmr-customers-table td { padding: 9px 20px; font-size: 13px; }
+   2000+-row list fits on screen at once without scrolling, without going so
+   tight it reads as cramped. Address is capped to one line (with the full
+   text still on hover via the cell's title attribute) rather than left to
+   wrap — a long address wrapping to 2-3 lines was what made rows uneven and
+   the compact spacing feel bad, not the padding itself. */
+.tmr-customers-table th { padding: 13px 20px; }
+.tmr-customers-table td { padding: 12px 20px; font-size: 13px; }
+.tmr-customers-table .tmr-customer-name-cell { font-weight: 700; color: #1e293b; }
+.tmr-customers-table .tmr-customer-address-cell { max-width: 260px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tmr-customers-table .tmr-customer-date-cell { color: #64748b; }
 
 .tmr-empty {
     text-align: center;
@@ -1551,7 +1570,15 @@ body.tmr-staff-chrome .tmr-admin-wrapper { height: calc(100vh - 40px); }
    (phone-width) cards. */
 .tmr-confirmation-item-header-center { margin-left: auto; flex-wrap: wrap; row-gap: 4px; max-width: 100%; }
 .tmr-confirmation-item-header-right { gap: 4px; }
-.tmr-confirmation-item-header-left .tmr-confirmation-summary-customer strong { white-space: nowrap; }
+/* The dress-name heading itself was the one zone here still sized to its full
+   nowrap content width with no cap — on a narrow phone a long multi-dress
+   heading (e.g. "শার্ট — নাম ১, নাম ২, নাম ৩") forced .tmr-modal-content's own
+   horizontal scrollbar, since flex-wrap on the parent row can't wrap content
+   *within* a single flex-shrink:0 zone. Same max-width:100% + ellipsis
+   treatment already used elsewhere in this modal (e.g. the pay-strip cards). */
+.tmr-confirmation-item-header-left { max-width: 100%; }
+.tmr-confirmation-item-header-left .tmr-confirmation-summary-customer { min-width: 0; max-width: 100%; }
+.tmr-confirmation-item-header-left .tmr-confirmation-summary-customer strong { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* Per-dress print / download-image / WhatsApp, then the collapse chevron — shared
    with .tmr-conf-customer-action (the customer-info header icons) and
    .tmr-conf-toolbar-action (the full-page/dress-only print+capture icons). */

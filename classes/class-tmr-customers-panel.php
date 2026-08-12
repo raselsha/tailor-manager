@@ -21,6 +21,7 @@ class TMR_Customers_Panel
         add_action('wp_ajax_tmr_delete_customer', array($this, 'ajax_delete'));
         add_action('wp_ajax_tmr_get_customer', array($this, 'ajax_get'));
         add_action('wp_ajax_tmr_search_customers_list', array($this, 'ajax_search'));
+        add_action('wp_ajax_tmr_get_customer_view', array($this, 'ajax_view'));
     }
 
     /**
@@ -210,10 +211,34 @@ class TMR_Customers_Panel
             </div>
         </div>
 
+        <div class="tmr-modal" id="tmr-customer-view-modal">
+            <div class="tmr-modal-content tmr-modal-content-lg">
+                <div class="tmr-modal-head">
+                    <h2 id="tmr-customer-view-modal-title"><?php esc_html_e('কাস্টমার', 'tailor-manager'); ?></h2>
+                    <button type="button" class="tmr-modal-close">&times;</button>
+                </div>
+                <div class="tmr-modal-body" id="tmr-customer-view-modal-body">
+                    <div class="tmr-empty"><?php esc_html_e('লোড হচ্ছে...', 'tailor-manager'); ?></div>
+                </div>
+            </div>
+        </div>
+
         <script>
         jQuery(function ($) {
             var $modal = $('#tmr-customer-modal');
             var $form = $('#tmr-customer-form');
+            var $viewModal = $('#tmr-customer-view-modal');
+
+            $(document).on('click', '.tmr-view-customer-trigger', function (e) {
+                e.preventDefault();
+                var id = $(this).data('id');
+                $('#tmr-customer-view-modal-body').html('<div class="tmr-empty"><?php echo esc_js(__('লোড হচ্ছে...', 'tailor-manager')); ?></div>');
+                TMRPanel.openModal($viewModal);
+                TMRPanel.call('tmr_get_customer_view', { id: id }, function (data) {
+                    $('#tmr-customer-view-modal-title').text(data.name);
+                    $('#tmr-customer-view-modal-body').html(data.html);
+                });
+            });
 
             // Shared by both the debounced search input and the per-page select
             // below — re-fetches and swaps only #tmr-customers-list-wrap (+ the
@@ -318,12 +343,24 @@ class TMR_Customers_Panel
             wp_die(esc_html__('কাস্টমার পাওয়া যায়নি।', 'tailor-manager'));
         }
 
-        $phone   = TMR_Customer_Post_Type::get_phone($customer_id);
-        $address = TMR_Customer_Post_Type::get_address($customer_id);
-
         $header_right = '<a class="tmr-btn-outline" href="' . esc_url(admin_url('admin.php?page=tmr-customers')) . '">' . esc_html__('তালিকায় ফিরুন', 'tailor-manager') . '</a>';
 
         TMR_Panel_Shell::header('customers', get_the_title($customer), '', $header_right, true);
+        self::render_view_content($customer_id);
+        TMR_Panel_Shell::footer();
+    }
+
+    /**
+     * The customer-info + order-history content shared by the standalone
+     * full-page view (render_view(), kept for direct/bookmarkable links) and
+     * the quick-view modal on the list page (ajax_view()) — same content
+     * either way, just a different chrome around it.
+     */
+    private static function render_view_content($customer_id)
+    {
+        $customer = get_post($customer_id);
+        $phone    = TMR_Customer_Post_Type::get_phone($customer_id);
+        $address  = TMR_Customer_Post_Type::get_address($customer_id);
         ?>
         <div class="tmr-card-plain tmr-highlight-card">
             <div class="tmr-step-header tmr-highlight-header">
@@ -407,7 +444,31 @@ class TMR_Customers_Panel
             </table>
         </div>
         <?php
-        TMR_Panel_Shell::footer();
+    }
+
+    /**
+     * Quick-view modal on the list page — same content as render_view()'s
+     * standalone page, returned as an HTML fragment to inject into
+     * #tmr-customer-view-modal instead of navigating away.
+     */
+    public function ajax_view()
+    {
+        check_ajax_referer('tmr_panel_nonce', 'nonce');
+        if (!current_user_can(TMR_Panel_Shell::CAPABILITY)) {
+            wp_send_json_error(array('message' => __('অনুমতি নেই।', 'tailor-manager')));
+        }
+
+        $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+        $customer = get_post($id);
+        if (!$customer || self::POST_TYPE !== $customer->post_type) {
+            wp_send_json_error(array('message' => __('কাস্টমার পাওয়া যায়নি।', 'tailor-manager')));
+        }
+
+        ob_start();
+        self::render_view_content($id);
+        $html = ob_get_clean();
+
+        wp_send_json_success(array('html' => $html, 'name' => get_the_title($customer)));
     }
 
     private static function render_table($query, $paged, $search, $per_page)
@@ -429,14 +490,15 @@ class TMR_Customers_Panel
                         <tr><td colspan="5" class="tmr-empty"><?php esc_html_e('কোনো কাস্টমার পাওয়া যায়নি।', 'tailor-manager'); ?></td></tr>
                     <?php else : ?>
                         <?php foreach ($query->posts as $customer) : ?>
+                            <?php $address = TMR_Customer_Post_Type::get_address($customer->ID); ?>
                             <tr>
-                                <td><?php echo esc_html(get_the_title($customer)); ?></td>
+                                <td class="tmr-customer-name-cell"><?php echo esc_html(get_the_title($customer)); ?></td>
                                 <td><?php echo esc_html(TMR_Customer_Post_Type::get_phone($customer->ID)); ?></td>
-                                <td><?php echo esc_html(TMR_Customer_Post_Type::get_address($customer->ID)); ?></td>
-                                <td><?php echo esc_html(get_the_date('Y-m-d', $customer)); ?></td>
+                                <td class="tmr-customer-address-cell" title="<?php echo esc_attr($address); ?>"><?php echo esc_html($address); ?></td>
+                                <td class="tmr-customer-date-cell"><?php echo esc_html(get_the_date('Y-m-d', $customer)); ?></td>
                                 <td>
                                     <div class="tmr-actions">
-                                        <a class="tmr-action-btn" href="<?php echo esc_url(admin_url('admin.php?page=tmr-customers&action=view&id=' . $customer->ID)); ?>" title="<?php esc_attr_e('দেখুন', 'tailor-manager'); ?>"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></a>
+                                        <a class="tmr-action-btn tmr-view-customer-trigger" data-id="<?php echo esc_attr($customer->ID); ?>" href="<?php echo esc_url(admin_url('admin.php?page=tmr-customers&action=view&id=' . $customer->ID)); ?>" title="<?php esc_attr_e('দেখুন', 'tailor-manager'); ?>"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></a>
                                         <span class="tmr-action-btn tmr-edit-customer" data-id="<?php echo esc_attr($customer->ID); ?>" title="<?php esc_attr_e('এডিট', 'tailor-manager'); ?>"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></span>
                                         <span class="tmr-action-btn tmr-action-btn-red tmr-delete-customer" data-id="<?php echo esc_attr($customer->ID); ?>" title="<?php esc_attr_e('ডিলিট', 'tailor-manager'); ?>"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></span>
                                     </div>
