@@ -205,6 +205,11 @@ class TMR_Orders_Panel
         $search = isset($_GET['s']) ? sanitize_text_field(wp_unslash($_GET['s'])) : '';
         $status = isset($_GET['status']) ? sanitize_key($_GET['status']) : 'all';
         $paged  = isset($_GET['paged']) ? max(1, (int) $_GET['paged']) : 1;
+        // Lets any other screen (the customer view page's order-history list)
+        // link straight to "this exact order, opened in the real view modal"
+        // without duplicating any of showOrderConfirmation()'s markup/JS —
+        // reuses the same viewOrderSummary() the list's own eye-icon calls.
+        $view_order_id = isset($_GET['view_order']) ? (int) $_GET['view_order'] : 0;
 
         $query = self::build_query($search, $status, $paged);
 
@@ -398,7 +403,7 @@ class TMR_Orders_Panel
             </div>
         </div>
 
-        <?php self::render_order_form_script($auto_open_id); ?>
+        <?php self::render_order_form_script($auto_open_id, $view_order_id); ?>
         <?php
         TMR_Panel_Shell::footer();
     }
@@ -864,7 +869,7 @@ class TMR_Orders_Panel
         <?php
     }
 
-    private static function render_order_form_script($auto_open_id = 0)
+    private static function render_order_form_script($auto_open_id = 0, $view_order_id = 0)
     {
         // Bound once on the list page via $(document).on(...) delegation — the
         // form/customer-search/etc. markup itself is injected into the modal body
@@ -2058,6 +2063,9 @@ class TMR_Orders_Panel
 
             <?php if ($auto_open_id) : ?>
             loadOrderForm(<?php echo (int) $auto_open_id; ?>);
+            <?php endif; ?>
+            <?php if ($view_order_id) : ?>
+            viewOrderSummary(<?php echo (int) $view_order_id; ?>);
             <?php endif; ?>
         });
         </script>
