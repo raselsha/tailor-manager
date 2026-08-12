@@ -520,16 +520,20 @@ class TMR_Customers_Panel
                 return html;
             }
 
+            var tmrAccEditIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>';
+            var tmrAccPrintIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>';
+            var tmrAccDeleteIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+
             function tmrAccRender($body, data) {
                 var html = '';
                 html += '<div class="tmr-confirmation-toolbar">';
                 html += '<div class="tmr-confirmation-toolbar-status">' + tmrAccStatusPillHtml(data.status_key, data.urgent) + '</div>';
                 html += '<div class="tmr-confirmation-toolbar-actions">';
-                html += '<a class="tmr-btn-outline tmr-btn-sm" href="' + data.edit_url + '"><?php echo esc_js(__('এডিট', 'tailor-manager')); ?></a>';
-                html += '<a class="tmr-btn-outline tmr-btn-sm" href="' + data.print_receipt_url + '" target="_blank"><?php echo esc_js(__('রিসিট', 'tailor-manager')); ?></a>';
-                html += '<a class="tmr-btn-outline tmr-btn-sm" href="' + data.print_workslip_url + '" target="_blank"><?php echo esc_js(__('ওয়ার্ক', 'tailor-manager')); ?></a>';
-                html += '<a class="tmr-btn-outline tmr-btn-sm" href="' + data.print_fullslip_url + '" target="_blank"><?php echo esc_js(__('ফুল', 'tailor-manager')); ?></a>';
-                html += '<button type="button" class="tmr-btn-outline tmr-btn-outline-danger tmr-btn-sm tmr-order-acc-delete"><?php echo esc_js(__('ডিলিট', 'tailor-manager')); ?></button>';
+                html += '<a class="tmr-btn-outline tmr-btn-sm" href="' + data.edit_url + '">' + tmrAccEditIcon + ' <?php echo esc_js(__('এডিট', 'tailor-manager')); ?></a>';
+                html += '<a class="tmr-btn-outline tmr-btn-sm" href="' + data.print_receipt_url + '" target="_blank">' + tmrAccPrintIcon + ' <?php echo esc_js(__('রিসিট', 'tailor-manager')); ?></a>';
+                html += '<a class="tmr-btn-outline tmr-btn-sm" href="' + data.print_workslip_url + '" target="_blank">' + tmrAccPrintIcon + ' <?php echo esc_js(__('ওয়ার্ক', 'tailor-manager')); ?></a>';
+                html += '<a class="tmr-btn-outline tmr-btn-sm" href="' + data.print_fullslip_url + '" target="_blank">' + tmrAccPrintIcon + ' <?php echo esc_js(__('ফুল', 'tailor-manager')); ?></a>';
+                html += '<button type="button" class="tmr-btn-outline tmr-btn-outline-danger tmr-btn-sm tmr-order-acc-delete">' + tmrAccDeleteIcon + ' <?php echo esc_js(__('ডিলিট', 'tailor-manager')); ?></button>';
                 html += '</div></div>';
 
                 html += '<div class="tmr-confirmation-details">';

@@ -631,7 +631,14 @@ body.tmr-staff-chrome .tmr-admin-wrapper { height: calc(100vh - 40px); }
 .tmr-order-acc-chevron.is-open { transform: rotate(180deg); }
 .tmr-order-acc-row td { background: #f8fafc; padding: 20px; }
 .tmr-order-acc-body .tmr-confirmation-toolbar { margin-bottom: 14px; }
-.tmr-order-acc-body .tmr-confirmation-details { margin-bottom: 0; }
+/* The real modal caps .tmr-confirmation-details at 760px because it's a
+   narrow popup — this accordion lives directly in the page flow with the
+   whole page width to use, so the cap is lifted here only (scoped under
+   .tmr-order-acc-body) without touching the shared rule the modal still
+   relies on. */
+.tmr-order-acc-body .tmr-confirmation-details { margin-bottom: 0; max-width: 100%; }
+.tmr-order-acc-body .tmr-confirmation-summary-pay-row { grid-template-columns: repeat(4, 1fr); }
+.tmr-order-acc-body .tmr-vp-design-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
 /* The accordion row after the last order is always the table's true last DOM
    child (hidden or not), so .tmr-table's own :last-child corner-rounding
    (panel.css:395-396) misses the trigger row that's actually visible at the
