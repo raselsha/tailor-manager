@@ -161,7 +161,7 @@ class TMR_My_Orders_Panel
                                     <tr>
                                         <td data-label="<?php esc_attr_e('অর্ডার', 'tailor-manager'); ?>">#<?php echo esc_html($order_id); ?> — <?php echo esc_html($name); ?></td>
                                         <td data-label="<?php esc_attr_e('ড্রেস', 'tailor-manager'); ?>"><?php echo esc_html(self::dress_summary($order_id)); ?></td>
-                                        <td data-label="<?php esc_attr_e('ডেলিভারি তারিখ', 'tailor-manager'); ?>"><?php echo esc_html(get_post_meta($order_id, '_tmr_delivery_date', true)); ?></td>
+                                        <td data-label="<?php esc_attr_e('ডেলিভারি তারিখ', 'tailor-manager'); ?>"><?php echo esc_html(TMR_Orders_Panel::format_date_bn(get_post_meta($order_id, '_tmr_delivery_date', true))); ?></td>
                                         <td data-label="<?php esc_attr_e('স্ট্যাটাস', 'tailor-manager'); ?>"><span class="tmr-badge tmr-badge-<?php echo $ready ? 'ready' : 'pending'; ?>"><?php echo $ready ? esc_html__('রেডি', 'tailor-manager') : esc_html__('পেন্ডিং', 'tailor-manager'); ?></span></td>
                                         <td class="tmr-myorders-actions-cell">
                                             <div class="tmr-myorders-row-actions">
@@ -409,8 +409,8 @@ class TMR_My_Orders_Panel
 
         wp_send_json_success(array(
             'order_id'      => $order_id,
-            'order_date'    => get_post_meta($order_id, '_tmr_order_date', true),
-            'delivery_date' => get_post_meta($order_id, '_tmr_delivery_date', true),
+            'order_date'    => TMR_Orders_Panel::format_date_bn(get_post_meta($order_id, '_tmr_order_date', true)),
+            'delivery_date' => TMR_Orders_Panel::format_date_bn(get_post_meta($order_id, '_tmr_delivery_date', true)),
             'items'         => $items,
         ));
     }

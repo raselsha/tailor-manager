@@ -351,7 +351,7 @@ class TMR_Customers_Panel
                 </div>
                 <div class="tmr-vp-info-item">
                     <span class="tmr-vp-info-label"><?php esc_html_e('নিবন্ধনের তারিখ', 'tailor-manager'); ?></span>
-                    <strong><?php echo esc_html(get_the_date('Y-m-d', $customer)); ?></strong>
+                    <strong><?php echo esc_html(TMR_Orders_Panel::format_date_bn(get_the_date('Y-m-d', $customer))); ?></strong>
                 </div>
                 <?php if ($address) : ?>
                 <div class="tmr-vp-info-item">
@@ -401,8 +401,8 @@ class TMR_Customers_Panel
                         ?>
                             <tr class="tmr-order-acc-trigger" data-id="<?php echo esc_attr($order->ID); ?>">
                                 <td>#<?php echo esc_html($order->ID); ?></td>
-                                <td><?php echo esc_html(get_post_meta($order->ID, '_tmr_order_date', true)); ?></td>
-                                <td><?php echo esc_html(get_post_meta($order->ID, '_tmr_delivery_date', true)); ?></td>
+                                <td><?php echo esc_html(TMR_Orders_Panel::format_date_bn(get_post_meta($order->ID, '_tmr_order_date', true))); ?></td>
+                                <td><?php echo esc_html(TMR_Orders_Panel::format_date_bn(get_post_meta($order->ID, '_tmr_delivery_date', true))); ?></td>
                                 <td><span class="tmr-badge tmr-badge-<?php echo esc_attr($status_key); ?>"><?php echo esc_html(ucfirst($status_key)); ?></span></td>
                                 <td><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order->ID, '_tmr_total', true))); ?></td>
                                 <td><span class="tmr-badge tmr-badge-green"><?php echo esc_html(TMR_Panel_Shell::format_money(get_post_meta($order->ID, '_tmr_advance', true))); ?></span></td>
@@ -608,7 +608,7 @@ class TMR_Customers_Panel
                                 <td class="tmr-customer-name-cell"><?php echo esc_html(get_the_title($customer)); ?></td>
                                 <td><?php echo esc_html(TMR_Customer_Post_Type::get_phone($customer->ID)); ?></td>
                                 <td class="tmr-customer-address-cell" title="<?php echo esc_attr($address); ?>"><?php echo esc_html($address); ?></td>
-                                <td class="tmr-customer-date-cell"><?php echo esc_html(get_the_date('Y-m-d', $customer)); ?></td>
+                                <td class="tmr-customer-date-cell"><?php echo esc_html(TMR_Orders_Panel::format_date_bn(get_the_date('Y-m-d', $customer))); ?></td>
                                 <td>
                                     <div class="tmr-actions">
                                         <a class="tmr-action-btn" href="<?php echo esc_url(admin_url('admin.php?page=tmr-customers&action=view&id=' . $customer->ID)); ?>" title="<?php esc_attr_e('দেখুন', 'tailor-manager'); ?>"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></a>

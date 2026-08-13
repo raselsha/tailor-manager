@@ -180,8 +180,8 @@ class TMR_Orders_Panel
                                 <td data-label="<?php esc_attr_e('কাস্টমার', 'tailor-manager'); ?>" class="tmr-orders-customer-cell"><a href="#" class="tmr-view-order-trigger" data-id="<?php echo esc_attr($order->ID); ?>" title="<?php echo esc_attr($name . ($phone ? ' (' . $phone . ')' : '')); ?>"><?php echo esc_html($name . ($phone ? ' (' . $phone . ')' : '')); ?></a></td>
                                 <td data-label="<?php esc_attr_e('ড্রেস ও পরিমাণ', 'tailor-manager'); ?>" class="tmr-orders-dress-cell" title="<?php echo esc_attr(self::dress_summary($order->ID)); ?>"><?php echo esc_html(self::dress_summary($order->ID)); ?></td>
                                 <td data-label="<?php esc_attr_e('স্টাফ', 'tailor-manager'); ?>" class="tmr-orders-staff-cell"><?php echo $staff ? esc_html($staff) : '<span class="tmr-empty-inline">' . esc_html__('অনির্ধারিত', 'tailor-manager') . '</span>'; // phpcs:ignore -- self-escaped ?></td>
-                                <td data-label="<?php esc_attr_e('অর্ডারের তারিখ', 'tailor-manager'); ?>" class="tmr-orders-date-cell"><?php echo esc_html(get_post_meta($order->ID, '_tmr_order_date', true)); ?></td>
-                                <td data-label="<?php esc_attr_e('ডেলিভারি তারিখ', 'tailor-manager'); ?>" class="tmr-orders-date-cell"><?php echo esc_html(get_post_meta($order->ID, '_tmr_delivery_date', true)); ?></td>
+                                <td data-label="<?php esc_attr_e('অর্ডারের তারিখ', 'tailor-manager'); ?>" class="tmr-orders-date-cell"><?php echo esc_html(self::format_date_bn(get_post_meta($order->ID, '_tmr_order_date', true))); ?></td>
+                                <td data-label="<?php esc_attr_e('ডেলিভারি তারিখ', 'tailor-manager'); ?>" class="tmr-orders-date-cell"><?php echo esc_html(self::format_date_bn(get_post_meta($order->ID, '_tmr_delivery_date', true))); ?></td>
                                 <td data-label="<?php esc_attr_e('ডেলিভারি স্ট্যাটাস', 'tailor-manager'); ?>" class="tmr-orders-status-cell"><span class="tmr-badge tmr-badge-<?php echo esc_attr($status_key); ?>"><?php echo esc_html(ucfirst($status_key)); ?></span></td>
                                 <td class="tmr-orders-actions-cell">
                                     <div class="tmr-actions">
@@ -462,7 +462,7 @@ class TMR_Orders_Panel
      * reorders that (e.g. "j F, Y" to "F j, Y") sees it reflected here too,
      * instead of a hardcoded "day Month, Year" layout.
      */
-    private static function format_date_bn($ymd, $short_year = false)
+    public static function format_date_bn($ymd, $short_year = false)
     {
         if (!$ymd) {
             return '';
@@ -2141,11 +2141,11 @@ class TMR_Orders_Panel
                     </div>
                     <div class="tmr-vp-info-item">
                         <span class="tmr-vp-info-label"><?php esc_html_e('অর্ডারের তারিখ', 'tailor-manager'); ?></span>
-                        <strong><?php echo esc_html(get_post_meta($order_id, '_tmr_order_date', true)); ?></strong>
+                        <strong><?php echo esc_html(self::format_date_bn(get_post_meta($order_id, '_tmr_order_date', true))); ?></strong>
                     </div>
                     <div class="tmr-vp-info-item">
                         <span class="tmr-vp-info-label"><?php esc_html_e('ডেলিভারি তারিখ', 'tailor-manager'); ?></span>
-                        <strong><?php echo esc_html(get_post_meta($order_id, '_tmr_delivery_date', true)); ?></strong>
+                        <strong><?php echo esc_html(self::format_date_bn(get_post_meta($order_id, '_tmr_delivery_date', true))); ?></strong>
                     </div>
                 </div>
             </div>

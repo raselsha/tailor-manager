@@ -96,7 +96,7 @@ class TMR_Accounts_Report
                     <?php else : ?>
                         <?php foreach ($rows as $row) : ?>
                             <tr>
-                                <td><?php echo esc_html($row->order_date); ?></td>
+                                <td><?php echo esc_html(TMR_Orders_Panel::format_date_bn($row->order_date)); ?></td>
                                 <td><?php echo esc_html($row->order_count); ?></td>
                                 <td><?php echo esc_html(number_format((float) $row->wage, 2)); ?></td>
                                 <td><?php echo esc_html(number_format((float) $row->cloth_price, 2)); ?></td>
