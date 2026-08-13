@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
 <html>
 <head>
 <meta charset="utf-8">
-<title><?php echo esc_html__('ওয়ার্ক স্লিপ', 'tailor-manager'); ?> #<?php echo esc_html($data['order_id']); ?></title>
+<title><?php echo esc_html__('ওয়ার্ক স্লিপ', 'tailor-manager'); ?> #<?php echo esc_html($data['order_number']); ?></title>
 <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; padding: 24px; color: #1e293b; background: #fff; margin: 0; }
     .print-shop-name { margin: 0 0 3px; font-size: 17px; font-weight: 700; text-align: center; }
@@ -45,7 +45,7 @@ defined('ABSPATH') || exit;
         <div class="print-item-block">
             <p class="print-item-title"><?php echo esc_html($item['category'] . (!empty($item['dress_lines']) ? ' — ' . implode(', ', $item['dress_lines']) : '')); ?></p>
             <div class="print-meta-row">
-                <span><?php esc_html_e('অর্ডার নং', 'tailor-manager'); ?>:<strong>#<?php echo esc_html($data['order_id']); ?></strong></span>
+                <span><?php esc_html_e('অর্ডার নং', 'tailor-manager'); ?>:<strong>#<?php echo esc_html($data['order_number']); ?></strong></span>
                 <span><?php esc_html_e('ডেলিভারি', 'tailor-manager'); ?>:<strong><?php echo esc_html($data['delivery_date']); ?></strong></span>
                 <?php if ($item['cutter']) : ?><span><?php esc_html_e('কাটিং মাস্টার', 'tailor-manager'); ?>:<strong><?php echo esc_html($item['cutter']); ?></strong></span><?php endif; ?>
                 <?php if ($item['tailor']) : ?><span><?php esc_html_e('সোয়িং অপারেটর', 'tailor-manager'); ?>:<strong><?php echo esc_html($item['tailor']); ?></strong></span><?php endif; ?>

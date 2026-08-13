@@ -54,7 +54,7 @@ class TMR_My_Orders_Panel
             if ('' !== $search) {
                 $customer_id  = (int) get_post_meta($order_id, '_tmr_customer_id', true);
                 $name         = $customer_id ? get_the_title($customer_id) : __('ওয়াক-ইন', 'tailor-manager');
-                $matches_id   = false !== strpos((string) $order_id, $search);
+                $matches_id   = false !== strpos((string) TMR_Orders_Panel::get_order_number($order_id), $search);
                 $matches_name = false !== mb_stripos($name, $search);
                 if (!$matches_id && !$matches_name) {
                     return false;
@@ -159,7 +159,7 @@ class TMR_My_Orders_Panel
                                     $ready       = TMR_Order_Post_Type::is_ready($order_id);
                                 ?>
                                     <tr>
-                                        <td data-label="<?php esc_attr_e('অর্ডার', 'tailor-manager'); ?>">#<?php echo esc_html($order_id); ?> — <?php echo esc_html($name); ?></td>
+                                        <td data-label="<?php esc_attr_e('অর্ডার', 'tailor-manager'); ?>">#<?php echo esc_html(TMR_Orders_Panel::get_order_number($order_id)); ?> — <?php echo esc_html($name); ?></td>
                                         <td data-label="<?php esc_attr_e('ড্রেস', 'tailor-manager'); ?>"><?php echo esc_html(self::dress_summary($order_id)); ?></td>
                                         <td data-label="<?php esc_attr_e('ডেলিভারি তারিখ', 'tailor-manager'); ?>"><?php echo esc_html(TMR_Orders_Panel::format_date_bn(get_post_meta($order_id, '_tmr_delivery_date', true))); ?></td>
                                         <td data-label="<?php esc_attr_e('স্ট্যাটাস', 'tailor-manager'); ?>"><span class="tmr-badge tmr-badge-<?php echo $ready ? 'ready' : 'pending'; ?>"><?php echo $ready ? esc_html__('রেডি', 'tailor-manager') : esc_html__('পেন্ডিং', 'tailor-manager'); ?></span></td>
@@ -323,7 +323,7 @@ class TMR_My_Orders_Panel
             $(document).on('click', '.tmr-view-staff-order', function () {
                 var id = $(this).data('id');
                 TMRPanel.call('tmr_view_staff_measurements', { id: id }, function (data) {
-                    $('#tmr-staff-view-title').text('#' + data.order_id);
+                    $('#tmr-staff-view-title').text('#' + data.order_number);
                     $('#tmr-staff-view-order-date').text(data.order_date);
                     $('#tmr-staff-view-delivery-date').text(data.delivery_date);
 
@@ -409,6 +409,7 @@ class TMR_My_Orders_Panel
 
         wp_send_json_success(array(
             'order_id'      => $order_id,
+            'order_number'  => TMR_Orders_Panel::get_order_number($order_id),
             'order_date'    => TMR_Orders_Panel::format_date_bn(get_post_meta($order_id, '_tmr_order_date', true)),
             'delivery_date' => TMR_Orders_Panel::format_date_bn(get_post_meta($order_id, '_tmr_delivery_date', true)),
             'items'         => $items,

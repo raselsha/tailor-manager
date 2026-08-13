@@ -98,7 +98,7 @@ class TMR_Dashboard_Panel
                                 $staff       = TMR_Orders_Panel::staff_summary($order->ID);
                             ?>
                                 <tr>
-                                    <td data-label="<?php esc_attr_e('অর্ডার আইডি', 'tailor-manager'); ?>" class="tmr-orders-id-cell">#<?php echo esc_html($order->ID); ?></td>
+                                    <td data-label="<?php esc_attr_e('অর্ডার আইডি', 'tailor-manager'); ?>" class="tmr-orders-id-cell">#<?php echo esc_html(TMR_Orders_Panel::get_order_number($order->ID)); ?></td>
                                     <td data-label="<?php esc_attr_e('কাস্টমার', 'tailor-manager'); ?>" class="tmr-orders-customer-cell" title="<?php echo esc_attr($name); ?>"><?php echo esc_html($name); ?></td>
                                     <td data-label="<?php esc_attr_e('ড্রেস ও পরিমাণ', 'tailor-manager'); ?>" class="tmr-orders-dress-cell" title="<?php echo esc_attr(TMR_Orders_Panel::dress_summary($order->ID)); ?>"><?php echo esc_html(TMR_Orders_Panel::dress_summary($order->ID)); ?></td>
                                     <td data-label="<?php esc_attr_e('স্টাফ', 'tailor-manager'); ?>" class="tmr-orders-staff-cell"><?php echo $staff ? esc_html($staff) : '<span class="tmr-empty-inline">' . esc_html__('অনির্ধারিত', 'tailor-manager') . '</span>'; // phpcs:ignore -- self-escaped ?></td>

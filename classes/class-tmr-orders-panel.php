@@ -176,7 +176,7 @@ class TMR_Orders_Panel
                             $staff       = self::staff_summary($order->ID);
                         ?>
                             <tr>
-                                <td data-label="<?php esc_attr_e('অর্ডার আইডি', 'tailor-manager'); ?>" class="tmr-orders-id-cell">#<?php echo esc_html($order->ID); ?></td>
+                                <td data-label="<?php esc_attr_e('অর্ডার আইডি', 'tailor-manager'); ?>" class="tmr-orders-id-cell">#<?php echo esc_html(self::get_order_number($order->ID)); ?></td>
                                 <td data-label="<?php esc_attr_e('কাস্টমার', 'tailor-manager'); ?>" class="tmr-orders-customer-cell"><a href="#" class="tmr-view-order-trigger" data-id="<?php echo esc_attr($order->ID); ?>" title="<?php echo esc_attr($name . ($phone ? ' (' . $phone . ')' : '')); ?>"><?php echo esc_html($name . ($phone ? ' (' . $phone . ')' : '')); ?></a></td>
                                 <td data-label="<?php esc_attr_e('ড্রেস ও পরিমাণ', 'tailor-manager'); ?>" class="tmr-orders-dress-cell" title="<?php echo esc_attr(self::dress_summary($order->ID)); ?>"><?php echo esc_html(self::dress_summary($order->ID)); ?></td>
                                 <td data-label="<?php esc_attr_e('স্টাফ', 'tailor-manager'); ?>" class="tmr-orders-staff-cell"><?php echo $staff ? esc_html($staff) : '<span class="tmr-empty-inline">' . esc_html__('অনির্ধারিত', 'tailor-manager') . '</span>'; // phpcs:ignore -- self-escaped ?></td>
@@ -450,6 +450,30 @@ class TMR_Orders_Panel
             }
         }
         return implode(', ', array_keys($names));
+    }
+
+    /**
+     * The customer-facing order number shown everywhere (list, receipts, the
+     * confirmation modal, …) instead of the raw WP post ID — post IDs are
+     * shared across every post type this plugin registers (order items,
+     * customers, catalog entries, …), so two orders taken back-to-back can
+     * land on IDs several apart, and the migrated orders' IDs never matched
+     * the legacy system's own numbering at all. _tmr_order_number is a
+     * dedicated, order-only counter: migrated orders got the legacy system's
+     * own order ID (already preserved as _tmr_legacy_order_id for exactly
+     * this), and every order taken since just continues that same sequence.
+     */
+    public static function get_next_order_number()
+    {
+        global $wpdb;
+        $max = $wpdb->get_var("SELECT MAX(CAST(meta_value AS UNSIGNED)) FROM {$wpdb->postmeta} WHERE meta_key = '_tmr_order_number'");
+        return $max ? ((int) $max + 1) : 1;
+    }
+
+    public static function get_order_number($order_id)
+    {
+        $number = get_post_meta($order_id, '_tmr_order_number', true);
+        return $number ? $number : $order_id;
     }
 
     /**
@@ -1542,7 +1566,7 @@ class TMR_Orders_Panel
                 // customer/payment cards get the extra visual weight instead.
                 $('.tmr-confirmation-heading').toggle(!modalTitle);
 
-                $('#tmr-conf-order-id').text('#' + data.id);
+                $('#tmr-conf-order-id').text('#' + data.order_number);
                 $('#tmr-conf-customer-name').text(data.customer_name);
                 $('#tmr-conf-customer-phone').text(data.customer_phone);
                 $('#tmr-conf-customer-phone-row').toggle(!!data.customer_phone);
@@ -1695,7 +1719,7 @@ class TMR_Orders_Panel
                 $orderConfirmationBody.hide();
                 TMRPanel.openModal($orderModal);
                 TMRPanel.call('tmr_get_order_summary', { id: id }, function (data) {
-                    showOrderConfirmation(data, '#' + data.id + ' — ' + data.customer_name);
+                    showOrderConfirmation(data, '#' + data.order_number + ' — ' + data.customer_name);
                 });
             }
 
@@ -1978,7 +2002,7 @@ class TMR_Orders_Panel
                     var el = document.querySelector('#tmr-conf-summary-card');
                     tmrScreenshotElement(
                         el,
-                        'order-' + (currentOrderConfirmation.id || 'summary') + '.png',
+                        'order-' + (currentOrderConfirmation.order_number || 'summary') + '.png',
                         // Hides the buttons, not the #tmr-conf-customer-actions wrapper
                         // itself — that wrapper carries the margin-left:auto that pins
                         // the status pill + QR code to the right edge, so it needs to
@@ -1994,7 +2018,7 @@ class TMR_Orders_Panel
                     // actually dial it internationally.
                     var digits = currentOrderConfirmation.customer_phone.replace(/\D/g, '');
                     if (digits.indexOf('0') === 0) { digits = '880' + digits.substring(1); }
-                    var text = '<?php echo esc_js(__('আপনার অর্ডার', 'tailor-manager')); ?> #' + currentOrderConfirmation.id + ' — ' +
+                    var text = '<?php echo esc_js(__('আপনার অর্ডার', 'tailor-manager')); ?> #' + currentOrderConfirmation.order_number + ' — ' +
                         '<?php echo esc_js(__('বাকি', 'tailor-manager')); ?>: ' + formatMoney(currentOrderConfirmation.due) + '\n' +
                         currentOrderConfirmation.view_url;
                     window.open('https://wa.me/' + digits + '?text=' + encodeURIComponent(text), '_blank');
@@ -2010,7 +2034,7 @@ class TMR_Orders_Panel
                     var fullEl = document.querySelector('#tmr-order-confirmation-body');
                     tmrScreenshotElement(
                         fullEl,
-                        'order-' + (currentOrderConfirmation.id || 'summary') + '-full.png',
+                        'order-' + (currentOrderConfirmation.order_number || 'summary') + '-full.png',
                         // .tmr-confirmation-header-actions itself must stay (only its
                         // buttons go) — see the comment on the customer-card capture
                         // above; the toolbar/actions-row/item-header-right blocks have
@@ -2023,7 +2047,7 @@ class TMR_Orders_Panel
                     var itemsEl = document.querySelector('#tmr-conf-items');
                     tmrScreenshotElement(
                         itemsEl,
-                        'order-' + (currentOrderConfirmation.id || 'summary') + '-dresses.png',
+                        'order-' + (currentOrderConfirmation.order_number || 'summary') + '-dresses.png',
                         '.tmr-confirmation-item-header-right',
                         function () { window.alert('<?php echo esc_js(__('স্ক্রিনশট নেওয়া যায়নি।', 'tailor-manager')); ?>'); }
                     );
@@ -2092,7 +2116,7 @@ class TMR_Orders_Panel
             . ' <a class="tmr-btn-outline" target="_blank" href="' . esc_url(admin_url('admin-post.php?action=tmr_print&order_id=' . $order_id . '&type=2')) . '">' . esc_html__('ওয়ার্ক স্লিপ প্রিন্ট', 'tailor-manager') . '</a>'
             . ' <a class="tmr-btn-outline" target="_blank" href="' . esc_url(admin_url('admin-post.php?action=tmr_print&order_id=' . $order_id . '&type=3')) . '">' . esc_html__('ফুল স্লিপ প্রিন্ট', 'tailor-manager') . '</a>'
             . ' <button type="button" class="tmr-btn-outline tmr-btn-outline-danger tmr-delete-order-view" data-id="' . esc_attr($order_id) . '">' . esc_html__('ডিলিট', 'tailor-manager') . '</button>';
-        TMR_Panel_Shell::header('orders', __('অর্ডার', 'tailor-manager') . ' #' . $order_id, '', $header_right, true);
+        TMR_Panel_Shell::header('orders', __('অর্ডার', 'tailor-manager') . ' #' . self::get_order_number($order_id), '', $header_right, true);
         $status_key   = TMR_Order_Post_Type::status_label($order_id);
         $field_labels = TMR_Measurement_Fields::get_library();
         $due          = (float) get_post_meta($order_id, '_tmr_due', true);
@@ -2510,6 +2534,7 @@ class TMR_Orders_Panel
 
         wp_send_json_success(array_merge(array(
             'id'             => $order_id,
+            'order_number'   => self::get_order_number($order_id),
             'customer_name'  => $customer ? $customer->post_title : __('ওয়াক-ইন', 'tailor-manager'),
             'customer_phone' => $customer_id ? TMR_Customer_Post_Type::get_phone($customer_id) : '',
             'order_date'     => self::format_date_bn(get_post_meta($order_id, '_tmr_order_date', true), true),
@@ -2629,6 +2654,8 @@ class TMR_Orders_Panel
             'post_status' => 'publish',
         );
 
+        $is_new_order = !$order_id;
+
         if ($order_id > 0) {
             $post_data['ID'] = $order_id;
             $result = wp_update_post($post_data, true);
@@ -2641,6 +2668,10 @@ class TMR_Orders_Panel
         }
 
         $order_id = $result;
+
+        if ($is_new_order) {
+            update_post_meta($order_id, '_tmr_order_number', self::get_next_order_number());
+        }
 
         update_post_meta($order_id, '_tmr_customer_id', $customer_id);
         update_post_meta($order_id, '_tmr_order_date', $order_date);
@@ -2735,6 +2766,7 @@ class TMR_Orders_Panel
 
         wp_send_json_success(array_merge(array(
             'id'             => $order_id,
+            'order_number'   => self::get_order_number($order_id),
             'customer_name'  => $customer ? $customer->post_title : '',
             'customer_phone' => $customer_id ? TMR_Customer_Post_Type::get_phone($customer_id) : '',
             'order_date'     => self::format_date_bn($order_date, true),

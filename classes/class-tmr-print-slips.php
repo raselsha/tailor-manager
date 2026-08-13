@@ -120,6 +120,7 @@ class TMR_Print_Slips
 
         return array(
             'order_id'      => $order_id,
+            'order_number'  => TMR_Orders_Panel::get_order_number($order_id),
             'shop_name'     => get_option('tmr_shop_name', get_bloginfo('name')),
             'shop_address'  => get_option('tmr_shop_address', ''),
             'shop_phone'    => get_option('tmr_shop_phone', ''),

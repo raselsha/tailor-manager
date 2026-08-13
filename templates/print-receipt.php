@@ -6,7 +6,7 @@ defined('ABSPATH') || exit;
 <html>
 <head>
 <meta charset="utf-8">
-<title><?php echo esc_html__('রিসিট', 'tailor-manager'); ?> #<?php echo esc_html($data['order_id']); ?></title>
+<title><?php echo esc_html__('রিসিট', 'tailor-manager'); ?> #<?php echo esc_html($data['order_number']); ?></title>
 <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; padding: 24px; color: #1e293b; background: #fff; margin: 0 auto; max-width: 480px; }
     .print-shop-name { margin: 0 0 3px; font-size: 17px; font-weight: 700; text-align: center; }
@@ -39,7 +39,7 @@ defined('ABSPATH') || exit;
     <hr class="print-divider">
 
     <div class="print-meta-row">
-        <span><?php esc_html_e('অর্ডার নং', 'tailor-manager'); ?>:<strong>#<?php echo esc_html($data['order_id']); ?></strong></span>
+        <span><?php esc_html_e('অর্ডার নং', 'tailor-manager'); ?>:<strong>#<?php echo esc_html($data['order_number']); ?></strong></span>
         <span><?php esc_html_e('নাম', 'tailor-manager'); ?>:<strong><?php echo esc_html($data['customer_name']); ?></strong></span>
         <?php if ($data['customer_phone']) : ?><span><?php esc_html_e('মোবাইল', 'tailor-manager'); ?>:<strong><?php echo esc_html($data['customer_phone']); ?></strong></span><?php endif; ?>
         <span><?php esc_html_e('অর্ডারের তারিখ', 'tailor-manager'); ?>:<strong><?php echo esc_html($data['order_date']); ?></strong></span>

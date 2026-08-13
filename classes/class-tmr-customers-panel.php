@@ -400,7 +400,7 @@ class TMR_Customers_Panel
                             $status_key = TMR_Order_Post_Type::status_label($order->ID);
                         ?>
                             <tr class="tmr-order-acc-trigger" data-id="<?php echo esc_attr($order->ID); ?>">
-                                <td>#<?php echo esc_html($order->ID); ?></td>
+                                <td>#<?php echo esc_html(TMR_Orders_Panel::get_order_number($order->ID)); ?></td>
                                 <td><?php echo esc_html(TMR_Orders_Panel::format_date_bn(get_post_meta($order->ID, '_tmr_order_date', true))); ?></td>
                                 <td><?php echo esc_html(TMR_Orders_Panel::format_date_bn(get_post_meta($order->ID, '_tmr_delivery_date', true))); ?></td>
                                 <td><span class="tmr-badge tmr-badge-<?php echo esc_attr($status_key); ?>"><?php echo esc_html(ucfirst($status_key)); ?></span></td>
