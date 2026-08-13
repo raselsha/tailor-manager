@@ -78,6 +78,9 @@ class TMR_Dashboard_Panel
                         <tr>
                             <th><?php esc_html_e('অর্ডার আইডি', 'tailor-manager'); ?></th>
                             <th><?php esc_html_e('কাস্টমার', 'tailor-manager'); ?></th>
+                            <th><?php esc_html_e('ড্রেস ও পরিমাণ', 'tailor-manager'); ?></th>
+                            <th><?php esc_html_e('স্টাফ', 'tailor-manager'); ?></th>
+                            <th><?php esc_html_e('অর্ডারের তারিখ', 'tailor-manager'); ?></th>
                             <th><?php esc_html_e('ডেলিভারি তারিখ', 'tailor-manager'); ?></th>
                             <th><?php esc_html_e('ডেলিভারি স্ট্যাটাস', 'tailor-manager'); ?></th>
                             <th><?php esc_html_e('মোট', 'tailor-manager'); ?></th>
@@ -86,16 +89,20 @@ class TMR_Dashboard_Panel
                     </thead>
                     <tbody>
                         <?php if (empty($upcoming_orders)) : ?>
-                            <tr><td colspan="6" class="tmr-empty"><?php esc_html_e('আসন্ন কোনো ডেলিভারি নেই।', 'tailor-manager'); ?></td></tr>
+                            <tr><td colspan="9" class="tmr-empty"><?php esc_html_e('আসন্ন কোনো ডেলিভারি নেই।', 'tailor-manager'); ?></td></tr>
                         <?php else : ?>
                             <?php foreach ($upcoming_orders as $order) :
                                 $customer_id = (int) get_post_meta($order->ID, '_tmr_customer_id', true);
                                 $name        = $customer_id ? get_the_title($customer_id) : __('ওয়াক-ইন', 'tailor-manager');
                                 $status_key  = TMR_Order_Post_Type::status_label($order->ID);
+                                $staff       = TMR_Orders_Panel::staff_summary($order->ID);
                             ?>
                                 <tr>
                                     <td data-label="<?php esc_attr_e('অর্ডার আইডি', 'tailor-manager'); ?>">#<?php echo esc_html($order->ID); ?></td>
                                     <td data-label="<?php esc_attr_e('কাস্টমার', 'tailor-manager'); ?>" class="tmr-orders-customer-cell" title="<?php echo esc_attr($name); ?>"><?php echo esc_html($name); ?></td>
+                                    <td data-label="<?php esc_attr_e('ড্রেস ও পরিমাণ', 'tailor-manager'); ?>" class="tmr-orders-dress-cell" title="<?php echo esc_attr(TMR_Orders_Panel::dress_summary($order->ID)); ?>"><?php echo esc_html(TMR_Orders_Panel::dress_summary($order->ID)); ?></td>
+                                    <td data-label="<?php esc_attr_e('স্টাফ', 'tailor-manager'); ?>" class="tmr-orders-staff-cell"><?php echo $staff ? esc_html($staff) : '<span class="tmr-empty-inline">' . esc_html__('অনির্ধারিত', 'tailor-manager') . '</span>'; // phpcs:ignore -- self-escaped ?></td>
+                                    <td data-label="<?php esc_attr_e('অর্ডারের তারিখ', 'tailor-manager'); ?>"><?php echo esc_html(get_post_meta($order->ID, '_tmr_order_date', true)); ?></td>
                                     <td data-label="<?php esc_attr_e('ডেলিভারি তারিখ', 'tailor-manager'); ?>"><?php echo esc_html(get_post_meta($order->ID, '_tmr_delivery_date', true)); ?></td>
                                     <td data-label="<?php esc_attr_e('ডেলিভারি স্ট্যাটাস', 'tailor-manager'); ?>"><span class="tmr-badge tmr-badge-<?php echo esc_attr($status_key); ?>"><?php echo esc_html(ucfirst($status_key)); ?></span></td>
                                     <td data-label="<?php esc_attr_e('মোট', 'tailor-manager'); ?>"><?php echo esc_html('৳ ' . number_format((float) get_post_meta($order->ID, '_tmr_total', true))); ?></td>

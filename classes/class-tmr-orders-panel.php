@@ -158,6 +158,7 @@ class TMR_Orders_Panel
                         <th><?php esc_html_e('কাস্টমার', 'tailor-manager'); ?></th>
                         <th><?php esc_html_e('ড্রেস ও পরিমাণ', 'tailor-manager'); ?></th>
                         <th><?php esc_html_e('স্টাফ', 'tailor-manager'); ?></th>
+                        <th><?php esc_html_e('অর্ডারের তারিখ', 'tailor-manager'); ?></th>
                         <th><?php esc_html_e('ডেলিভারি তারিখ', 'tailor-manager'); ?></th>
                         <th><?php esc_html_e('ডেলিভারি স্ট্যাটাস', 'tailor-manager'); ?></th>
                         <th></th>
@@ -165,7 +166,7 @@ class TMR_Orders_Panel
                 </thead>
                 <tbody>
                     <?php if (!$query->have_posts()) : ?>
-                        <tr><td colspan="7" class="tmr-empty"><?php esc_html_e('কোনো অর্ডার পাওয়া যায়নি।', 'tailor-manager'); ?></td></tr>
+                        <tr><td colspan="8" class="tmr-empty"><?php esc_html_e('কোনো অর্ডার পাওয়া যায়নি।', 'tailor-manager'); ?></td></tr>
                     <?php else : ?>
                         <?php foreach ($query->posts as $order) :
                             $customer_id = (int) get_post_meta($order->ID, '_tmr_customer_id', true);
@@ -179,6 +180,7 @@ class TMR_Orders_Panel
                                 <td data-label="<?php esc_attr_e('কাস্টমার', 'tailor-manager'); ?>" class="tmr-orders-customer-cell"><a href="#" class="tmr-view-order-trigger" data-id="<?php echo esc_attr($order->ID); ?>" title="<?php echo esc_attr($name . ($phone ? ' (' . $phone . ')' : '')); ?>"><?php echo esc_html($name . ($phone ? ' (' . $phone . ')' : '')); ?></a></td>
                                 <td data-label="<?php esc_attr_e('ড্রেস ও পরিমাণ', 'tailor-manager'); ?>" class="tmr-orders-dress-cell" title="<?php echo esc_attr(self::dress_summary($order->ID)); ?>"><?php echo esc_html(self::dress_summary($order->ID)); ?></td>
                                 <td data-label="<?php esc_attr_e('স্টাফ', 'tailor-manager'); ?>" class="tmr-orders-staff-cell"><?php echo $staff ? esc_html($staff) : '<span class="tmr-empty-inline">' . esc_html__('অনির্ধারিত', 'tailor-manager') . '</span>'; // phpcs:ignore -- self-escaped ?></td>
+                                <td data-label="<?php esc_attr_e('অর্ডারের তারিখ', 'tailor-manager'); ?>"><?php echo esc_html(get_post_meta($order->ID, '_tmr_order_date', true)); ?></td>
                                 <td data-label="<?php esc_attr_e('ডেলিভারি তারিখ', 'tailor-manager'); ?>"><?php echo esc_html(get_post_meta($order->ID, '_tmr_delivery_date', true)); ?></td>
                                 <td data-label="<?php esc_attr_e('ডেলিভারি স্ট্যাটাস', 'tailor-manager'); ?>"><span class="tmr-badge tmr-badge-<?php echo esc_attr($status_key); ?>"><?php echo esc_html(ucfirst($status_key)); ?></span></td>
                                 <td class="tmr-orders-actions-cell">
@@ -408,7 +410,7 @@ class TMR_Orders_Panel
         TMR_Panel_Shell::footer();
     }
 
-    private static function dress_summary($order_id)
+    public static function dress_summary($order_id)
     {
         $parts = array();
         foreach (TMR_Order_Post_Type::get_items($order_id) as $item) {
@@ -434,7 +436,7 @@ class TMR_Orders_Panel
      *                 collapses them into one unique, comma-separated list rather
      *                 than repeating the same name per item.
      */
-    private static function staff_summary($order_id)
+    public static function staff_summary($order_id)
     {
         $names = array();
         foreach (TMR_Order_Post_Type::get_items($order_id) as $item) {
