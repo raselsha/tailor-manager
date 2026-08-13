@@ -653,11 +653,33 @@ tr.tmr-order-acc-row:last-child td:last-child { border-bottom-right-radius: 20px
    (customer name+phone, dress/quantity summary, staff names) so wrapping
    doesn't make rows uneven. Full text still available via each cell's own
    title attribute on hover. */
-.tmr-orders-table th { padding: 13px 20px; }
-.tmr-orders-table td { padding: 12px 20px; font-size: 13px; }
+/* table-layout:fixed + an explicit width budget (below) instead of the
+   previous max-width-on-<td> approach — max-width is only a hint under the
+   default auto layout, so the browser was free to size customer/dress wider
+   than intended whenever the row's total content "wanted" more room, which
+   is exactly what happened once order-date (and, on the dashboard, dress/
+   staff/order-date together) pushed the row past normal desktop widths.
+   .tmr-scroll-wrap ended up needing a horizontal scrollbar it never used to
+   (see the overflow-pairing note above .tmr-table) — and since that same
+   element also handles the page's normal vertical list scroll, an ordinary
+   trackpad scroll (rarely purely vertical) nudged it sideways too, silently
+   shifting the table mid-read. Fixed layout makes every column's width
+   authoritative, so the row's total is a known, budgeted quantity that fits
+   without a scrollbar at normal widths — not a "hope it's short enough". */
+.tmr-orders-table { table-layout: fixed; }
+.tmr-orders-table th,
+.tmr-orders-table td { box-sizing: border-box; padding: 10px 10px; font-size: 13px; }
+.tmr-orders-table .tmr-orders-id-cell { width: 50px; }
+.tmr-orders-table .tmr-orders-customer-cell { width: 115px; }
+.tmr-orders-table .tmr-orders-dress-cell { width: 110px; }
+.tmr-orders-table .tmr-orders-staff-cell { width: 70px; }
+.tmr-orders-table .tmr-orders-date-cell { width: 68px; }
+.tmr-orders-table .tmr-orders-status-cell { width: 75px; }
+.tmr-orders-table .tmr-orders-total-cell { width: 55px; }
+.tmr-orders-table .tmr-orders-actions-cell { width: 55px; }
 .tmr-orders-table .tmr-orders-customer-cell,
 .tmr-orders-table .tmr-orders-dress-cell,
-.tmr-orders-table .tmr-orders-staff-cell { max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tmr-orders-table .tmr-orders-staff-cell { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tmr-orders-table .tmr-orders-customer-cell a { color: #1e293b; font-weight: 700; text-decoration: none; }
 
 .tmr-empty {
