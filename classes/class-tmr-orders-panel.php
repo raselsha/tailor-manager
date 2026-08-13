@@ -645,7 +645,7 @@ class TMR_Orders_Panel
                     <label class="tmr-form-label"><?php esc_html_e('রেফারেন্স ছবি', 'tailor-manager'); ?></label>
                     <div class="tmr-photo-picker">
                         <div class="tmr-photo-preview">
-                            <img id="tmr-order-image-preview" src="<?php echo $image_id ? esc_url(wp_get_attachment_image_url($image_id, 'thumbnail')) : ''; ?>" style="width:100%;height:100%;object-fit:cover;<?php echo $image_id ? '' : 'display:none;'; ?>" />
+                            <img id="tmr-order-image-preview" src="<?php echo $image_id ? esc_url(wp_get_attachment_image_url($image_id, 'thumbnail')) : ''; ?>" style="width:100%;height:100%;object-fit:contain;<?php echo $image_id ? '' : 'display:none;'; ?>" />
                             <svg id="tmr-order-image-placeholder" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" <?php echo $image_id ? 'style="display:none;"' : ''; ?>><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg>
                         </div>
                         <button type="button" class="tmr-btn-outline tmr-btn-sm" id="tmr-pick-order-image"><?php esc_html_e('ছবি নির্বাচন করুন', 'tailor-manager'); ?></button>

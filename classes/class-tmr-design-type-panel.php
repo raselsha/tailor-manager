@@ -81,7 +81,7 @@ class TMR_Design_Type_Panel
                         <div class="tmr-form-row">
                             <label class="tmr-form-label"><?php esc_html_e('ডিজাইনের ছবি', 'tailor-manager'); ?></label>
                             <div class="tmr-photo-picker">
-                                <div class="tmr-photo-preview" id="tmr-design-preview-wrap"><img id="tmr-design-preview" src="" style="display:none;width:100%;height:100%;object-fit:cover;" /><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="tmr-design-preview-placeholder"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg></div>
+                                <div class="tmr-photo-preview" id="tmr-design-preview-wrap"><img id="tmr-design-preview" src="" style="display:none;width:100%;height:100%;object-fit:contain;" /><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="tmr-design-preview-placeholder"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg></div>
                                 <div class="tmr-photo-actions">
                                     <button type="button" class="tmr-btn-outline tmr-btn-sm" id="tmr-pick-image"><?php esc_html_e('ছবি নির্বাচন করুন', 'tailor-manager'); ?></button>
                                     <button type="button" class="tmr-btn-outline tmr-btn-sm" id="tmr-remove-image"><?php esc_html_e('মুছুন', 'tailor-manager'); ?></button>
