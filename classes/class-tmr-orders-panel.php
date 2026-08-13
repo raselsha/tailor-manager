@@ -569,6 +569,16 @@ class TMR_Orders_Panel
         if (!$is_edit && '' === $delivery_date) {
             $default_days = (int) get_option('tmr_default_delivery_days', 7);
             $delivery_date = date('Y-m-d', strtotime('+' . $default_days . ' days', current_time('timestamp')));
+
+            // The shop's own off day(s) — weekly or a one-off special holiday — can't
+            // be a delivery date, so nudge the auto-suggested date forward until it
+            // lands on a day the shop is actually open. Capped well past a week so a
+            // misconfigured "every day is off" setting can't loop forever.
+            $guard = 0;
+            while (TMR_Settings_Page::is_off_day($delivery_date) && $guard < 14) {
+                $delivery_date = date('Y-m-d', strtotime('+1 day', strtotime($delivery_date)));
+                $guard++;
+            }
         }
 
         $urgent = $is_edit && '1' === get_post_meta($order_id, '_tmr_urgent', true);
@@ -1126,6 +1136,17 @@ class TMR_Orders_Panel
             )); ?>;
             var calYear, calMonth, calSelected;
 
+            // Settings > delivery — days the shop is closed, so a delivery date
+            // can't fall on them. tmrOffWeekdays is JS Date's own 0=Sun..6=Sat.
+            var tmrOffWeekdays = <?php echo wp_json_encode(TMR_Settings_Page::get_weekly_off_days()); ?>;
+            var tmrSpecialOffDays = <?php echo wp_json_encode(TMR_Settings_Page::get_special_off_days()); ?>;
+
+            function tmrIsOffDay(dateStr) {
+                if (tmrSpecialOffDays.indexOf(dateStr) !== -1) { return true; }
+                var d = new Date(dateStr + 'T00:00:00');
+                return tmrOffWeekdays.indexOf(d.getDay()) !== -1;
+            }
+
             function pad2(n) { return n < 10 ? '0' + n : '' + n; }
             function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
             function firstDayOfMonth(y, m) { return new Date(y, m, 1).getDay(); }
@@ -1156,6 +1177,7 @@ class TMR_Orders_Panel
                     if (dateStr === todayStr) { cls += ' today'; }
                     if (dateStr < todayStr) { cls += ' past'; }
                     if (dateStr === calSelected) { cls += ' selected'; }
+                    if (tmrIsOffDay(dateStr)) { cls += ' off'; }
                     html += '<span class="' + cls + '" data-date="' + dateStr + '">' + d + '</span>';
                 }
                 html += '</div>';
@@ -1295,7 +1317,7 @@ class TMR_Orders_Panel
                 renderDeliveryCalendar();
             });
 
-            $(document).on('click', '#tmr-delivery-cal-popover .tmr-cal-day:not(.empty):not(.past)', function (e) {
+            $(document).on('click', '#tmr-delivery-cal-popover .tmr-cal-day:not(.empty):not(.past):not(.off)', function (e) {
                 e.stopPropagation();
                 calSelected = $(this).data('date');
                 $('#tmr-delivery-date').val(calSelected);

@@ -1134,11 +1134,29 @@ tr.tmr-order-acc-row:last-child td:last-child { border-bottom-right-radius: 20px
     border-radius: 8px;
     cursor: pointer;
 }
-.tmr-cal-day:hover:not(.empty):not(.past) { background: rgba(0, 97, 213, .1); }
+.tmr-cal-day:hover:not(.empty):not(.past):not(.off) { background: rgba(0, 97, 213, .1); }
 .tmr-cal-day.today { font-weight: 700; color: #0061d5; }
 .tmr-cal-day.selected { background: #0061d5; color: #fff; font-weight: 700; }
 .tmr-cal-day.past { color: #cbd5e1; cursor: not-allowed; }
+/* Shop-closed dates (weekly off day or a one-off special holiday) — a soft
+   red tint instead of .past's plain grey so "closed" reads differently from
+   "already gone by", and a strike-through as a second, color-independent cue. */
+.tmr-cal-day.off { background: #fef2f2; color: #fca5a5; cursor: not-allowed; text-decoration: line-through; }
+.tmr-cal-day.off.selected { background: #ef4444; color: #fff; }
 .tmr-cal-day.empty { cursor: default; }
+
+/* Settings > delivery — weekly off-day checkboxes and the special-holiday
+   date chips, styled like the rest of this page's compact form controls. */
+.tmr-weekday-checks { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+.tmr-weekday-check { display: inline-flex; align-items: center; gap: 6px; padding: 7px 12px; border: 1px solid #e2e8f0; border-radius: 10px; font-size: 12px; font-weight: 600; color: #475569; cursor: pointer; user-select: none; }
+.tmr-weekday-check input { margin: 0; }
+.tmr-weekday-check:has(input:checked) { background: rgba(0, 97, 213, .08); border-color: #0061d5; color: #0061d5; }
+.tmr-special-day-add-row { display: flex; align-items: flex-end; gap: 10px; margin-top: 4px; }
+.tmr-special-days-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.tmr-special-days-list:empty { margin-top: 0; }
+.tmr-special-day-chip { display: inline-flex; align-items: center; gap: 4px; padding: 5px 6px 5px 12px; border-radius: 999px; background: #f1f5f9; color: #334155; font-size: 12px; font-weight: 600; }
+.tmr-special-day-remove { display: inline-flex; align-items: center; justify-content: center; width: 18px; height: 18px; border: none; background: transparent; color: #94a3b8; font-size: 15px; line-height: 1; cursor: pointer; border-radius: 50%; }
+.tmr-special-day-remove:hover { background: #e2e8f0; color: #ef4444; }
 
 /* Selectable "chip" cards for Dress & Quantity / Design options — the whole box is the
    clickable target, no visible checkbox at all. This still works with zero JS changes:
