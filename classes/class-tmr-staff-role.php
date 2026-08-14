@@ -25,11 +25,19 @@ class TMR_Staff_Role
                 // query filters, same trust-boundary pattern as doctor-appointment's
                 // mdbk_doctor_role.
                 'upload_files'    => true,
+                // upload_files alone lets wp.media() upload an attachment but not
+                // delete one — WP maps the "delete_post" meta cap for an attachment
+                // the user owns to this primitive cap, so without it the media
+                // library's own "delete permanently" silently 403s.
+                'delete_posts'    => true,
             ));
         } else {
             $role = get_role(self::ROLE);
             if ($role && !$role->has_cap('upload_files')) {
                 $role->add_cap('upload_files');
+            }
+            if ($role && !$role->has_cap('delete_posts')) {
+                $role->add_cap('delete_posts');
             }
         }
 

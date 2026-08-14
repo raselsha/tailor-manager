@@ -495,7 +495,8 @@ class TMR_Customers_Panel
                     if ((item.parts || []).length) {
                         html += '<div class="tmr-vp-block-title"><?php echo esc_js(__('ডিজাইন', 'tailor-manager')); ?></div><div class="tmr-vp-design-grid">';
                         item.parts.forEach(function (p) {
-                            html += '<div class="tmr-vp-design-card"><div class="tmr-vp-design-icon-block"><span class="tmr-vp-design-icon-circle">' + tmrAccDesignIcon + '</span>';
+                            var iconInner = p.image_url ? '<img class="tmr-vp-design-photo" src="' + $('<div>').text(p.image_url).html() + '">' : tmrAccDesignIcon;
+                            html += '<div class="tmr-vp-design-card"><div class="tmr-vp-design-icon-block"><span class="tmr-vp-design-icon-circle">' + iconInner + '</span>';
                             if (p.extra_value) {
                                 html += '<span class="tmr-vp-design-qty">' + $('<div>').text(p.extra_value).html() + '</span>';
                             }

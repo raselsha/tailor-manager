@@ -26,11 +26,19 @@ class TMR_Manager_Role
                 // (TMR_Profile_Panel's media query filters exempt this role), same
                 // as doctor-appointment's own manager-role exemption.
                 'upload_files'              => true,
+                // upload_files alone lets wp.media() upload an attachment but not
+                // delete one — WP maps the "delete_post" meta cap for an attachment
+                // the user owns to this primitive cap, so without it every image
+                // picker's own media-library "delete permanently" silently 403s.
+                'delete_posts'              => true,
             ));
         } else {
             $role = get_role(self::ROLE);
             if ($role && !$role->has_cap('upload_files')) {
                 $role->add_cap('upload_files');
+            }
+            if ($role && !$role->has_cap('delete_posts')) {
+                $role->add_cap('delete_posts');
             }
         }
 

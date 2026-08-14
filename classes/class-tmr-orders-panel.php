@@ -1696,9 +1696,13 @@ class TMR_Orders_Panel
                         var $partGrid = $('<div class="tmr-vp-design-grid"></div>');
                         item.parts.forEach(function (p) {
                             var $card = $('<div class="tmr-vp-design-card"></div>');
-                            var $iconBlock = $('<div class="tmr-vp-design-icon-block"></div>').append(
-                                $('<span class="tmr-vp-design-icon-circle"></span>').html('<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>')
-                            );
+                            var $iconCircle = $('<span class="tmr-vp-design-icon-circle"></span>');
+                            if (p.image_url) {
+                                $iconCircle.append($('<img class="tmr-vp-design-photo">').attr('src', p.image_url));
+                            } else {
+                                $iconCircle.html('<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"></path></svg>');
+                            }
+                            var $iconBlock = $('<div class="tmr-vp-design-icon-block"></div>').append($iconCircle);
                             if (p.extra_value) {
                                 $iconBlock.append($('<span class="tmr-vp-design-qty"></span>').text(p.extra_value));
                             }
@@ -2149,7 +2153,6 @@ class TMR_Orders_Panel
             <div class="tmr-step-header tmr-highlight-header">
                 <h3><?php esc_html_e('অর্ডার তথ্য', 'tailor-manager'); ?></h3>
                 <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-                    <span class="tmr-badge tmr-badge-<?php echo esc_attr($status_key); ?>"><?php echo esc_html(ucfirst($status_key)); ?></span>
                     <?php if ('1' === get_post_meta($order_id, '_tmr_urgent', true)) : ?>
                         <span class="tmr-badge tmr-badge-red"><?php esc_html_e('জরুরি', 'tailor-manager'); ?></span>
                     <?php endif; ?>
@@ -2424,16 +2427,25 @@ class TMR_Orders_Panel
                 if (!$part) {
                     continue;
                 }
-                $names = array();
+                $names      = array();
+                $image_url  = '';
                 foreach ($sel['design_type_ids'] as $did) {
                     $d = get_post($did);
                     if ($d) {
                         $names[] = $d->post_title;
+                        // First selected design's own reference photo, if it has one —
+                        // shown in place of the generic shirt icon in the confirmation
+                        // modal/accordion, same idea as the dress/category cards' own
+                        // has_post_thumbnail()-or-fallback-icon pattern.
+                        if ('' === $image_url && has_post_thumbnail($d)) {
+                            $image_url = get_the_post_thumbnail_url($d, 'thumbnail');
+                        }
                     }
                 }
                 $parts[] = array(
                     'name'         => $part->post_title,
                     'designs'      => $names,
+                    'image_url'    => $image_url,
                     'extra_label'  => !empty($sel['part_measurement']) ? TMR_Dress_Part_Post_Type::get_measurement_label($part->ID) : '',
                     'extra_value'  => !empty($sel['part_measurement']) ? $sel['part_measurement'] : '',
                 );

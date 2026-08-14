@@ -56,7 +56,7 @@ class TMR_Measurement_Fields_Panel
                                 );
                             }
                         }
-                        self::render_field_card($slug, $label, $assigned_tags, TMR_Measurement_Fields::is_field_active($slug), TMR_Measurement_Fields::is_default_field($slug));
+                        self::render_field_card($slug, $label, $assigned_tags, TMR_Measurement_Fields::is_field_active($slug), TMR_Measurement_Fields::is_default_field($slug), TMR_Measurement_Fields::get_field_image_id($slug));
                     endforeach; ?>
                 <?php endif; ?>
                 <div class="tmr-dress-card tmr-dress-card-add" id="tmr-add-field-trigger">
@@ -74,7 +74,18 @@ class TMR_Measurement_Fields_Panel
                 </div>
                 <form id="tmr-field-form">
                     <input type="hidden" name="slug" value="" />
+                    <input type="hidden" name="image_id" value="0" />
                     <div class="tmr-modal-body">
+                        <div class="tmr-form-row">
+                            <label class="tmr-form-label"><?php esc_html_e('মাপের ছবি', 'tailor-manager'); ?></label>
+                            <div class="tmr-photo-picker">
+                                <div class="tmr-photo-preview" id="tmr-field-preview-wrap"><img id="tmr-field-preview" src="" style="display:none;width:100%;height:100%;object-fit:contain;" /><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" id="tmr-field-preview-placeholder"><rect x="3" y="3" width="18" height="18" rx="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg></div>
+                                <div class="tmr-photo-actions">
+                                    <button type="button" class="tmr-btn-outline tmr-btn-sm" id="tmr-field-pick-image"><?php esc_html_e('ছবি নির্বাচন করুন', 'tailor-manager'); ?></button>
+                                    <button type="button" class="tmr-btn-outline tmr-btn-sm" id="tmr-field-remove-image"><?php esc_html_e('মুছুন', 'tailor-manager'); ?></button>
+                                </div>
+                            </div>
+                        </div>
                         <div class="tmr-form-row">
                             <label class="tmr-form-label" for="tmr-field-name"><?php esc_html_e('ফিল্ডের নাম', 'tailor-manager'); ?> *</label>
                             <input type="text" name="label" id="tmr-field-name" required />
@@ -112,12 +123,27 @@ class TMR_Measurement_Fields_Panel
         jQuery(function ($) {
             var $modal = $('#tmr-field-modal');
             var $form = $('#tmr-field-form');
+            var $preview = $('#tmr-field-preview');
+            var $placeholder = $('#tmr-field-preview-placeholder');
+            var frame;
 
             TMRPanel.initSortableGrids('.tmr-dress-grid', 'tmr_reorder_measurement_fields');
+
+            function setPreview(url) {
+                if (url) {
+                    $preview.attr('src', url).show();
+                    $placeholder.hide();
+                } else {
+                    $preview.hide().attr('src', '');
+                    $placeholder.show();
+                }
+            }
 
             function openAddModal() {
                 $form[0].reset();
                 $form.find('[name="slug"]').val('');
+                $form.find('[name="image_id"]').val(0);
+                setPreview('');
                 $form.find('[name="active"]').prop('checked', true);
                 TMRPanel.syncStatusToggle($form.find('[name="active"]'));
                 $('#tmr-field-modal-title').text('<?php echo esc_js(__('মাপের ফিল্ড যোগ করুন', 'tailor-manager')); ?>');
@@ -134,6 +160,8 @@ class TMR_Measurement_Fields_Panel
                 TMRPanel.call('tmr_mf_get_field', { slug: slug }, function (data) {
                     $form.find('[name="slug"]').val(data.slug);
                     $form.find('[name="label"]').val(data.label);
+                    $form.find('[name="image_id"]').val(data.image_id);
+                    setPreview(data.image_url);
                     $form.find('input[name="categories[]"]').each(function () {
                         $(this).prop('checked', data.categories.indexOf($(this).val()) !== -1);
                     });
@@ -142,6 +170,27 @@ class TMR_Measurement_Fields_Panel
                     $('#tmr-field-modal-title').text('<?php echo esc_js(__('মাপের ফিল্ড এডিট করুন', 'tailor-manager')); ?>');
                     TMRPanel.openModal($modal);
                 });
+            });
+
+            $('#tmr-field-pick-image').on('click', function (e) {
+                e.preventDefault();
+                if (frame) {
+                    frame.open();
+                    return;
+                }
+                frame = wp.media({ title: '<?php echo esc_js(__('মাপের ছবি নির্বাচন করুন', 'tailor-manager')); ?>', multiple: false });
+                frame.on('select', function () {
+                    var attachment = frame.state().get('selection').first().toJSON();
+                    $form.find('[name="image_id"]').val(attachment.id);
+                    setPreview(attachment.sizes && attachment.sizes.thumbnail ? attachment.sizes.thumbnail.url : attachment.url);
+                });
+                frame.open();
+            });
+
+            $('#tmr-field-remove-image').on('click', function (e) {
+                e.preventDefault();
+                $form.find('[name="image_id"]').val(0);
+                setPreview('');
             });
 
             $(document).on('click', '.tmr-delete-field', function () {
@@ -181,12 +230,16 @@ class TMR_Measurement_Fields_Panel
         TMR_Panel_Shell::footer();
     }
 
-    private static function render_field_card($slug, $label, array $assigned_tags, $active, $is_default)
+    private static function render_field_card($slug, $label, array $assigned_tags, $active, $is_default, $image_id = 0)
     {
         ?>
         <div class="tmr-dress-card" data-id="<?php echo esc_attr($slug); ?>">
             <div class="tmr-dress-card-icon">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0z"></path><path d="M14.5 6.5l3 3"></path><path d="M11.5 9.5l1.5 1.5"></path><path d="M8.5 12.5l1.5 1.5"></path></svg>
+                <?php if ($image_id) : ?>
+                    <?php echo wp_get_attachment_image($image_id, array(40, 40)); ?>
+                <?php else : ?>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.4 2.4 0 0 1 0-3.4l2.6-2.6a2.4 2.4 0 0 1 3.4 0z"></path><path d="M14.5 6.5l3 3"></path><path d="M11.5 9.5l1.5 1.5"></path><path d="M8.5 12.5l1.5 1.5"></path></svg>
+                <?php endif; ?>
             </div>
             <div class="tmr-dress-card-name"><?php echo esc_html($label); ?></div>
             <?php if ($is_default) : ?>
@@ -254,11 +307,15 @@ class TMR_Measurement_Fields_Panel
             wp_send_json_error(array('message' => __('ফিল্ড পাওয়া যায়নি।', 'tailor-manager')));
         }
 
+        $image_id = TMR_Measurement_Fields::get_field_image_id($slug);
+
         wp_send_json_success(array(
             'slug'       => $slug,
             'label'      => $library[$slug],
             'categories' => TMR_Measurement_Fields::get_assigned_categories($slug),
             'active'     => TMR_Measurement_Fields::is_field_active($slug),
+            'image_id'   => $image_id,
+            'image_url'  => $image_id ? wp_get_attachment_image_url($image_id, 'thumbnail') : '',
         ));
     }
 
@@ -302,6 +359,9 @@ class TMR_Measurement_Fields_Panel
             TMR_Measurement_Fields::set_field_categories($slug, $category_slugs);
         }
         TMR_Measurement_Fields::set_field_active($slug, !empty($_POST['active']));
+
+        $image_id = isset($_POST['image_id']) ? (int) $_POST['image_id'] : 0;
+        TMR_Measurement_Fields::set_field_image($slug, $image_id);
 
         wp_send_json_success(array('slug' => $slug));
     }

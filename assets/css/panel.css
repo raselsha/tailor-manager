@@ -463,10 +463,17 @@ body.tmr-staff-chrome .tmr-admin-wrapper { height: calc(100vh - 40px); }
 .tmr-staff-login-chip-on { background: #dcfce7; color: #16a34a; }
 .tmr-staff-login-chip-off { background: #f1f5f9; color: #94a3b8; }
 .tmr-dress-card-footer { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 4px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
-.tmr-dress-card-actions { display: flex; gap: 4px; }
-.tmr-dress-card-actions .tmr-action-btn { opacity: .55; }
+.tmr-dress-card-actions { display: flex; gap: 2px; }
+/* Edit/delete were just the bare 14px icon with nothing around it — a real
+   pain to tap accurately, and the pair sat close enough to mis-tap the wrong
+   one. padding+matching negative margin grows the actual hit target (touches
+   land on the icon from further away) without shifting anything else in the
+   card footer, same trick used for the special-day chip's own remove button. */
+.tmr-dress-card-actions .tmr-action-btn { opacity: .55; padding: 8px; margin: -8px; border-radius: 8px; }
 .tmr-dress-card:hover .tmr-action-btn,
 .tmr-dress-card-actions .tmr-action-btn:hover { opacity: 1; }
+.tmr-dress-card-actions .tmr-action-btn:hover { background: rgba(0, 97, 213, .08); }
+.tmr-dress-card-actions .tmr-action-btn-red:hover { background: #fee2e2; color: #ef4444; }
 
 /* "+ add" card at the end of every grid — same box footprint as a real item card so
    it lines up in the grid, dashed border + muted color to read as an action, not data. */
@@ -1014,6 +1021,7 @@ tr.tmr-order-acc-row:last-child td:last-child { border-bottom-right-radius: 20px
 .tmr-step-header {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 10px;
     margin: 0 0 16px;
 }
@@ -1805,7 +1813,12 @@ tr.tmr-order-acc-row:last-child td:last-child { border-bottom-right-radius: 20px
 /* Icon + its qty number now stack vertically inside this block instead of the
    number sitting in a separate right-side column. */
 .tmr-vp-design-icon-block { flex-shrink: 0; width: 48px; background: #eef4fc; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 6px 4px; }
-.tmr-vp-design-icon-circle { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: #0061d5; }
+.tmr-vp-design-icon-circle { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: #0061d5; overflow: hidden; border-radius: 50%; }
+/* The design's own reference photo, when it has one, replaces the generic
+   shirt-icon placeholder here — cover (not contain, unlike the larger admin
+   photo-picker previews) since this is a tiny fixed-size icon substitute,
+   not a "see the whole photo" preview. */
+.tmr-vp-design-photo { width: 100%; height: 100%; object-fit: cover; }
 .tmr-vp-design-qty { font-size: 12px; font-weight: 800; color: #0061d5; line-height: 1; }
 .tmr-vp-design-body { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 6px 10px; }
 /* Was single-line + ellipsis, which cut off anything longer than the card's
@@ -1901,7 +1914,12 @@ tr.tmr-order-acc-row:last-child td:last-child { border-bottom-right-radius: 20px
 
 /* Order view page (.tmr-order-view) — a dedicated compact component set, not the
    shared form-page classes (.tmr-part-block, .tmr-price-grid etc. stay untouched
-   since the order add/edit form still uses those). */
+   since the order add/edit form still uses those). Capped + centered like a
+   normal reading-width page instead of stretching full-bleed on a wide monitor
+   — every card/grid inside already wraps its own content responsively, so this
+   alone doesn't reintroduce the horizontal-scroll problem above, just narrows
+   the column it all sits in. */
+.tmr-order-view { max-width: 900px; margin: 0 auto; }
 
 /* Order-info + payment-summary combined into one card, two labeled sections. */
 .tmr-order-detail-section { padding-top: 14px; }

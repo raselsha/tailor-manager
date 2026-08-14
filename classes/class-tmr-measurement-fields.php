@@ -13,6 +13,7 @@ class TMR_Measurement_Fields
     const ASSIGNMENTS_OPTION = 'tmr_category_field_assignments';
     const ACTIVE_OPTION      = 'tmr_field_active_state';
     const DEFAULT_OPTION     = 'tmr_field_default_state';
+    const IMAGE_OPTION       = 'tmr_field_image_state';
     const LEGACY_OPTION      = 'tmr_measurement_fields';
 
     /**
@@ -129,6 +130,29 @@ class TMR_Measurement_Fields
     public static function get_default_field_slugs()
     {
         return array_keys(array_filter(get_option(self::DEFAULT_OPTION, array())));
+    }
+
+    /**
+     * A reference photo for this field (e.g. what "লম্বা" actually measures on the
+     * garment) — fields are option-array entries, not posts, so this can't be a
+     * post_thumbnail like the dress/dress-part/design-type CPTs use; a slug =>
+     * attachment ID map is the same shape as ACTIVE_OPTION/DEFAULT_OPTION above.
+     */
+    public static function get_field_image_id($field_slug)
+    {
+        $images = get_option(self::IMAGE_OPTION, array());
+        return isset($images[$field_slug]) ? (int) $images[$field_slug] : 0;
+    }
+
+    public static function set_field_image($field_slug, $image_id)
+    {
+        $images = get_option(self::IMAGE_OPTION, array());
+        if ($image_id > 0) {
+            $images[$field_slug] = (int) $image_id;
+        } else {
+            unset($images[$field_slug]);
+        }
+        update_option(self::IMAGE_OPTION, $images);
     }
 
     /**
@@ -364,6 +388,7 @@ class TMR_Measurement_Fields
         update_option(self::ACTIVE_OPTION, $states);
 
         self::set_default_field($field_slug, false);
+        self::set_field_image($field_slug, 0);
     }
 
     /**
