@@ -463,13 +463,14 @@ body.tmr-staff-chrome .tmr-admin-wrapper { height: calc(100vh - 40px); }
 .tmr-staff-login-chip-on { background: #dcfce7; color: #16a34a; }
 .tmr-staff-login-chip-off { background: #f1f5f9; color: #94a3b8; }
 .tmr-dress-card-footer { display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 4px; padding-top: 10px; border-top: 1px solid #f1f5f9; }
-.tmr-dress-card-actions { display: flex; gap: 2px; }
+.tmr-dress-card-actions { display: flex; gap: 4px; }
 /* Edit/delete were just the bare 14px icon with nothing around it — a real
-   pain to tap accurately, and the pair sat close enough to mis-tap the wrong
-   one. padding+matching negative margin grows the actual hit target (touches
-   land on the icon from further away) without shifting anything else in the
-   card footer, same trick used for the special-day chip's own remove button. */
-.tmr-dress-card-actions .tmr-action-btn { opacity: .55; padding: 8px; margin: -8px; border-radius: 8px; }
+   pain to tap accurately. padding+negative-margin (tried first) grew the hit
+   target but left the two paddings overlapping each other since the gap was
+   smaller than either halo, so the two buttons' hover boxes ran straight into
+   one another. A real padding box (no canceling margin) avoids that — the
+   footer just gets a little taller/wider for it, which this row has room for. */
+.tmr-dress-card-actions .tmr-action-btn { opacity: .55; padding: 6px; border-radius: 8px; }
 .tmr-dress-card:hover .tmr-action-btn,
 .tmr-dress-card-actions .tmr-action-btn:hover { opacity: 1; }
 .tmr-dress-card-actions .tmr-action-btn:hover { background: rgba(0, 97, 213, .08); }
@@ -1815,10 +1816,11 @@ tr.tmr-order-acc-row:last-child td:last-child { border-bottom-right-radius: 20px
 .tmr-vp-design-icon-block { flex-shrink: 0; width: 48px; background: #eef4fc; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; padding: 6px 4px; }
 .tmr-vp-design-icon-circle { width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; color: #0061d5; overflow: hidden; border-radius: 50%; }
 /* The design's own reference photo, when it has one, replaces the generic
-   shirt-icon placeholder here — cover (not contain, unlike the larger admin
-   photo-picker previews) since this is a tiny fixed-size icon substitute,
-   not a "see the whole photo" preview. */
-.tmr-vp-design-photo { width: 100%; height: 100%; object-fit: cover; }
+   shirt-icon placeholder here — contain, same as every other photo preview
+   in this app, so the whole picture stays visible instead of a cropped
+   center-slice (this was cover at first, deliberately, for this one tiny
+   circular icon; overridden back to the app-wide convention on request). */
+.tmr-vp-design-photo { width: 100%; height: 100%; object-fit: contain; }
 .tmr-vp-design-qty { font-size: 12px; font-weight: 800; color: #0061d5; line-height: 1; }
 .tmr-vp-design-body { flex: 1; min-width: 0; display: flex; flex-direction: column; justify-content: center; gap: 2px; padding: 6px 10px; }
 /* Was single-line + ellipsis, which cut off anything longer than the card's
