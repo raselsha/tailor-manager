@@ -766,7 +766,13 @@ tr.tmr-order-acc-row:last-child td:last-child { border-bottom-right-radius: 20px
     top: 0; left: 0;
     width: 100%; height: 100%;
     background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(4px);
+    /* backdrop-filter: blur() on a full-viewport fixed overlay forces the
+       browser to keep re-blurring everything behind it on every compositor
+       frame — including while scrolling content *inside* the modal, since
+       that's a repaint of the same area. Cheap on a strong GPU, but a real
+       source of scroll jank on weaker/integrated graphics. The plain dim
+       overlay alone already reads as "background dimmed, modal in focus"
+       without that cost, so it's dropped rather than just narrowed. */
     z-index: 100000;
     justify-content: center;
     align-items: center;
