@@ -173,12 +173,14 @@ class TMR_Orders_Panel
                             $phone       = $customer_id ? TMR_Customer_Post_Type::get_phone($customer_id) : '';
                             $name        = $customer_id ? get_the_title($customer_id) : __('ওয়াক-ইন', 'tailor-manager');
                             $status_key  = TMR_Order_Post_Type::status_label($order->ID);
-                            $staff       = self::staff_summary($order->ID);
+                            $row_summary = self::get_row_summary($order->ID);
+                            $dress       = $row_summary['dress'];
+                            $staff       = $row_summary['staff'];
                         ?>
                             <tr>
                                 <td data-label="<?php esc_attr_e('অর্ডার আইডি', 'tailor-manager'); ?>" class="tmr-orders-id-cell">#<?php echo esc_html(self::get_order_number($order->ID)); ?></td>
                                 <td data-label="<?php esc_attr_e('কাস্টমার', 'tailor-manager'); ?>" class="tmr-orders-customer-cell"><a href="#" class="tmr-view-order-trigger" data-id="<?php echo esc_attr($order->ID); ?>" title="<?php echo esc_attr($name . ($phone ? ' (' . $phone . ')' : '')); ?>"><?php echo esc_html($name . ($phone ? ' (' . $phone . ')' : '')); ?></a></td>
-                                <td data-label="<?php esc_attr_e('ড্রেস ও পরিমাণ', 'tailor-manager'); ?>" class="tmr-orders-dress-cell" title="<?php echo esc_attr(self::dress_summary($order->ID)); ?>"><?php echo esc_html(self::dress_summary($order->ID)); ?></td>
+                                <td data-label="<?php esc_attr_e('ড্রেস ও পরিমাণ', 'tailor-manager'); ?>" class="tmr-orders-dress-cell" title="<?php echo esc_attr($dress); ?>"><?php echo esc_html($dress); ?></td>
                                 <td data-label="<?php esc_attr_e('স্টাফ', 'tailor-manager'); ?>" class="tmr-orders-staff-cell"><?php echo $staff ? esc_html($staff) : '<span class="tmr-empty-inline">' . esc_html__('অনির্ধারিত', 'tailor-manager') . '</span>'; // phpcs:ignore -- self-escaped ?></td>
                                 <td data-label="<?php esc_attr_e('অর্ডারের তারিখ', 'tailor-manager'); ?>" class="tmr-orders-date-cell"><?php echo esc_html(self::format_date_bn(get_post_meta($order->ID, '_tmr_order_date', true))); ?></td>
                                 <td data-label="<?php esc_attr_e('ডেলিভারি তারিখ', 'tailor-manager'); ?>" class="tmr-orders-date-cell"><?php echo esc_html(self::format_date_bn(get_post_meta($order->ID, '_tmr_delivery_date', true))); ?></td>
@@ -410,9 +412,22 @@ class TMR_Orders_Panel
         TMR_Panel_Shell::footer();
     }
 
-    public static function dress_summary($order_id)
+    /**
+     * Dress-list and staff-name summaries together, from a single get_items() fetch.
+     * dress_summary()/staff_summary() below are kept as single-purpose wrappers for
+     * call sites that only ever need one of the two, but any row that displays both
+     * (every list table's own row — order ID, customer, dress, staff, ... in one
+     * pass) must call this once instead of both wrappers, which independently
+     * re-fetch the exact same items and tripled the query count per row (dress
+     * shown twice — cell text and its title attribute — plus staff, all separately
+     * re-querying tmr_order_item for the same order_id).
+     * @return array{dress: string, staff: string}
+     */
+    public static function get_row_summary($order_id)
     {
-        $parts = array();
+        $dress_parts = array();
+        $staff_names = array();
+
         foreach (TMR_Order_Post_Type::get_items($order_id) as $item) {
             $cat_id = TMR_Order_Item_Post_Type::get_category_id($item->ID);
             $term   = get_term($cat_id, TMR_Category_Taxonomy::TAXONOMY);
@@ -422,11 +437,29 @@ class TMR_Orders_Panel
                 $dress = !empty($d['dress_id']) ? get_post($d['dress_id']) : null;
                 $name  = $dress ? $dress->post_title : $category_name;
                 if ($name) {
-                    $parts[] = $name . '(' . (int) $d['quantity'] . ')';
+                    $dress_parts[] = $name . '(' . (int) $d['quantity'] . ')';
                 }
             }
+
+            $cutter = trim((string) get_post_meta($item->ID, '_tmr_cutter_name', true));
+            $tailor = trim((string) get_post_meta($item->ID, '_tmr_tailor_name', true));
+            if ('' !== $cutter) {
+                $staff_names[$cutter] = true;
+            }
+            if ('' !== $tailor) {
+                $staff_names[$tailor] = true;
+            }
         }
-        return implode(' ', $parts);
+
+        return array(
+            'dress' => implode(' ', $dress_parts),
+            'staff' => implode(', ', array_keys($staff_names)),
+        );
+    }
+
+    public static function dress_summary($order_id)
+    {
+        return self::get_row_summary($order_id)['dress'];
     }
 
     /**
@@ -438,18 +471,7 @@ class TMR_Orders_Panel
      */
     public static function staff_summary($order_id)
     {
-        $names = array();
-        foreach (TMR_Order_Post_Type::get_items($order_id) as $item) {
-            $cutter = trim((string) get_post_meta($item->ID, '_tmr_cutter_name', true));
-            $tailor = trim((string) get_post_meta($item->ID, '_tmr_tailor_name', true));
-            if ('' !== $cutter) {
-                $names[$cutter] = true;
-            }
-            if ('' !== $tailor) {
-                $names[$tailor] = true;
-            }
-        }
-        return implode(', ', array_keys($names));
+        return self::get_row_summary($order_id)['staff'];
     }
 
     /**
@@ -727,6 +749,10 @@ class TMR_Orders_Panel
         $dresses = TMR_Dress_Post_Type::get_by_category($term->slug);
         $parts   = TMR_Dress_Part_Post_Type::get_by_category($term->slug);
         $fields  = TMR_Measurement_Fields::get_for_category($term->slug);
+        // One query for every assigned part's design types instead of one query per
+        // part in the loop below — this block renders on every single order-form
+        // open (new or edit), the most frequently-used screen in the app.
+        $designs_by_part = TMR_Design_Type_Post_Type::get_by_parts(wp_list_pluck($parts, 'ID'));
 
         $selected_dresses = array();
         $cutter_name = '';
@@ -829,7 +855,7 @@ class TMR_Orders_Panel
                 <?php endif; ?>
 
                 <?php foreach ($parts as $part) :
-                    $designs = TMR_Design_Type_Post_Type::get_by_part($part->ID);
+                    $designs = isset($designs_by_part[$part->ID]) ? $designs_by_part[$part->ID] : array();
                     if (empty($designs)) {
                         continue;
                     }

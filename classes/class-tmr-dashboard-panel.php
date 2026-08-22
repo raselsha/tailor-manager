@@ -95,12 +95,14 @@ class TMR_Dashboard_Panel
                                 $customer_id = (int) get_post_meta($order->ID, '_tmr_customer_id', true);
                                 $name        = $customer_id ? get_the_title($customer_id) : __('ওয়াক-ইন', 'tailor-manager');
                                 $status_key  = TMR_Order_Post_Type::status_label($order->ID);
-                                $staff       = TMR_Orders_Panel::staff_summary($order->ID);
+                                $row_summary = TMR_Orders_Panel::get_row_summary($order->ID);
+                                $dress       = $row_summary['dress'];
+                                $staff       = $row_summary['staff'];
                             ?>
                                 <tr>
                                     <td data-label="<?php esc_attr_e('অর্ডার আইডি', 'tailor-manager'); ?>" class="tmr-orders-id-cell">#<?php echo esc_html(TMR_Orders_Panel::get_order_number($order->ID)); ?></td>
                                     <td data-label="<?php esc_attr_e('কাস্টমার', 'tailor-manager'); ?>" class="tmr-orders-customer-cell" title="<?php echo esc_attr($name); ?>"><?php echo esc_html($name); ?></td>
-                                    <td data-label="<?php esc_attr_e('ড্রেস ও পরিমাণ', 'tailor-manager'); ?>" class="tmr-orders-dress-cell" title="<?php echo esc_attr(TMR_Orders_Panel::dress_summary($order->ID)); ?>"><?php echo esc_html(TMR_Orders_Panel::dress_summary($order->ID)); ?></td>
+                                    <td data-label="<?php esc_attr_e('ড্রেস ও পরিমাণ', 'tailor-manager'); ?>" class="tmr-orders-dress-cell" title="<?php echo esc_attr($dress); ?>"><?php echo esc_html($dress); ?></td>
                                     <td data-label="<?php esc_attr_e('স্টাফ', 'tailor-manager'); ?>" class="tmr-orders-staff-cell"><?php echo $staff ? esc_html($staff) : '<span class="tmr-empty-inline">' . esc_html__('অনির্ধারিত', 'tailor-manager') . '</span>'; // phpcs:ignore -- self-escaped ?></td>
                                     <td data-label="<?php esc_attr_e('অর্ডারের তারিখ', 'tailor-manager'); ?>" class="tmr-orders-date-cell"><?php echo esc_html(TMR_Orders_Panel::format_date_bn(get_post_meta($order->ID, '_tmr_order_date', true))); ?></td>
                                     <td data-label="<?php esc_attr_e('ডেলিভারি তারিখ', 'tailor-manager'); ?>" class="tmr-orders-date-cell"><?php echo esc_html(TMR_Orders_Panel::format_date_bn(get_post_meta($order->ID, '_tmr_delivery_date', true))); ?></td>

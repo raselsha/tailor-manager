@@ -27,6 +27,16 @@ class TMR_My_Orders_Panel
         $search    = isset($_GET['s']) ? sanitize_text_field(wp_unslash($_GET['s'])) : '';
         $date_filter = isset($_GET['date']) ? sanitize_text_field(wp_unslash($_GET['date'])) : '';
 
+        // $order_ids came from a query against order *items*, not a WP_Query of the
+        // orders themselves — so none of these order posts' meta is cached yet, and
+        // every is_delivered()/is_ready()/get_post_meta() call below (there's several
+        // per order, across this loop and the filter/render code further down) would
+        // otherwise be its own individual DB round trip. One batched fetch up front
+        // makes all of that free.
+        if ($order_ids) {
+            update_postmeta_cache($order_ids);
+        }
+
         $pending = $ready = $delivered_today = 0;
         $rows    = array();
 
