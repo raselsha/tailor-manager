@@ -1105,9 +1105,10 @@ class TMR_Orders_Panel
                 var status = $('.tmr-orders-search-form input[name="status"]').val();
 
                 clearTimeout(ordersSearchTimer);
+                var $wrap = $('#tmr-orders-list-wrap').addClass('tmr-list-refreshing');
                 ordersSearchTimer = setTimeout(function () {
                     TMRPanel.call('tmr_search_orders', { s: search, status: status, paged: 1 }, function (data) {
-                        $('#tmr-orders-list-wrap').html(data.html);
+                        $wrap.removeClass('tmr-list-refreshing').html(data.html);
 
                         var url = new URL(window.location.href);
                         if (search) {
@@ -1117,6 +1118,9 @@ class TMR_Orders_Panel
                         }
                         url.searchParams.set('paged', '1');
                         window.history.replaceState(null, '', url.toString());
+                    }, function (message) {
+                        $wrap.removeClass('tmr-list-refreshing');
+                        window.alert(message);
                     });
                 }, 350);
             });
@@ -1296,7 +1300,7 @@ class TMR_Orders_Panel
             function loadOrderForm(id) {
                 $orderModalTitle.text(id ? '<?php echo esc_js(__('অর্ডার আপডেট করুন', 'tailor-manager')); ?>' : '<?php echo esc_js(__('অর্ডার নিন', 'tailor-manager')); ?>');
                 $orderConfirmationBody.hide();
-                $orderModalBody.show().html('<div class="tmr-empty"><?php echo esc_js(__('লোড হচ্ছে…', 'tailor-manager')); ?></div>');
+                $orderModalBody.show().html('<div style="padding:8px 4px;">' + TMRPanel.skeletonLines(6) + '</div>');
                 TMRPanel.openModal($orderModal);
                 TMRPanel.call('tmr_get_order_form', { id: id || 0 }, function (data) {
                     $orderModalBody.html(data.html);
@@ -1308,6 +1312,8 @@ class TMR_Orders_Panel
                     if (!id) {
                         tmrMaybeRestoreOrderDraft();
                     }
+                }, function (message) {
+                    $orderModalBody.html('<div class="tmr-empty">' + message + '</div>');
                 });
             }
 
@@ -1767,11 +1773,13 @@ class TMR_Orders_Panel
             // create a fresh order just to see how the summary/QR/download look).
             function viewOrderSummary(id) {
                 $orderModalTitle.text('<?php echo esc_js(__('অর্ডার সারাংশ', 'tailor-manager')); ?>');
-                $orderModalBody.hide();
                 $orderConfirmationBody.hide();
+                $orderModalBody.show().html('<div style="padding:8px 4px;">' + TMRPanel.skeletonLines(6) + '</div>');
                 TMRPanel.openModal($orderModal);
                 TMRPanel.call('tmr_get_order_summary', { id: id }, function (data) {
                     showOrderConfirmation(data, '#' + data.order_number + ' — ' + data.customer_name);
+                }, function (message) {
+                    $orderModalBody.html('<div class="tmr-empty">' + message + '</div>');
                 });
             }
 

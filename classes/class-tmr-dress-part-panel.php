@@ -167,6 +167,8 @@ class TMR_Dress_Part_Panel
 
             $('.tmr-edit-part').on('click', function () {
                 var id = $(this).data('id');
+                $('#tmr-part-modal-title').text('<?php echo esc_js(__('পার্ট এডিট করুন', 'tailor-manager')); ?>');
+                TMRPanel.showSkeletonModal($modal, 4);
                 TMRPanel.call('tmr_get_dress_part', { id: id }, function (data) {
                     $form.find('[name="part_id"]').val(data.id);
                     $form.find('[name="name"]').val(data.name);
@@ -176,8 +178,10 @@ class TMR_Dress_Part_Panel
                     toggleMeasurementLabelRow();
                     $form.find('[name="status"]').prop('checked', data.status === 'publish');
                     TMRPanel.syncStatusToggle($form.find('[name="status"]'));
-                    $('#tmr-part-modal-title').text('<?php echo esc_js(__('পার্ট এডিট করুন', 'tailor-manager')); ?>');
-                    TMRPanel.openModal($modal);
+                    TMRPanel.hideSkeletonModal($modal);
+                }, function (message) {
+                    TMRPanel.closeModal($modal);
+                    window.alert(message);
                 });
             });
 

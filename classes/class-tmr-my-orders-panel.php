@@ -332,6 +332,10 @@ class TMR_My_Orders_Panel
             var $viewModal = $('#tmr-staff-view-modal');
             $(document).on('click', '.tmr-view-staff-order', function () {
                 var id = $(this).data('id');
+                $('#tmr-staff-view-title').text('');
+                $('#tmr-staff-view-order-date, #tmr-staff-view-delivery-date').text('');
+                $('#tmr-staff-view-items').html(TMRPanel.skeletonLines(6));
+                TMRPanel.openModal($viewModal);
                 TMRPanel.call('tmr_view_staff_measurements', { id: id }, function (data) {
                     $('#tmr-staff-view-title').text('#' + data.order_number);
                     $('#tmr-staff-view-order-date').text(data.order_date);
@@ -354,9 +358,8 @@ class TMR_My_Orders_Panel
                         }
                         $items.append($grid);
                     });
-
-                    TMRPanel.openModal($viewModal);
                 }, function (message) {
+                    TMRPanel.closeModal($viewModal);
                     window.alert(message);
                 });
             });

@@ -222,9 +222,10 @@ class TMR_Customers_Panel
             function fetchCustomersList(paged) {
                 var search = $('.tmr-customers-search-form input[name="s"]').val();
                 var perPage = $('#tmr-customers-per-page').val();
+                var $wrap = $('#tmr-customers-list-wrap').addClass('tmr-list-refreshing');
 
                 TMRPanel.call('tmr_search_customers_list', { s: search, paged: paged, per_page: perPage }, function (data) {
-                    $('#tmr-customers-list-wrap').html(data.html);
+                    $wrap.removeClass('tmr-list-refreshing').html(data.html);
                     $('#tmr-customers-count').text(data.count);
 
                     var url = new URL(window.location.href);
@@ -236,6 +237,9 @@ class TMR_Customers_Panel
                     url.searchParams.set('paged', paged);
                     url.searchParams.set('per_page', perPage);
                     window.history.replaceState(null, '', url.toString());
+                }, function (message) {
+                    $wrap.removeClass('tmr-list-refreshing');
+                    window.alert(message);
                 });
             }
 
@@ -270,6 +274,8 @@ class TMR_Customers_Panel
             // stop matching anything after the first re-render.
             $(document).on('click', '.tmr-edit-customer', function () {
                 var id = $(this).data('id');
+                $('#tmr-customer-modal-title').text('<?php echo esc_js(__('কাস্টমার এডিট করুন', 'tailor-manager')); ?>');
+                TMRPanel.showSkeletonModal($modal, 3);
                 TMRPanel.call('tmr_get_customer', { id: id }, function (data) {
                     $form.find('[name="customer_id"]').val(data.id);
                     $form.find('[name="name"]').val(data.name);
@@ -277,8 +283,10 @@ class TMR_Customers_Panel
                     $form.find('[name="address"]').val(data.address);
                     $form.find('[name="status"]').prop('checked', data.status === 'publish');
                     TMRPanel.syncStatusToggle($form.find('[name="status"]'));
-                    $('#tmr-customer-modal-title').text('<?php echo esc_js(__('কাস্টমার এডিট করুন', 'tailor-manager')); ?>');
-                    TMRPanel.openModal($modal);
+                    TMRPanel.hideSkeletonModal($modal);
+                }, function (message) {
+                    TMRPanel.closeModal($modal);
+                    window.alert(message);
                 });
             });
 
@@ -559,9 +567,11 @@ class TMR_Customers_Panel
                     return;
                 }
 
-                $body.html('<div class="tmr-empty"><?php echo esc_js(__('লোড হচ্ছে…', 'tailor-manager')); ?></div>');
+                $body.html('<div class="tmr-skeleton-loading-wrap" style="padding:16px 4px;">' + TMRPanel.skeletonLines(5) + '</div>');
                 TMRPanel.call('tmr_get_order_summary', { id: id }, function (data) {
                     tmrAccRender($body, data);
+                }, function (message) {
+                    $body.html('<div class="tmr-empty">' + message + '</div>');
                 });
             });
 

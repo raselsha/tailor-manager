@@ -184,6 +184,8 @@ class TMR_Design_Type_Panel
 
             $('.tmr-edit-design').on('click', function () {
                 var id = $(this).data('id');
+                $('#tmr-design-modal-title').text('<?php echo esc_js(__('ডিজাইন টাইপ এডিট করুন', 'tailor-manager')); ?>');
+                TMRPanel.showSkeletonModal($modal, 3);
                 TMRPanel.call('tmr_get_design_type', { id: id }, function (data) {
                     $form.find('[name="design_id"]').val(data.id);
                     $form.find('[name="name"]').val(data.name);
@@ -192,8 +194,10 @@ class TMR_Design_Type_Panel
                     $form.find('[name="status"]').prop('checked', data.status === 'publish');
                     TMRPanel.syncStatusToggle($form.find('[name="status"]'));
                     setPreview(data.image_url);
-                    $('#tmr-design-modal-title').text('<?php echo esc_js(__('ডিজাইন টাইপ এডিট করুন', 'tailor-manager')); ?>');
-                    TMRPanel.openModal($modal);
+                    TMRPanel.hideSkeletonModal($modal);
+                }, function (message) {
+                    TMRPanel.closeModal($modal);
+                    window.alert(message);
                 });
             });
 

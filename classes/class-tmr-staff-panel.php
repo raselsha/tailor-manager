@@ -179,15 +179,19 @@ class TMR_Staff_Panel
 
             $(document).on('click', '.tmr-edit-staff', function () {
                 var id = $(this).data('id');
+                resetModal();
+                $('#tmr-staff-modal-title').text('<?php echo esc_js(__('স্টাফ এডিট করুন', 'tailor-manager')); ?>');
+                TMRPanel.showSkeletonModal($modal, 3);
                 TMRPanel.call('tmr_get_staff', { id: id }, function (data) {
-                    resetModal();
                     $form.find('[name="id"]').val(data.id);
                     $form.find('[name="name"]').val(data.name);
                     setImage(data.image_id, data.image_url);
                     $form.find('[name="status"]').prop('checked', data.status === 'publish');
                     TMRPanel.syncStatusToggle($form.find('[name="status"]'));
-                    $('#tmr-staff-modal-title').text('<?php echo esc_js(__('স্টাফ এডিট করুন', 'tailor-manager')); ?>');
-                    TMRPanel.openModal($modal);
+                    TMRPanel.hideSkeletonModal($modal);
+                }, function (message) {
+                    TMRPanel.closeModal($modal);
+                    window.alert(message);
                 });
             });
 

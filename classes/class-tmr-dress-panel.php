@@ -179,6 +179,8 @@ class TMR_Dress_Panel
 
             $('.tmr-edit-dress').on('click', function () {
                 var id = $(this).data('id');
+                $('#tmr-dress-modal-title').text('<?php echo esc_js(__('ড্রেস এডিট করুন', 'tailor-manager')); ?>');
+                TMRPanel.showSkeletonModal($modal, 3);
                 TMRPanel.call('tmr_get_dress', { id: id }, function (data) {
                     $form.find('[name="dress_id"]').val(data.id);
                     $form.find('[name="name"]').val(data.name);
@@ -187,8 +189,10 @@ class TMR_Dress_Panel
                     TMRPanel.syncStatusToggle($form.find('[name="status"]'));
                     $form.find('[name="image_id"]').val(data.image_id);
                     setDressPreview(data.image_url);
-                    $('#tmr-dress-modal-title').text('<?php echo esc_js(__('ড্রেস এডিট করুন', 'tailor-manager')); ?>');
-                    TMRPanel.openModal($modal);
+                    TMRPanel.hideSkeletonModal($modal);
+                }, function (message) {
+                    TMRPanel.closeModal($modal);
+                    window.alert(message);
                 });
             });
 

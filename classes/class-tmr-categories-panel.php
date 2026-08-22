@@ -164,8 +164,10 @@ class TMR_Categories_Panel
 
             $(document).on('click', '.tmr-edit-category', function () {
                 var id = $(this).data('id');
+                resetModal();
+                $('#tmr-category-modal-title').text('<?php echo esc_js(__('পোশাক এডিট করুন', 'tailor-manager')); ?>');
+                TMRPanel.showSkeletonModal($modal, 4);
                 TMRPanel.call('tmr_get_category', { id: id }, function (data) {
-                    resetModal();
                     $form.find('[name="id"]').val(data.id);
                     $form.find('[name="name"]').val(data.name);
                     setImage(data.image_id, data.image_url);
@@ -174,8 +176,10 @@ class TMR_Categories_Panel
                     });
                     $form.find('[name="active"]').prop('checked', data.active);
                     TMRPanel.syncStatusToggle($form.find('[name="active"]'));
-                    $('#tmr-category-modal-title').text('<?php echo esc_js(__('পোশাক এডিট করুন', 'tailor-manager')); ?>');
-                    TMRPanel.openModal($modal);
+                    TMRPanel.hideSkeletonModal($modal);
+                }, function (message) {
+                    TMRPanel.closeModal($modal);
+                    window.alert(message);
                 });
             });
 

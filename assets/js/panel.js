@@ -54,10 +54,73 @@
 
         closeModal: function ($backdrop) {
             $backdrop.removeClass('is-open');
+            TMRPanel.hideSkeletonModal($backdrop);
         },
 
         confirmDelete: function (message) {
             return window.confirm(message || 'আপনি কি নিশ্চিত এটি ডিলিট করতে চান?');
+        },
+
+        /**
+         * Skeleton loading placeholders (see panel.css) — a few ready-made shapes
+         * built from the same shimmering .tmr-skeleton block, one generator per
+         * call site shape rather than a single generic one, since a form's field
+         * rows, a paragraph of detail lines, and a table row don't share markup.
+         */
+        skeletonLines: function (n, widths) {
+            n = n || 4;
+            var html = '';
+            var defaults = ['95%', '88%', '70%', '92%', '60%'];
+            for (var i = 0; i < n; i++) {
+                var w = (widths && widths[i]) || defaults[i % defaults.length];
+                html += '<div class="tmr-skeleton tmr-skeleton-line" style="width:' + w + '"></div>';
+            }
+            return html;
+        },
+
+        skeletonFormRows: function (n) {
+            n = n || 4;
+            var html = '';
+            for (var i = 0; i < n; i++) {
+                html += '<div class="tmr-skeleton-form-row">' +
+                    '<div class="tmr-skeleton tmr-skeleton-label"></div>' +
+                    '<div class="tmr-skeleton tmr-skeleton-input"></div>' +
+                    '</div>';
+            }
+            return html;
+        },
+
+        skeletonTableRow: function (colCount, widths) {
+            var html = '<tr class="tmr-skeleton-row">';
+            for (var i = 0; i < colCount; i++) {
+                var w = (widths && widths[i]) || '70%';
+                html += '<td><div class="tmr-skeleton tmr-skeleton-line" style="width:' + w + '"></div></td>';
+            }
+            return html + '</tr>';
+        },
+
+        /**
+         * Opens an edit modal immediately instead of waiting for its tmr_get_*
+         * fetch to resolve, showing a skeleton over the (already-in-DOM) form and
+         * disabling its submit button — so a slow request never leaves the click
+         * looking like it did nothing, and can't be raced by an early Save.
+         * Caller still populates fields in its own AJAX success handler; call
+         * hideSkeletonModal() there when done (closeModal() also does this).
+         */
+        showSkeletonModal: function ($modal, formRowCount) {
+            var $body = $modal.find('.tmr-modal-body').first();
+            var $overlay = $body.find('.tmr-skeleton-overlay');
+            if (!$overlay.length) {
+                $overlay = $('<div class="tmr-skeleton-overlay"></div>').appendTo($body);
+            }
+            $overlay.html(TMRPanel.skeletonFormRows(formRowCount)).addClass('is-active');
+            $modal.find('.tmr-modal-foot button[type="submit"]').prop('disabled', true);
+            TMRPanel.openModal($modal);
+        },
+
+        hideSkeletonModal: function ($modal) {
+            $modal.find('.tmr-skeleton-overlay').removeClass('is-active');
+            $modal.find('.tmr-modal-foot button[type="submit"]').prop('disabled', false);
         },
 
         /**

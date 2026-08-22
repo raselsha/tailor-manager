@@ -157,6 +157,8 @@ class TMR_Measurement_Fields_Panel
 
             $(document).on('click', '.tmr-edit-field', function () {
                 var slug = $(this).data('slug');
+                $('#tmr-field-modal-title').text('<?php echo esc_js(__('মাপের ফিল্ড এডিট করুন', 'tailor-manager')); ?>');
+                TMRPanel.showSkeletonModal($modal, 3);
                 TMRPanel.call('tmr_mf_get_field', { slug: slug }, function (data) {
                     $form.find('[name="slug"]').val(data.slug);
                     $form.find('[name="label"]').val(data.label);
@@ -167,8 +169,10 @@ class TMR_Measurement_Fields_Panel
                     });
                     $form.find('[name="active"]').prop('checked', data.active);
                     TMRPanel.syncStatusToggle($form.find('[name="active"]'));
-                    $('#tmr-field-modal-title').text('<?php echo esc_js(__('মাপের ফিল্ড এডিট করুন', 'tailor-manager')); ?>');
-                    TMRPanel.openModal($modal);
+                    TMRPanel.hideSkeletonModal($modal);
+                }, function (message) {
+                    TMRPanel.closeModal($modal);
+                    window.alert(message);
                 });
             });
 
